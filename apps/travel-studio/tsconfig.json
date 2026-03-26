@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig/nextjs.json",
+  "compilerOptions": {
+    "strict": true,
+    "plugins": [{ "name": "next" }],
+    "paths": {
+      "@/core": ["../../packages/core"],
+      "@/core/*": ["../../packages/core/*"],
+      "@puckeditor/core": ["../../packages/core"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}

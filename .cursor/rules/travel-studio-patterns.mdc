@@ -1,0 +1,43 @@
+---
+description: Conventions for the Travel Composition Studio app
+globs: ["apps/travel-studio/**"]
+---
+
+# Travel Studio Patterns
+
+## Architecture Boundary
+
+Puck owns composition and rendering. Domain truth (clients, trips, suppliers, pricing)
+lives outside Puck and is referenced via `external` fields or `resolveData`.
+
+## Component Organization
+
+Components live under `config/components/` in four families:
+- `structural/` -- layout containers with slots (DocumentSection, DaySection, SidebarLayout, CardGroup, Spacer, Divider)
+- `travel/` -- trip content cards (TripHeader, TripOverview, StayCard, ActivityCard, TransportCard, PricingSummary)
+- `context/` -- interpretive blocks (AdvisorInsight, IncludedFeatures)
+- `conversion/` -- action blocks (PrimaryCTA)
+
+## Component Contract
+
+Every component must:
+- Export a named `ComponentConfig` and a Props type
+- Use `type: "slot"` for nested composition regions
+- Set `allow`/`disallow` on slots via the config barrel (`config/index.ts`), not in the component file
+- Check `puck.metadata?.target` for mode-aware rendering if the component behaves differently per mode
+- Use inline styles (no CSS Modules in this app for now)
+
+## Root Config
+
+Root provides document-level fields: `title`, `documentMode`, `brandTheme`.
+The `documentMode` flows to components via `metadata.target`.
+
+## Data Persistence
+
+Save/load uses a JSON file (`travel-data.json`) via the API route at `app/api/documents/route.ts`.
+Seed data in `config/seed-data.ts` is the fallback when no saved data exists.
+
+## Import Pattern
+
+Import Puck types from `@/core` (resolved via tsconfig paths to `packages/core`).
+Do NOT add `@puckeditor/core` to `package.json` dependencies.

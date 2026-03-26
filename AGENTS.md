@@ -484,6 +484,58 @@ docker compose down             # stop + cleanup
 
 ---
 
+## Travel Composition Studio (`apps/travel-studio`)
+
+A domain-specific composition app built on top of Puck, implementing the Travel
+Composition Studio PRD. It turns Puck into a constrained travel-document authoring
+system rather than a generic page builder.
+
+### Architecture
+
+- **Layer 1 (Domain)**: TypeScript types in `config/schema.ts` -- TripDocument, DocumentMode, VisibilityRule
+- **Layer 2 (Composition)**: Puck config in `config/index.ts` with 15 travel-specific components organized into 5 categories
+- **Layer 3 (Render)**: Mode-aware rendering via `metadata.target` (itinerary/proposal/client_view)
+- **Layer 4 (Shell)**: Custom `headerActions` override with Save Draft and Preview
+
+### Component Taxonomy
+
+| Category     | Components                                                             |
+| ------------ | ---------------------------------------------------------------------- |
+| Structure    | DocumentSection, DaySection, SidebarLayout, CardGroup, Spacer, Divider |
+| Trip Content | TripHeader, TripOverview, StayCard, ActivityCard, TransportCard        |
+| Pricing      | PricingSummary                                                         |
+| Context      | AdvisorInsight, IncludedFeatures                                       |
+| Actions      | PrimaryCTA                                                             |
+
+### Slot Rules
+
+- DaySection: `morning`/`afternoon`/`evening` slots allow only StayCard, ActivityCard, TransportCard
+- SidebarLayout: `main` allows narrative content; `sidebar` allows pricing/context/CTA
+- DocumentSection: `content` allows all travel/context/conversion components
+- CardGroup: `items` allows only card-type components
+
+### Key Paths
+
+| What          | Path                                              |
+| ------------- | ------------------------------------------------- |
+| App root      | `apps/travel-studio/`                             |
+| Config barrel | `apps/travel-studio/config/index.ts`              |
+| Root config   | `apps/travel-studio/config/root.tsx`              |
+| Schema types  | `apps/travel-studio/config/schema.ts`             |
+| Seed data     | `apps/travel-studio/config/seed-data.ts`          |
+| Editor client | `apps/travel-studio/app/[...puckPath]/client.tsx` |
+| API route     | `apps/travel-studio/app/api/documents/route.ts`   |
+
+### Running
+
+```sh
+cd apps/travel-studio && yarn dev    # http://localhost:3001
+```
+
+The home page redirects to `/trip/edit`. Seed data loads a sample "Mediterranean Cruise" document.
+
+---
+
 ## Learned User Preferences
 
 - Prefers thorough codebase exploration before making changes
