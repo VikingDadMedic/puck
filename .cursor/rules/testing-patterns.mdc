@@ -1,0 +1,49 @@
+---
+description: Testing setup, patterns, and conventions for Puck
+globs: ["**/*.spec.ts", "**/*.spec.tsx", "**/__tests__/**", "**/jest.config.*"]
+---
+
+# Testing Patterns
+
+## Stack
+
+- **Jest** with `ts-jest/presets/js-with-ts-esm` (ESM mode)
+- **jsdom** environment
+- **@testing-library/react** + **@testing-library/jest-dom**
+- CSS Modules → `identity-obj-proxy`
+
+## Test File Locations
+
+Tests live alongside source in `packages/core/`:
+
+```
+packages/core/
+├── lib/__tests__/
+├── lib/data/__tests__/
+├── reducer/actions/__tests__/
+├── store/slices/__tests__/
+├── types/__tests__/
+└── components/Puck/__tests__/
+```
+
+Naming: `*.spec.ts` or `*.spec.tsx`. One exception: `components/Puck/__tests__/index.tsx`.
+
+## Running Tests
+
+- From root: `yarn test` (Turbo delegates to `packages/core`)
+- From core: `cd packages/core && yarn test`
+- Single file: `cd packages/core && yarn jest path/to/file.spec.ts`
+
+## Conventions
+
+- Tests are appreciated but not strictly required for every PR
+- Complex code or public API changes should include tests
+- The test suite currently covers only `packages/core`
+- Plugins and field packages do not have test suites yet
+
+## Configuration
+
+Jest config: `packages/core/jest.config.ts`
+- `useESM: true` in ts-jest config
+- `transformIgnorePatterns` allows `@preact/signals-core`, `@preact/signals-react`, and `@dnd-kit` through
+- `moduleNameMapper` maps `*.module.css` to `identity-obj-proxy`

@@ -1,0 +1,45 @@
+---
+description: Monorepo structure, workspace layout, and tooling conventions for the Puck repository
+globs: ["package.json", "turbo.json", "lerna.json", "*.config.*"]
+---
+
+# Monorepo Conventions
+
+## Workspace Layout
+
+This is a Yarn 1.x workspaces monorepo orchestrated by Turborepo.
+
+- `packages/*` — shared libraries (published and private)
+- `apps/*` — applications (demo, docs)
+- `recipes/*` — starter templates for various frameworks
+
+## Engine Requirements
+
+- Node.js >= 20 (pinned in `.nvmrc`)
+- Yarn 1.x (pinned in `package.json` as `packageManager: yarn@1.22.19`)
+- Do NOT use npm, pnpm, or Yarn 2+/Berry
+
+## Turbo Pipeline
+
+- `build` depends on `^build` (packages build before dependents)
+- `dev` is uncached and persistent
+- `test` and `lint` are independent tasks
+- Build outputs: `dist/**` (library packages), `.next/**` (Next.js apps)
+
+## Adding New Packages
+
+1. Create the directory under `packages/`, `apps/`, or `recipes/`
+2. Add a `package.json` with appropriate `name` and `version`
+3. If published, add to `lerna.json` `packages` array
+4. Use workspace references (`"@puckeditor/core": "*"`) for internal deps
+5. Add shared configs: extend `tsconfig` from `packages/tsconfig`, use `tsup-config`
+
+## Published vs Private
+
+Published packages use `@puckeditor/*` scope (except `create-puck-app`).
+Private packages (`eslint-config-custom`, `tsconfig`, `tsup-config`, all apps, all recipes)
+have `"private": true` in their `package.json`.
+
+## Version Alignment
+
+All published packages share the same version number, managed by Lerna.

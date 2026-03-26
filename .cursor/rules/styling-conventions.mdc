@@ -1,0 +1,102 @@
+---
+description: CSS and styling conventions for Puck components
+globs: ["**/*.module.css", "**/*.css", "**/*.tsx"]
+---
+
+# Styling Conventions
+
+## CSS Modules Only
+
+All styles MUST use CSS Modules (`.module.css` files). Never use global stylesheets.
+Puck is deployed into hostile third-party environments where arbitrary CSS may exist on the page.
+
+## SUIT CSS Naming
+
+Class names follow the [SUIT CSS](https://suitcss.github.io) methodology:
+
+- **Component**: `.ComponentName` (PascalCase)
+- **Descendant**: `.ComponentName-descendantName` (camelCase after hyphen)
+- **Modifier**: `.ComponentName--modifierName`
+- **State**: `.ComponentName.is-stateName`
+
+Examples:
+- `.Puck-header`
+- `.DropZone--isActive`
+- `.DraggableComponent-overlay`
+- `.Sidebar.is-collapsed`
+
+## `getClassNameFactory` — The Bridge Utility
+
+Components do NOT import `styles.ClassName` directly. Instead, use `getClassNameFactory`
+(`lib/get-class-name-factory.ts`) which bridges SUIT CSS names to hashed module classes:
+
+```tsx
+import { getClassNameFactory } from "../../lib/get-class-name-factory";
+import styles from "./styles.module.css";
+
+const getClassName = getClassNameFactory("MyComponent", styles);
+
+// Three calling modes:
+getClassName()                  // → styles["MyComponent"] (root class)
+getClassName("header")          // → styles["MyComponent-header"] (descendant)
+getClassName({ active: true })  // → styles["MyComponent"] + styles["MyComponent--active"] (modifier)
+```
+
+Every component in `packages/core/components/` follows this pattern. Always use
+`getClassNameFactory` — never access `styles[...]` directly.
+
+## `--puck-*` CSS Custom Properties
+
+All design tokens use a `--puck-` prefix to prevent collisions with host app variables:
+- Colors: `--puck-color-*` (defined in `packages/core/styles/color.css`)
+- Typography: `--puck-font-*` (defined in `packages/core/styles/typography.css`)
+- Spacing: `--puck-space-*` (used inline in component CSS; not centrally defined like colors)
+
+Always use these tokens in CSS Modules rather than hard-coded values.
+
+## PostCSS Pipeline
+
+The build uses `postcss` + `postcss-modules` through the shared `packages/tsup-config`.
+A custom esbuild plugin in `packages/tsup-config/index.ts` intercepts `.module.css` imports,
+processes them via postcss-modules (generating hashed class names + JSON mapping),
+and emits both the processed CSS and a JS module exporting the class name map.
+
+## Iframe as Runtime Isolation
+
+The primary CSS isolation mechanism is the **iframe boundary** (`components/AutoFrame/`):
+- User components render inside the iframe; editor chrome renders in the parent document.
+- `CopyHostStyles` mirrors parent `<style>`/`<link>` elements into the iframe via
+  `MutationObserver`, so Puck overlay styles work inside the preview.
+- User component styles in the iframe do NOT leak back to the parent document.
+- When `iframe.enabled = false`, there is no hard boundary — only CSS Module hashing
+  and `--puck-*` prefixing protect against collisions.
+
+## `data-*` Attribute Selectors
+
+A few non-module `.css` files use `data-*` attribute selectors for elements Puck manages:
+- `[data-puck-component]` — disables pointer events on component children in edit mode
+- `[data-puck-dropzone]` — re-enables pointer events on nested drop zones
+- `[data-dnd-placeholder]` — drag placeholder styling
+- `[data-puck-overlay-portal]` — overlay portal pointer event overrides
+
+These selectors are inherently scoped because only Puck adds these attributes.
+
+## CSS-in-JS in Iframes
+
+The core library does not use CSS-in-JS. However, user components may use Emotion or
+styled-components. The `plugin-emotion-cache` package solves the problem where Emotion
+injects `<style>` tags into the parent `document.head` instead of the iframe's:
+
+```tsx
+import createEmotionCachePlugin from "@puckeditor/plugin-emotion-cache";
+// Creates an Emotion cache targeting the iframe's document.head
+<Puck plugins={[createEmotionCachePlugin("my-key")]} />
+```
+
+This pattern (using `overrides.iframe` to redirect style injection) can be replicated
+for other CSS-in-JS libraries.
+
+## Testing with CSS Modules
+
+In Jest tests, CSS Modules are mapped to `identity-obj-proxy` so class name lookups
+return the property name as a string.

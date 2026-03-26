@@ -1,0 +1,49 @@
+---
+description: Commit message format and release workflow
+globs: ["CHANGELOG.md", "lerna.json", "scripts/**"]
+---
+
+# Commit and Release Conventions
+
+## Commit Messages
+
+Use **angular-style conventional commits**:
+
+- `feat: add new field type` — new feature (minor version bump)
+- `fix: resolve drag-drop offset` — bug fix (patch version bump)
+- `chore: update dependencies` — maintenance
+- `docs: clarify API reference` — documentation
+- `refactor:`, `perf:`, `test:`, `style:`, `ci:` — other types
+
+Breaking changes use `BREAKING CHANGE:` in the commit footer or `feat!:` / `fix!:` prefix.
+
+## PR Guidelines
+
+- Keep PRs focused on a **single issue**
+- PRs are squash-merged; the team rewrites commit messages on merge
+- PRs without issues may be accepted for small fixes but larger changes need discussion
+- PRs changing public APIs receive additional scrutiny
+
+## Release Flow
+
+### Canary (automatic)
+
+After each merge to `main`, a canary version is published automatically:
+`0.21.1-canary.<commit-hash>` via `.github/workflows/publish-canary.yml`.
+
+### Latest (manual)
+
+1. `yarn release:prepare` — fetch tags, determine bump via conventional-recommended-bump
+2. `yarn changelog` — generate changelog entry via `standard-changelog`
+3. `yarn release-commit` — commit version bump and changelog
+4. Push to `releases/**` branch to trigger `.github/workflows/publish.yml`
+5. `scripts/publish.sh latest` publishes to npm with `latest` tag
+
+### Published Packages
+
+`@puckeditor/core`, `create-puck-app`, `@puckeditor/field-contentful`,
+`@puckeditor/plugin-emotion-cache`, `@puckeditor/plugin-heading-analyzer`.
+
+### Version Alignment
+
+All published packages share the same version, managed by Lerna (`lerna.json`).

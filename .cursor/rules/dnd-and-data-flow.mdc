@@ -1,0 +1,139 @@
+---
+description: Drag-and-drop mechanics, data tree walking, reducer patterns, and the resolve pipeline for Puck core
+globs: ["packages/core/components/DragDropContext/**", "packages/core/components/DropZone/**", "packages/core/components/DraggableComponent/**", "packages/core/components/Drawer/**", "packages/core/lib/dnd/**", "packages/core/lib/data/**", "packages/core/reducer/**"]
+---
+
+# DND and Data Flow
+
+## DND Actor Types
+
+Three `@dnd-kit/react` actors form the drag-and-drop system:
+
+| Actor | Hook | Type | Data Shape | File |
+|-------|------|------|------------|------|
+| Sidebar drawer items | `useDraggable` | `"drawer"` | `{ componentType: string }` | `components/Drawer/index.tsx` |
+| Drop zones in canvas | `useDroppable` | `"dropzone"` | `DropZoneDndData` (areaId, depth, isDroppableTarget, path) | `components/DropZone/index.tsx` |
+| Placed components | `useSortable` | `"component"` | `ComponentDndData` (zone, index, componentType, depth, path, containsActiveZone) | `components/DraggableComponent/index.tsx` |
+
+Drawer items carry `data: { componentType: name }` — the key into `config.components`.
+Each drawer item regenerates a unique `dynamicId` after drag ends to force dnd-kit remount.
+
+## DragDropContext Lifecycle
+
+`components/DragDropContext/index.tsx` wraps the editor in `<DragDropProvider>`:
+
+1. **`onBeforeDragStart`** — detects `dragMode`: `"new"` if source type is `"drawer"`,
+   `"existing"` if `"component"`. Sets `isDragging: true` in UI state.
+2. **`onDragStart`** — for existing components, creates an initial preview in
+   `ZoneStore.previewIndex` with `type: "move"`.
+3. **`onDragOver`** — prevents dnd-kit's default optimistic reordering. Calculates
+   `targetZone` and `targetIndex` from collision data. Updates `ZoneStore.previewIndex`
+   with `type: "insert"` (new) or `type: "move"` (existing). Aborts if dragging over
+   self or a descendant.
+4. **`onDragEnd`** — waits for dnd-kit animation, reads `ZoneStore.previewIndex`, then:
+   - Insert: calls `insertComponent()` → dispatches `{ type: "insert" }`
+   - Move: dispatches `{ type: "move" }` or calls `moveComponent()`
+   - Clears `previewIndex`, `draggedItem`, and `isDragging`.
+
+## NestedDroppablePlugin
+
+`lib/dnd/NestedDroppablePlugin.ts` — custom `@dnd-kit` `Plugin` for nested drop zones.
+
+Algorithm (runs on every `pointermove`, throttled 50ms):
+1. `getPointerCollisions` — `elementsFromPoint(x, y)` to find all elements with
+   `data-puck-dropzone` or `data-puck-dnd` attributes under the cursor. If over the
+   iframe preview, queries inside the iframe document. 6px buffer contraction on bounding
+   boxes prevents edge mis-hits.
+2. `depthSort` — sorts candidates by `data.depth` (ascending).
+3. Filter — removes the dragged item, its descendants (path check), zones where
+   `isDroppableTarget` is false, and zones owned by the dragged item's area.
+4. Reverse — deepest first. Primary candidate is `filteredCandidates[0]`.
+5. `onChange({ zone, area })` — updates `ZoneStore.zoneDepthIndex`/`areaDepthIndex`.
+
+## Preview Ghost System
+
+During drag, `useContentIdsWithPreview` (in `components/DropZone/lib/`) merges real
+content IDs with a "preview" entry from `ZoneStore.previewIndex`. This renders a ghost
+placeholder in the target zone without mutating actual state until drop.
+
+## Dynamic Collision Detection
+
+`lib/dnd/collision/dynamic/index.ts` — `createDynamicCollisionDetector(dragAxis, midpointOffset)`:
+- **Midpoint detection**: checks if drag shape crossed drop target midpoint (5% dead zone).
+  Returns direction (`"before"`/`"after"`) for `onDragOver` to compute insertion index.
+- **Self-collision priority**: if source === target, `CollisionPriority.Highest` prevents
+  flicker during complex layout shifts.
+- **Fallback**: `closestCorners` at `CollisionPriority.Low`/`Lowest` when midpoint fails
+  but items overlap on the relevant axis.
+
+## Drop → State Mutation
+
+**Insert** (`lib/insert-component.ts`):
+1. Generates ID via `generateId(componentType)`
+2. Dispatches `{ type: "insert", componentType, destinationZone, destinationIndex, id }`
+3. Selects new item via `setUi({ itemSelector: { index, zone } })`
+4. Runs `resolveComponentData` for async prop resolution
+
+**Move** (`lib/move-component.ts`):
+Dispatches `{ type: "move", sourceZone, sourceIndex, destinationZone, destinationIndex }`,
+then runs `resolveComponentData` with trigger `"move"`.
+
+## walkAppState Pattern
+
+`lib/data/walk-app-state.ts` — the foundational utility for immutable state tree traversal.
+
+```typescript
+walkAppState(state, config, mapContent, mapNodeOrSkip) → PrivateAppState
+```
+
+- `mapContent(content, zoneCompound, zoneType) → Content | void` — transform a zone's
+  content array (insert, remove, replace items). Called for root content, slots, and zones.
+- `mapNodeOrSkip(item, path, index) → ComponentData | null` — transform a node. Returning
+  `null` skips re-indexing (optimization for unchanged nodes).
+
+Walks three layers:
+1. Root content (`state.data.content`)
+2. Each item's slots (via `mapFields` with a `slot` mapper)
+3. Remaining `state.data.zones` entries
+
+Rebuilds `NodeIndex` (id → `{ data, flatData, path, parentId, zone }`) and
+`ZoneIndex` (zoneCompound → `{ contentIds, type }`).
+
+### Writing a New Reducer Action
+
+1. Define the action type in `reducer/actions.tsx`
+2. Create a handler in `reducer/actions/yourAction.ts`
+3. Use `walkAppState` with specific `mapContent`/`mapNodeOrSkip` callbacks:
+   - To insert: `mapContent` adds the item at the target index
+   - To remove: `mapContent` splices the item from the source index
+   - To replace: `mapContent` swaps the item at the target index
+4. Register the handler in `reducer/index.ts`
+
+## mapFields Pattern
+
+`lib/data/map-fields.ts` — recursive field walker for component props.
+
+Traverses fields by type:
+- **`slot`** — maps slot content (`Content[]`) via the slot mapper
+- **`array`** — recurses into `arrayFields` for each element
+- **`object`** — recurses into `objectFields`
+
+Supports both sync and async mappers (detects promises, uses `Promise.all`).
+
+Used by:
+- `walkAppState` (slot indexing)
+- `resolveComponentData` (recursive slot resolution)
+- `useFieldTransforms` (slot → DropZone transform)
+
+## Resolve Pipeline Triggers
+
+| Trigger | When | Skip Condition |
+|---------|------|----------------|
+| `"insert"` | New component dropped from drawer | Never skipped |
+| `"replace"` | Field edit in props panel | Skipped if data unchanged (deep equality) |
+| `"move"` | Component dragged to new position | Skipped if parent unchanged |
+| `"load"` | Initial mount via `resolveAndCommitData` | Skipped if data unchanged |
+| `"force"` | `resolveAllData` public API | Never skipped |
+
+`resolveComponentData` caches results per component ID in `cache.lastChange[id]`.
+Uses `getChanged(item, oldItem)` to produce a `Record<string, boolean>` of which props changed.

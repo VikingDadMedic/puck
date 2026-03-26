@@ -1,0 +1,59 @@
+---
+description: Conventions for the Puck demo application (Next.js 16 App Router)
+globs: ["apps/demo/**"]
+---
+
+# Demo App Patterns
+
+## Overview
+
+The demo app (`apps/demo`) is a Next.js 16 App Router application that showcases the Puck
+editor. It is private and not published to npm.
+
+## Import Resolution
+
+`@puckeditor/core` is resolved via TypeScript path mapping, NOT via npm:
+
+```json
+"paths": {
+  "@/core": ["../../packages/core"],
+  "@/core/*": ["../../packages/core/*"],
+  "@puckeditor/core": ["../../packages/core"],
+  "@/plugin-heading-analyzer": ["../../packages/plugin-heading-analyzer"],
+  "@/plugin-heading-analyzer/*": ["../../packages/plugin-heading-analyzer/*"]
+}
+```
+
+`next.config.js` uses `transpilePackages: ["@puckeditor/core", "lucide-react"]`.
+Do NOT add `@puckeditor/core` to `package.json` dependencies -- it is a workspace symlink.
+
+## File Organization
+
+- `app/` -- Next.js App Router pages and layouts
+- `config/` -- Puck configuration: component definitions, categories, root config, initial data
+  - `config/blocks/` -- individual block components (Hero, Card, Grid, etc.)
+  - `config/components/` -- layout components (Header, Footer, Section, Layout)
+  - `config/index.tsx` -- main config barrel, exports `conf` (avoids name `config` due to Next.js conflict)
+  - `config/types.ts` -- typed config using `Config<UserComponents>`
+  - `config/root.tsx` -- root component configuration
+  - `config/initial-data.ts` -- default page data
+- `lib/` -- utilities (demo data hooks, path resolution)
+
+## Routing Pattern
+
+The demo uses catch-all routes for the editor and rendering:
+
+- `app/[...puckPath]/page.tsx` -- renders published Puck pages
+- `app/[...puckPath]/client.tsx` -- client component for the editor at `/edit` paths
+- `app/custom-ui/[...puckPath]/` -- custom UI variant of the editor
+
+## Adding Demo Blocks
+
+1. Create `config/blocks/YourBlock/index.tsx` with the `ComponentConfig`
+2. Add a `styles.module.css` with SUIT CSS class names
+3. Import and add to `config/index.tsx` components map and categories
+4. The block immediately appears in the editor sidebar
+
+## React Version
+
+The demo uses React 19 (`react@^19.2.1`). Components can use React 19 features.

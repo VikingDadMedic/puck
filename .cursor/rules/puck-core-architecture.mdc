@@ -1,0 +1,128 @@
+---
+description: Architecture patterns for the Puck core editor library
+globs: ["packages/core/**"]
+---
+
+# Puck Core Architecture
+
+## Component Hierarchy
+
+```
+<Puck> (editor shell — providers, Zustand store, layout)
+  ├── <Layout> (overall editor layout)
+  │   ├── <Header> / <MenuBar> (toolbar, viewport controls)
+  │   ├── <Sidebar> (left: component list / outline; right: fields)
+  │   ├── <Canvas> (preview container)
+  │   │   └── <Preview> (renders user components)
+  │   │       └── <DropZoneEdit> (drag-and-drop zones in edit mode)
+  │   │           └── <DraggableComponent> (each component instance)
+  │   └── Plugin panels
+  └── <Modal>, <ActionBar>, <Drawer>, etc.
+```
+
+## State Architecture
+
+The editor uses Zustand with a reducer pattern:
+
+1. **AppStore** (`store/index.ts`) — Zustand store with `subscribeWithSelector`
+2. **Slices** — `HistorySlice`, `NodesSlice`, `PermissionsSlice`, `FieldsSlice`
+3. **Reducer** — `createReducer()` processes `PuckAction` dispatches with history recording
+4. **Context** — `appStoreContext` propagates the store; additional contexts for render mode, dropzones, frames, fields
+5. **Consumer hooks** — `usePuck()` / `createUsePuck()` / `useGetPuck()` for typed store access
+
+When modifying state:
+- Dispatch `PuckAction` through `store.dispatch()` — never mutate state directly
+- The reducer is pure: `(AppState, PuckAction) => AppState`
+- History recording happens automatically in the reducer wrapper
+
+## Bundle Entrypoints
+
+- `bundle/index.ts` — client entry (imports CSS, re-exports `core.ts`)
+- `bundle/core.ts` — public API barrel for all exports
+- `bundle/rsc.tsx` — RSC-safe subset (Render, data utils, no client hooks)
+- `bundle/internal.ts` — internal-only exports (e.g. `createReducer`)
+
+## Plugin Interface
+
+Plugins receive sidebar UI via `render()` and can override editor components via `overrides`.
+The `Overrides` system replaces any editor UI piece without forking core.
+
+## DND Architecture
+
+Three actor types using `@dnd-kit/react`:
+- **Drawer items** — `useDraggable`, type `"drawer"`, data `{ componentType }` (`components/Drawer/`)
+- **Drop zones** — `useDroppable`, type `"dropzone"`, `collisionPriority = depth` (`components/DropZone/`)
+- **Placed components** — `useSortable`, type `"component"`, `feedback: "clone"` (`components/DraggableComponent/`)
+
+**DragDropContext** (`components/DragDropContext/`) orchestrates via four event handlers:
+`onBeforeDragStart` (detect new vs existing), `onDragStart` (create preview),
+`onDragOver` (calculate target, update `ZoneStore.previewIndex`),
+`onDragEnd` (dispatch `insert`/`move`, clear state).
+
+**NestedDroppablePlugin** (`lib/dnd/NestedDroppablePlugin.ts`) — uses `elementsFromPoint`
++ depth sorting to find the deepest valid zone. Filters out self and descendants.
+
+**Key pattern**: during drag, `useContentIdsWithPreview` merges real content IDs with
+a ghost preview entry — no state mutation until drop.
+
+## Iframe Architecture
+
+The canvas renders user content inside an `<iframe>` by default:
+- **AutoFrame** (`components/AutoFrame/`) — `srcDoc` iframe + `createPortal` = single React tree
+- **CopyHostStyles** — `MutationObserver` mirrors parent `<style>`/`<link>` into the iframe `<head>`
+- **useBubbleIframeEvents** — re-dispatches `pointermove` across the iframe boundary for dnd-kit
+- **GlobalPosition** (`lib/global-position.ts`) — coordinate mapping accounting for `scale(zoom)`
+
+When `iframe.enabled = false`, components render inline (no isolation boundary).
+
+## Core Data Utilities
+
+- **`walkAppState`** (`lib/data/walk-app-state.ts`) — foundational tree walker used by
+  every reducer action. Walks content + slots + zones, applies `mapContent`/`mapNodeOrSkip`
+  callbacks, and rebuilds `NodeIndex` + `ZoneIndex` immutably.
+- **`mapFields`** (`lib/data/map-fields.ts`) — recursive field walker for slots, arrays,
+  objects. Used by `walkAppState`, `resolveComponentData`, and the field transforms system.
+
+When writing a new reducer action, provide `mapContent` (to insert/remove/replace items
+in a zone) and optionally `mapNodeOrSkip` (to transform individual nodes or skip indexing).
+
+## Resolve Pipeline
+
+`resolveComponentData` (`lib/resolve-component-data.ts`) runs `configForItem.resolveData`
+with caching and skip logic. Triggers: `"insert"`, `"replace"`, `"move"`, `"load"`, `"force"`.
+
+- **On mount**: `resolveAndCommitData` walks all nodes with trigger `"load"`
+- **On field edit**: `createOnChange` in Fields calls with trigger `"replace"`
+- **On drop**: `insertComponent`/`moveComponent` call with trigger `"insert"`/`"move"`
+- **Public API**: `resolveAllData` resolves an entire `Data` tree with trigger `"force"`
+
+## Slot System
+
+`SlotField` (`{ type: "slot", allow?, disallow? }`) props are:
+- **Skipped** in the fields panel (`AutoField` returns `null`)
+- **Transformed** into `<DropZoneEdit>` components via `useSlots` → `useFieldTransforms` →
+  `getSlotTransform` → `buildMappers` → `mapFields`
+- **Indexed** by `walkAppState` as zone entries (e.g. `componentId:slotPropName`)
+
+## Overrides Composition
+
+`loadOverrides` (`lib/load-overrides.ts`) merges user overrides with plugin overrides
+in a wrapping chain: each plugin receives the previous layer as `children`.
+Override keys: `header`, `headerActions`, `actionBar`, `preview`, `fields`, `fieldLabel`,
+`drawer`, `drawerItem`, `iframe`, `outline`, `componentOverlay`, `puck`, `fieldTypes`.
+
+## Rendering Pipeline
+
+- **Edit mode**: `<DropZoneEdit>` + `<DraggableComponent>` + store dispatch
+- **Client render**: `<Render>` with `DropZoneProvider` in `mode: "render"`, uses `useSlots`
+- **Server render**: `<ServerRender>` avoids client hooks, imported from `@puckeditor/core/rsc`
+
+## File Organization
+
+Source lives directly in `packages/core/` (no `src/` subdirectory):
+- `components/` — one directory per component with `index.tsx`
+- `lib/` — utilities, hooks, data helpers (`lib/dnd/` for DnD, `lib/data/` for tree walking)
+- `store/` — Zustand store and slices
+- `reducer/` — reducer and action modules (each in `actions/`)
+- `types/` — all TypeScript type definitions
+- `plugins/` — built-in editor plugins
