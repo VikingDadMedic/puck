@@ -7,7 +7,7 @@ export type AdvisorInsightProps = {
 
 export const AdvisorInsight: ComponentConfig<AdvisorInsightProps> = {
   fields: {
-    content: { type: "textarea", label: "Advisor Notes" },
+    content: { type: "richtext", label: "Advisor Notes" },
     visibility: {
       type: "select",
       label: "Visibility",
@@ -58,9 +58,10 @@ export const AdvisorInsight: ComponentConfig<AdvisorInsightProps> = {
           {isAdvisorOnly && <span>🔒</span>}
           Advisor Insight
         </div>
-        <div style={{ fontSize: 14, color: "#374151", lineHeight: 1.6 }}>
-          {content}
-        </div>
+        <div
+          style={{ fontSize: 14, color: "#374151", lineHeight: 1.6 }}
+          dangerouslySetInnerHTML={{ __html: content || "" }}
+        />
       </div>
     );
   },

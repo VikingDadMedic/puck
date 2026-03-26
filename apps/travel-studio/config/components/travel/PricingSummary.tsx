@@ -2,35 +2,54 @@ import type { ComponentConfig } from "@/core";
 
 export type PricingSummaryProps = {
   currency: string;
-  lineItems: { description: string; amount: string }[];
-  total: string;
+  basis: "perPerson" | "total";
+  lineItems: { description: string; amount: number }[];
+  total: number;
   notes: string;
 };
 
 export const PricingSummary: ComponentConfig<PricingSummaryProps> = {
   fields: {
-    currency: { type: "text" },
+    currency: { type: "text", label: "Currency" },
+    basis: {
+      type: "select",
+      label: "Price Basis",
+      options: [
+        { value: "perPerson", label: "Per Person" },
+        { value: "total", label: "Total" },
+      ],
+    },
     lineItems: {
       type: "array",
+      label: "Line Items",
       arrayFields: {
-        description: { type: "text" },
-        amount: { type: "text" },
+        description: { type: "text", label: "Description" },
+        amount: { type: "number", label: "Amount" },
       },
-      getItemSummary: (item: { description: string; amount: string }) =>
+      getItemSummary: (item: { description: string; amount: number }) =>
         item.description ? `${item.description} — ${item.amount}` : "Item",
-      defaultItemProps: { description: "", amount: "" },
+      defaultItemProps: { description: "", amount: 0 },
     },
-    total: { type: "text", label: "Total" },
-    notes: { type: "textarea" },
+    total: { type: "number", label: "Total" },
+    notes: { type: "richtext", label: "Notes" },
   },
   defaultProps: {
     currency: "USD",
+    basis: "perPerson",
     lineItems: [],
-    total: "",
+    total: 0,
     notes: "",
   },
-  render: ({ currency, lineItems, total, notes, puck }) => {
+  render: ({ currency, basis, lineItems, total, notes, puck }) => {
     const isProposal = puck.metadata?.target === "proposal";
+    const basisLabel = basis === "perPerson" ? "per person" : "total";
+
+    const formatAmount = (amount: number) => {
+      if (!amount) return `${currency} 0`;
+      return `${currency} ${amount.toLocaleString("en-US", {
+        minimumFractionDigits: 0,
+      })}`;
+    };
 
     return (
       <div
@@ -48,6 +67,9 @@ export const PricingSummary: ComponentConfig<PricingSummaryProps> = {
           style={{
             background: "#1e40af",
             padding: isProposal ? "16px 24px" : "10px 20px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
           }}
         >
           <h3
@@ -60,6 +82,16 @@ export const PricingSummary: ComponentConfig<PricingSummaryProps> = {
           >
             Pricing Summary
           </h3>
+          <span
+            style={{
+              fontSize: 12,
+              color: "rgba(255,255,255,0.7)",
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+            }}
+          >
+            {basisLabel}
+          </span>
         </div>
 
         <div style={{ padding: isProposal ? "20px 24px" : "12px 20px" }}>
@@ -72,13 +104,8 @@ export const PricingSummary: ComponentConfig<PricingSummaryProps> = {
               }}
             >
               <tbody>
-                {lineItems.map((item) => (
-                  <tr
-                    key={`${item.description}-${item.amount}`}
-                    style={{
-                      borderBottom: "1px solid #f3f4f6",
-                    }}
-                  >
+                {lineItems.map((item, i) => (
+                  <tr key={i} style={{ borderBottom: "1px solid #f3f4f6" }}>
                     <td
                       style={{
                         padding: isProposal ? "10px 0" : "8px 0",
@@ -96,7 +123,7 @@ export const PricingSummary: ComponentConfig<PricingSummaryProps> = {
                         whiteSpace: "nowrap",
                       }}
                     >
-                      {currency} {item.amount}
+                      {formatAmount(item.amount)}
                     </td>
                   </tr>
                 ))}
@@ -104,7 +131,7 @@ export const PricingSummary: ComponentConfig<PricingSummaryProps> = {
             </table>
           )}
 
-          {total && (
+          {total > 0 && (
             <div
               style={{
                 display: "flex",
@@ -131,13 +158,13 @@ export const PricingSummary: ComponentConfig<PricingSummaryProps> = {
                   color: "#1e40af",
                 }}
               >
-                {currency} {total}
+                {formatAmount(total)}
               </span>
             </div>
           )}
 
           {notes && (
-            <p
+            <div
               style={{
                 margin: "12px 0 0",
                 fontSize: 13,
@@ -145,9 +172,8 @@ export const PricingSummary: ComponentConfig<PricingSummaryProps> = {
                 color: "#6b7280",
                 fontStyle: "italic",
               }}
-            >
-              {notes}
-            </p>
+              dangerouslySetInnerHTML={{ __html: notes }}
+            />
           )}
         </div>
       </div>

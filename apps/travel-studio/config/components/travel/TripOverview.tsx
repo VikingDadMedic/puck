@@ -8,7 +8,7 @@ export type TripOverviewProps = {
 
 export const TripOverview: ComponentConfig<TripOverviewProps> = {
   fields: {
-    summary: { type: "textarea" },
+    summary: { type: "richtext", label: "Summary" },
     duration: { type: "text", label: "Duration" },
     highlights: {
       type: "array",
@@ -69,16 +69,15 @@ export const TripOverview: ComponentConfig<TripOverviewProps> = {
         </div>
 
         {summary && (
-          <p
+          <div
             style={{
               margin: 0,
               fontSize: 15,
               lineHeight: 1.6,
               color: "#374151",
             }}
-          >
-            {summary}
-          </p>
+            dangerouslySetInnerHTML={{ __html: summary }}
+          />
         )}
 
         {highlights.length > 0 && (

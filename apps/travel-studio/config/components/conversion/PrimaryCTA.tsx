@@ -44,7 +44,10 @@ export const PrimaryCTA: ComponentConfig<PrimaryCTAProps> = {
     variant: "primary",
   },
   render: ({ text, url, variant, puck }) => {
-    const isProposal = puck.metadata?.target === "proposal";
+    const target = puck.metadata?.target;
+    const isProposal = target === "proposal";
+
+    if (target === "itinerary") return null;
 
     return (
       <div

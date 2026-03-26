@@ -534,6 +534,30 @@ cd apps/travel-studio && yarn dev    # http://localhost:3001
 
 The home page redirects to `/trip/edit`. Seed data loads a sample "Mediterranean Cruise" document.
 
+### Data Feed Architecture
+
+Components connect to live travel data through a three-layer architecture:
+
+1. **SerpAPI engine wrappers** (`lib/serp/engines/`) -- typed functions for each data source
+   (hotels, flights, activities, restaurants, places, images, explore)
+2. **Next.js API routes** (`app/api/search/`) -- 7 GET endpoints that proxy engine wrappers
+3. **Puck `external` fields** (`config/fields/`) -- picker configs that call API routes
+   via `fetchList` and hydrate component props via `resolveData`
+
+Caching: SerpAPI responses are file-cached for 24 hours in `.cache/serp/` (gitignored).
+Image search (Pexels/Unsplash) is direct (not SerpAPI, not cached).
+
+Components using external fields: `StayCard` (hotel picker), `ActivityCard` (activity picker),
+`TransportCard` (flight picker via resolveFields), `TripHeader` (image picker).
+
+Components using richtext: `StayCard.notes`, `ActivityCard.description`, `TransportCard.notes`,
+`AdvisorInsight.content`, `TripOverview.summary`, `PricingSummary.notes`.
+
+Components using resolveFields: `TransportCard` (polymorphic detail fields based on transport type).
+
+Components using resolveData: `StayCard` (hydrates from hotel search), `ActivityCard` (hydrates
+from activity search), `TransportCard` (hydrates from flight search).
+
 ### Domain Model (Itinerary Event Schema)
 
 The travel studio has a canonical domain model separate from Puck composition types.
@@ -571,10 +595,12 @@ types but are not yet fully aligned (see `domain/MAPPING.md` for the gap analysi
 - Prefers thorough codebase exploration before making changes
 - Values iterative refinement — multiple "step back and evaluate" passes after implementation
 - Wants comprehensive `.cursor/` configuration (rules, skills, hooks, commands) for AI agent productivity
+- Imports external domain analysis (e.g., ChatGPT schema discussions) into Cursor as structured input for architecture and modeling work
 
 ## Learned Workspace Facts
 
 - The docs app (`apps/docs`) build fails under Node 22 due to `import assert` syntax in `next.config.mjs` — not needed for local development workflow
 - Use `yarn prettier` (not `npx prettier`) for formatting; Prettier is a root devDependency
-- `.cursor/` has 7 rules, 4 skills, 3 commands, and 2 hooks configured for this workspace
+- `.cursor/` has 8 rules, 5 skills, 3 commands, and 2 hooks configured for this workspace
 - `create-reducer-action` skill exists at `.cursor/skills/create-reducer-action/SKILL.md` for adding new PuckAction types
+- Docker build for the demo app cannot use `turbo prune --docker` because `@puckeditor/core` is resolved via tsconfig path aliases, not `package.json` dependencies — requires full monorepo copy instead

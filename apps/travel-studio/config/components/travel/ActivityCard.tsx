@@ -1,30 +1,67 @@
 import type { ComponentConfig } from "@/core";
+import { activityPickerField } from "../../fields/activity-picker";
+import { imagePickerField } from "../../fields/image-picker";
 
 export type ActivityCardProps = {
+  activity: any;
   name: string;
-  time: string;
-  duration: string;
+  timing: { date: string; time: string; duration: string; timezone: string };
+  details: {
+    bookedThrough: string;
+    confirmationNumber: string;
+    provider: string;
+  };
   description: string;
   imageUrl: string;
 };
 
 export const ActivityCard: ComponentConfig<ActivityCardProps> = {
   fields: {
+    activity: activityPickerField,
     name: { type: "text" },
-    time: { type: "text" },
-    duration: { type: "text" },
-    description: { type: "textarea" },
-    imageUrl: { type: "text", label: "Image URL" },
+    timing: {
+      type: "object",
+      objectFields: {
+        date: { type: "text", label: "Date" },
+        time: { type: "text", label: "Time" },
+        duration: { type: "text", label: "Duration" },
+        timezone: { type: "text", label: "Timezone" },
+      },
+    },
+    details: {
+      type: "object",
+      objectFields: {
+        bookedThrough: { type: "text", label: "Booked Through" },
+        confirmationNumber: { type: "text", label: "Confirmation #" },
+        provider: { type: "text", label: "Provider" },
+      },
+    },
+    description: { type: "richtext" },
+    imageUrl: imagePickerField,
   },
   defaultProps: {
+    activity: null,
     name: "",
-    time: "",
-    duration: "",
+    timing: { date: "", time: "", duration: "", timezone: "" },
+    details: { bookedThrough: "", confirmationNumber: "", provider: "" },
     description: "",
     imageUrl: "",
   },
-  render: ({ name, time, duration, description, imageUrl }) => {
-    const hasImage = imageUrl.trim().length > 0;
+  resolveData: async ({ props }, { changed }) => {
+    if (!changed.activity || !props.activity) return { props };
+    return {
+      props: {
+        name: props.activity.name || props.name,
+        description: props.activity.description || props.description,
+        imageUrl: props.activity.imageUrl || props.imageUrl,
+      },
+      readOnly: { name: true },
+    };
+  },
+  render: ({ name, timing, details, description, imageUrl }) => {
+    const hasImage = typeof imageUrl === "string" && imageUrl.trim().length > 0;
+    const hasBookingDetails =
+      details.bookedThrough || details.confirmationNumber || details.provider;
 
     return (
       <div
@@ -58,7 +95,7 @@ export const ActivityCard: ComponentConfig<ActivityCardProps> = {
           </h4>
 
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            {time && (
+            {timing.time && (
               <span
                 style={{
                   fontSize: 12,
@@ -69,10 +106,10 @@ export const ActivityCard: ComponentConfig<ActivityCardProps> = {
                   borderRadius: 6,
                 }}
               >
-                {time}
+                {timing.time}
               </span>
             )}
-            {duration && (
+            {timing.duration && (
               <span
                 style={{
                   fontSize: 12,
@@ -83,22 +120,55 @@ export const ActivityCard: ComponentConfig<ActivityCardProps> = {
                   borderRadius: 6,
                 }}
               >
-                {duration}
+                {timing.duration}
               </span>
             )}
           </div>
 
           {description && (
-            <p
+            <div
               style={{
                 margin: 0,
                 fontSize: 14,
                 lineHeight: 1.5,
                 color: "#4b5563",
               }}
+              dangerouslySetInnerHTML={{ __html: description }}
+            />
+          )}
+
+          {hasBookingDetails && (
+            <div
+              style={{
+                marginTop: 4,
+                paddingTop: 8,
+                borderTop: "1px solid #f3f4f6",
+                display: "flex",
+                gap: 16,
+                flexWrap: "wrap",
+                fontSize: 12,
+                color: "#6b7280",
+              }}
             >
-              {description}
-            </p>
+              {details.bookedThrough && (
+                <span>
+                  <strong style={{ color: "#374151" }}>Booked via</strong>{" "}
+                  {details.bookedThrough}
+                </span>
+              )}
+              {details.confirmationNumber && (
+                <span>
+                  <strong style={{ color: "#374151" }}>Conf #</strong>{" "}
+                  {details.confirmationNumber}
+                </span>
+              )}
+              {details.provider && (
+                <span>
+                  <strong style={{ color: "#374151" }}>Provider</strong>{" "}
+                  {details.provider}
+                </span>
+              )}
+            </div>
           )}
         </div>
 

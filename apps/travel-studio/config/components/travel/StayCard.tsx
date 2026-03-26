@@ -1,10 +1,17 @@
 import type { ComponentConfig } from "@/core";
+import { hotelPickerField } from "../../fields/hotel-picker";
+import { imagePickerField } from "../../fields/image-picker";
 
 export type StayCardProps = {
+  hotel: any;
   name: string;
   location: string;
   dates: string;
-  roomType: string;
+  details: {
+    bookedThrough: string;
+    confirmationNumber: string;
+    roomBedType: string;
+  };
   rating: number;
   imageUrl: string;
   notes: string;
@@ -12,25 +19,50 @@ export type StayCardProps = {
 
 export const StayCard: ComponentConfig<StayCardProps> = {
   fields: {
+    hotel: hotelPickerField,
     name: { type: "text" },
     location: { type: "text" },
-    dates: { type: "text" },
-    roomType: { type: "text", label: "Room Type" },
+    dates: { type: "text", label: "Check-in / Check-out Dates" },
+    details: {
+      type: "object",
+      objectFields: {
+        bookedThrough: { type: "text", label: "Booked Through" },
+        confirmationNumber: { type: "text", label: "Confirmation #" },
+        roomBedType: { type: "text", label: "Room/Bed Type" },
+      },
+    },
     rating: { type: "number", min: 1, max: 5 },
-    imageUrl: { type: "text", label: "Image URL" },
-    notes: { type: "textarea" },
+    imageUrl: imagePickerField,
+    notes: { type: "richtext" },
+  },
+  resolveData: async ({ props }, { changed }) => {
+    if (!changed.hotel || !props.hotel) return { props };
+    return {
+      props: {
+        name: props.hotel.name || props.name,
+        location: props.hotel.location || props.location,
+        rating: props.hotel.rating || props.rating,
+        imageUrl: props.hotel.imageUrl || props.imageUrl,
+      },
+      readOnly: { name: true, location: true, rating: true },
+    };
   },
   defaultProps: {
+    hotel: null,
     name: "",
     location: "",
     dates: "",
-    roomType: "Standard",
+    details: {
+      bookedThrough: "",
+      confirmationNumber: "",
+      roomBedType: "Standard",
+    },
     rating: 4,
     imageUrl: "",
     notes: "",
   },
-  render: ({ name, location, dates, roomType, rating, imageUrl, notes }) => {
-    const hasImage = imageUrl.trim().length > 0;
+  render: ({ name, location, dates, details, rating, imageUrl, notes }) => {
+    const hasImage = typeof imageUrl === "string" && imageUrl.trim().length > 0;
     const stars =
       "★".repeat(Math.min(rating, 5)) + "☆".repeat(5 - Math.min(rating, 5));
 
@@ -123,7 +155,7 @@ export const StayCard: ComponentConfig<StayCardProps> = {
                 {dates}
               </span>
             )}
-            {roomType && (
+            {details?.roomBedType && (
               <span
                 style={{
                   fontSize: 12,
@@ -134,22 +166,47 @@ export const StayCard: ComponentConfig<StayCardProps> = {
                   borderRadius: 6,
                 }}
               >
-                {roomType}
+                {details.roomBedType}
+              </span>
+            )}
+            {details?.confirmationNumber && (
+              <span
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: "#065f46",
+                  background: "#ecfdf5",
+                  padding: "3px 10px",
+                  borderRadius: 6,
+                }}
+              >
+                Conf # {details.confirmationNumber}
               </span>
             )}
           </div>
 
-          {notes && (
+          {details?.bookedThrough && (
             <p
               style={{
-                margin: "4px 0 0",
+                margin: 0,
+                fontSize: 12,
+                color: "#9ca3af",
+              }}
+            >
+              Booked through {details.bookedThrough}
+            </p>
+          )}
+
+          {notes && (
+            <div
+              style={{
+                marginTop: 4,
                 fontSize: 13,
                 lineHeight: 1.5,
                 color: "#6b7280",
               }}
-            >
-              {notes}
-            </p>
+              dangerouslySetInnerHTML={{ __html: notes }}
+            />
           )}
         </div>
       </div>

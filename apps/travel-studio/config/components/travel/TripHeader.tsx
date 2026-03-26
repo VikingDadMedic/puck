@@ -1,4 +1,5 @@
 import type { ComponentConfig } from "@/core";
+import { imagePickerField } from "../../fields/image-picker";
 
 export type TripHeaderProps = {
   destination: string;
@@ -11,7 +12,7 @@ export const TripHeader: ComponentConfig<TripHeaderProps> = {
   fields: {
     destination: { type: "text" },
     dateRange: { type: "text", label: "Date Range" },
-    heroImage: { type: "text", label: "Hero Image URL" },
+    heroImage: imagePickerField,
     travelerCount: { type: "number", min: 1, max: 50 },
   },
   defaultProps: {
