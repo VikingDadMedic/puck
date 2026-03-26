@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://voyagersocial.io/schemas/itinerary/itinerary-document.schema.json",
+  "title": "ItineraryDocument",
+  "type": "object",
+  "required": ["id", "name", "visibility", "startDate"],
+  "properties": {
+    "id": { "type": "string" },
+    "visibility": { "$ref": "../common/visibility.schema.json" },
+    "name": { "type": "string" },
+    "startDate": { "type": "string", "format": "date" },
+    "price": { "$ref": "./itinerary-price.schema.json" },
+    "description": { "$ref": "../common/rich-text.schema.json" },
+    "downloadPdf": { "type": "boolean", "default": false },
+    "events": {
+      "type": "array",
+      "items": { "$ref": "../events/itinerary-event.schema.json" }
+    }
+  },
+  "additionalProperties": false
+}

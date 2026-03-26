@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://voyagersocial.io/schemas/common/supplier-ref.schema.json",
+  "title": "SupplierRef",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string" },
+    "name": { "type": "string" },
+    "externalId": { "type": "string" },
+    "source": { "type": "string" }
+  },
+  "additionalProperties": false
+}

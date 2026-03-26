@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://voyagersocial.io/schemas/events/lodging-event.schema.json",
+  "allOf": [
+    { "$ref": "./event-base.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "category": { "const": "lodging" },
+        "type": { "type": "string", "enum": ["checkIn", "checkOut"] },
+        "details": {
+          "type": "object",
+          "properties": {
+            "bookedThrough": { "$ref": "../common/supplier-ref.schema.json" },
+            "confirmationNumber": { "type": "string" },
+            "roomBedType": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "timing": { "$ref": "../common/event-timing.schema.json" },
+        "price": { "$ref": "../common/money.schema.json" }
+      },
+      "required": ["category", "type", "details"],
+      "additionalProperties": true
+    }
+  ]
+}

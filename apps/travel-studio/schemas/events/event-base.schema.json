@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://voyagersocial.io/schemas/events/event-base.schema.json",
+  "title": "EventBase",
+  "type": "object",
+  "required": ["id", "category"],
+  "properties": {
+    "id": { "type": "string" },
+    "category": {
+      "type": "string",
+      "enum": ["smartImport", "activity", "lodging", "flight", "transportation", "cruise", "tour", "booking", "info"]
+    },
+    "subCategory": { "type": "string" },
+    "type": { "type": "string" },
+    "title": { "type": "string" },
+    "notes": { "$ref": "../common/rich-text.schema.json" },
+    "media": {
+      "type": "array",
+      "maxItems": 10,
+      "items": { "$ref": "../common/media-asset.schema.json" }
+    },
+    "attachments": {
+      "type": "array",
+      "items": { "$ref": "../common/attachment-ref.schema.json" }
+    },
+    "documents": {
+      "type": "array",
+      "items": { "$ref": "../common/uploaded-document.schema.json" }
+    }
+  },
+  "additionalProperties": true
+}

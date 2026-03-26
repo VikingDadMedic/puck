@@ -39,3 +39,7 @@ yarn-error.log*
 .idea
 
 dist
+
+# external planning artifacts
+puck-plan.md
+itinerary-proposed-schema-chat.md

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://voyagersocial.io/schemas/common/rich-text.schema.json",
+  "title": "RichText",
+  "description": "Flexible rich text payload. Final format should later be locked to HTML, markdown, or editor JSON.",
+  "oneOf": [
+    { "type": "string" },
+    { "type": "object" },
+    { "type": "null" }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://voyagersocial.io/schemas/events/transportation/transportation-car-rental-event.schema.json",
+  "allOf": [
+    { "$ref": "../event-base.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "category": { "const": "transportation" },
+        "subCategory": { "const": "carRental" },
+        "type": { "type": "string", "enum": ["pickUp", "dropOff"] },
+        "timing": { "$ref": "../../common/event-timing.schema.json" },
+        "details": {
+          "type": "object",
+          "properties": {
+            "bookedThrough": { "$ref": "../../common/supplier-ref.schema.json" },
+            "confirmationNumber": { "type": "string" },
+            "carrier": { "$ref": "../../common/supplier-ref.schema.json" }
+          },
+          "additionalProperties": false
+        },
+        "price": { "$ref": "../../common/money.schema.json" }
+      },
+      "required": ["category", "subCategory", "type", "details"],
+      "additionalProperties": true
+    }
+  ]
+}

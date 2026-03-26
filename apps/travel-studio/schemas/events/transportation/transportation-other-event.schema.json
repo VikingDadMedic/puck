@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://voyagersocial.io/schemas/events/transportation/transportation-other-event.schema.json",
+  "allOf": [
+    { "$ref": "../event-base.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "category": { "const": "transportation" },
+        "subCategory": { "const": "other" },
+        "type": { "type": "string", "enum": ["departure", "arrival"] },
+        "timing": { "$ref": "../../common/event-timing.schema.json" },
+        "details": {
+          "type": "object",
+          "properties": {
+            "bookedThrough": { "$ref": "../../common/supplier-ref.schema.json" },
+            "confirmationNumber": { "type": "string" },
+            "carrier": { "$ref": "../../common/supplier-ref.schema.json" },
+            "number": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "price": { "$ref": "../../common/money.schema.json" }
+      },
+      "required": ["category", "subCategory", "type", "details"],
+      "additionalProperties": true
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://voyagersocial.io/schemas/events/flight-event.schema.json",
+  "allOf": [
+    { "$ref": "./event-base.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "category": { "const": "flight" },
+        "type": { "type": "string", "enum": ["departure", "arrival"] },
+        "timing": { "$ref": "../common/event-timing.schema.json" },
+        "details": {
+          "type": "object",
+          "properties": {
+            "bookedThrough": { "$ref": "../common/supplier-ref.schema.json" },
+            "confirmationNumber": { "type": "string" },
+            "airline": { "$ref": "../common/supplier-ref.schema.json" },
+            "flightNumber": { "type": "string" },
+            "terminal": { "type": "string" },
+            "gate": { "type": "string" },
+            "seatTicketDetails": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "price": { "$ref": "../common/money.schema.json" }
+      },
+      "required": ["category", "type", "details"],
+      "additionalProperties": true
+    }
+  ]
+}

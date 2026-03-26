@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://voyagersocial.io/schemas/events/cruise-event.schema.json",
+  "allOf": [
+    { "$ref": "./event-base.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "category": { "const": "cruise" },
+        "type": { "type": "string", "enum": ["departure", "arrival"] },
+        "timing": { "$ref": "../common/event-timing.schema.json" },
+        "details": {
+          "type": "object",
+          "properties": {
+            "bookedThrough": { "$ref": "../common/supplier-ref.schema.json" },
+            "confirmationNumber": { "type": "string" },
+            "carrier": { "$ref": "../common/supplier-ref.schema.json" },
+            "cabinType": { "type": "string" },
+            "cabinNumber": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "price": { "$ref": "../common/money.schema.json" }
+      },
+      "required": ["category", "type", "details"],
+      "additionalProperties": true
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://voyagersocial.io/schemas/common/uploaded-document.schema.json",
+  "title": "UploadedDocument",
+  "type": "object",
+  "required": ["id"],
+  "properties": {
+    "id": { "type": "string" },
+    "name": { "type": "string" },
+    "url": { "type": "string", "format": "uri" },
+    "mimeType": { "type": "string" },
+    "sizeBytes": { "type": "integer", "minimum": 0 }
+  },
+  "additionalProperties": false
+}

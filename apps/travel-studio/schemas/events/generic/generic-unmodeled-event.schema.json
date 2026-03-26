@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://voyagersocial.io/schemas/events/generic/generic-unmodeled-event.schema.json",
+  "allOf": [
+    { "$ref": "../event-base.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "category": { "type": "string", "enum": ["smartImport", "tour", "booking"] },
+        "details": { "type": "object" }
+      },
+      "required": ["category"],
+      "additionalProperties": true
+    }
+  ]
+}

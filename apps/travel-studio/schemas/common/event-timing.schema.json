@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://voyagersocial.io/schemas/common/event-timing.schema.json",
+  "title": "EventTiming",
+  "type": "object",
+  "properties": {
+    "date": { "type": "string", "format": "date" },
+    "time": { "type": "string", "description": "Local time string, e.g. 14:30" },
+    "duration": { "type": "string" },
+    "timezone": { "type": "string" }
+  },
+  "additionalProperties": false
+}

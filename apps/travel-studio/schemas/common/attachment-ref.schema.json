@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://voyagersocial.io/schemas/common/attachment-ref.schema.json",
+  "title": "AttachmentRef",
+  "type": "object",
+  "required": ["id", "kind"],
+  "properties": {
+    "id": { "type": "string" },
+    "kind": { "type": "string", "enum": ["savedItem", "place", "savedIdea", "genericReference"] },
+    "label": { "type": "string" }
+  },
+  "additionalProperties": false
+}

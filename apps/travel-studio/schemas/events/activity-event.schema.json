@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://voyagersocial.io/schemas/events/activity-event.schema.json",
+  "allOf": [
+    { "$ref": "./event-base.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "category": { "const": "activity" },
+        "subCategory": { "type": "string", "enum": ["activity", "foodDrink"] },
+        "details": {
+          "type": "object",
+          "properties": {
+            "bookedThrough": { "$ref": "../common/supplier-ref.schema.json" },
+            "confirmationNumber": { "type": "string" },
+            "provider": { "$ref": "../common/supplier-ref.schema.json" }
+          },
+          "additionalProperties": false
+        },
+        "timing": { "$ref": "../common/event-timing.schema.json" },
+        "price": { "$ref": "../common/money.schema.json" }
+      },
+      "required": ["category", "details"],
+      "additionalProperties": true
+    }
+  ]
+}

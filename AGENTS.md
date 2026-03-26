@@ -534,6 +534,36 @@ cd apps/travel-studio && yarn dev    # http://localhost:3001
 
 The home page redirects to `/trip/edit`. Seed data loads a sample "Mediterranean Cruise" document.
 
+### Domain Model (Itinerary Event Schema)
+
+The travel studio has a canonical domain model separate from Puck composition types.
+
+**Architecture:** JSON Schemas (`schemas/`) are the source of truth. Hand-written
+TypeScript types (`domain/`) mirror them exactly. Puck components consume these
+types but are not yet fully aligned (see `domain/MAPPING.md` for the gap analysis).
+
+**Event model:** Polymorphic discriminated union with 9 variants:
+
+- `InfoEvent`, `ActivityEvent`, `LodgingEvent`, `FlightEvent`, `CruiseEvent`
+- `RailEvent`, `CarRentalEvent`, `OtherTransportEvent` (transportation sub-family)
+- `GenericUnmodeledEvent` (smartImport, tour, booking -- placeholders)
+
+**Shared base:** Every event has `id`, `category` (discriminator), optional
+`subCategory`/`type`, `title`, `notes` (RichText), `media[]`, `attachments[]`, `documents[]`.
+
+**Reusable sub-objects:** `Money`, `SupplierRef`, `EventTiming`, `MediaAsset`,
+`AttachmentRef`, `UploadedDocument`, `RichText`, `Visibility`.
+
+**Key paths:**
+
+| What              | Path                                     |
+| ----------------- | ---------------------------------------- |
+| JSON Schemas      | `apps/travel-studio/schemas/` (21 files) |
+| TypeScript types  | `apps/travel-studio/domain/` (13 files)  |
+| Type guards       | `apps/travel-studio/domain/guards.ts`    |
+| Barrel export     | `apps/travel-studio/domain/index.ts`     |
+| Component mapping | `apps/travel-studio/domain/MAPPING.md`   |
+
 ---
 
 ## Learned User Preferences

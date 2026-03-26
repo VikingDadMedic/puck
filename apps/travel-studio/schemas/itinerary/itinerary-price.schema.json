@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://voyagersocial.io/schemas/itinerary/itinerary-price.schema.json",
+  "title": "ItineraryPrice",
+  "type": "object",
+  "required": ["amount", "currency", "basis"],
+  "properties": {
+    "amount": { "type": "number" },
+    "currency": { "type": "string", "minLength": 3, "maxLength": 3 },
+    "basis": { "type": "string", "enum": ["perPerson", "total"] }
+  },
+  "additionalProperties": false
+}

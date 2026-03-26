@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://voyagersocial.io/schemas/common/media-asset.schema.json",
+  "title": "MediaAsset",
+  "type": "object",
+  "required": ["id"],
+  "properties": {
+    "id": { "type": "string" },
+    "url": { "type": "string", "format": "uri" },
+    "kind": { "type": "string", "enum": ["image", "video"] },
+    "mimeType": { "type": "string" },
+    "caption": { "type": "string" },
+    "altText": { "type": "string" }
+  },
+  "additionalProperties": false
+}

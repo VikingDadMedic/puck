@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://voyagersocial.io/schemas/events/itinerary-event.schema.json",
+  "title": "ItineraryEvent",
+  "oneOf": [
+    { "$ref": "./info-event.schema.json" },
+    { "$ref": "./activity-event.schema.json" },
+    { "$ref": "./lodging-event.schema.json" },
+    { "$ref": "./flight-event.schema.json" },
+    { "$ref": "./cruise-event.schema.json" },
+    { "$ref": "./transportation/transportation-rail-event.schema.json" },
+    { "$ref": "./transportation/transportation-car-rental-event.schema.json" },
+    { "$ref": "./transportation/transportation-other-event.schema.json" },
+    { "$ref": "./generic/generic-unmodeled-event.schema.json" }
+  ]
+}

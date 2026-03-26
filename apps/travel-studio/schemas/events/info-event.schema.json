@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://voyagersocial.io/schemas/events/info-event.schema.json",
+  "allOf": [
+    { "$ref": "./event-base.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "category": { "const": "info" },
+        "subCategory": { "type": "string", "enum": ["info", "cityGuide"] }
+      },
+      "required": ["category"],
+      "additionalProperties": true
+    }
+  ]
+}
