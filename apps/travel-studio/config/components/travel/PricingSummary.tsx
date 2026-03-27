@@ -1,4 +1,5 @@
 import type { ComponentConfig } from "@/core";
+import { richTextToSafeHtml } from "../../../lib/render/richtext";
 
 export type PricingSummaryProps = {
   currency: string;
@@ -172,7 +173,7 @@ export const PricingSummary: ComponentConfig<PricingSummaryProps> = {
                 color: "#6b7280",
                 fontStyle: "italic",
               }}
-              dangerouslySetInnerHTML={{ __html: notes }}
+              dangerouslySetInnerHTML={{ __html: richTextToSafeHtml(notes) }}
             />
           )}
         </div>

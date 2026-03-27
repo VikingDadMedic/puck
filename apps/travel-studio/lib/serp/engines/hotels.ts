@@ -24,7 +24,7 @@ type HotelsParams = {
 export async function searchHotels(
   params: HotelsParams
 ): Promise<HotelResult[]> {
-  const data = await serpFetch<any>("google_hotels", {
+  const data = await serpFetch<Record<string, unknown>>("google_hotels", {
     q: params.destination,
     check_in_date: params.checkIn,
     check_out_date: params.checkOut,
@@ -34,19 +34,28 @@ export async function searchHotels(
     hl: "en",
   });
 
-  const properties = data.properties || [];
-  return properties.slice(0, 20).map((p: any, i: number) => ({
-    id: `hotel_${i}_${(p.name || "").replace(/\s+/g, "_").slice(0, 20)}`,
-    name: p.name || "Unknown Hotel",
-    location: p.description || p.neighborhood || "",
-    rating: p.overall_rating ?? 0,
-    stars: p.hotel_class ?? 0,
-    pricePerNight: String(
-      p.rate_per_night?.lowest ?? p.total_rate?.lowest ?? "N/A"
-    ),
-    currency: params.currency ?? "USD",
-    imageUrl: p.images?.[0]?.thumbnail || p.images?.[0]?.original_image || "",
-    bookingUrl: p.link || "",
-    amenities: p.amenities || [],
-  }));
+  const properties = (data.properties as Record<string, unknown>[]) || [];
+  return properties.slice(0, 20).map((p, i) => {
+    const ratePerNight = p.rate_per_night as
+      | Record<string, unknown>
+      | undefined;
+    const totalRate = p.total_rate as Record<string, unknown> | undefined;
+    const images = p.images as Record<string, unknown>[] | undefined;
+    return {
+      id: `hotel_${i}_${String(p.name ?? "")
+        .replace(/\s+/g, "_")
+        .slice(0, 20)}`,
+      name: String(p.name ?? "Unknown Hotel"),
+      location: String(p.description ?? p.neighborhood ?? ""),
+      rating: Number(p.overall_rating ?? 0),
+      stars: Number(p.hotel_class ?? 0),
+      pricePerNight: String(ratePerNight?.lowest ?? totalRate?.lowest ?? "N/A"),
+      currency: params.currency ?? "USD",
+      imageUrl: String(
+        images?.[0]?.thumbnail ?? images?.[0]?.original_image ?? ""
+      ),
+      bookingUrl: String(p.link ?? ""),
+      amenities: (p.amenities as string[]) || [],
+    };
+  });
 }

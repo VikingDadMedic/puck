@@ -158,7 +158,7 @@ export const smoke = async (tests, config) => {
 
   console.log(`${numSucceeded}/${results.length} tests passed`);
 
-  if (numSucceeded < 0) {
+  if (numSucceeded < results.length) {
     process.exit(1);
   }
 };

@@ -14,12 +14,15 @@ export const SidebarLayout: ComponentConfig<SidebarLayoutProps> = {
     main: [],
     sidebar: [],
   },
-  render: ({ main: Main, sidebar: Sidebar }) => {
+  render: ({ main: Main, sidebar: Sidebar, puck }) => {
+    const mode = puck.metadata?.target as string | undefined;
+    const isProposal = mode === "proposal";
+
     return (
       <div
         style={{
           display: "flex",
-          gap: 24,
+          gap: isProposal ? 32 : 24,
           flexWrap: "wrap",
         }}
       >

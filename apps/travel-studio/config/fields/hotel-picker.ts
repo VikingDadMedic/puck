@@ -1,6 +1,15 @@
 import type { ExternalField } from "@/core";
+import { travelStudioApiHeaders } from "../travel-studio-fetch";
 
-export const hotelPickerField: ExternalField = {
+type HotelSearchRow = {
+  name?: string;
+  location?: string;
+  rating?: number;
+  imageUrl?: string;
+  pricePerNight?: string;
+};
+
+export const hotelPickerField: ExternalField<Record<string, unknown> | null> = {
   type: "external",
   label: "Search Hotels",
   placeholder: "Search by destination...",
@@ -14,22 +23,37 @@ export const hotelPickerField: ExternalField = {
     const params = new URLSearchParams({ destination: query });
     if (filters?.checkIn) params.set("checkIn", String(filters.checkIn));
     if (filters?.checkOut) params.set("checkOut", String(filters.checkOut));
-    const res = await fetch(`/api/search/hotels?${params}`);
+    const res = await fetch(`/api/search/hotels?${params}`, {
+      headers: travelStudioApiHeaders(),
+    });
     if (!res.ok) return [];
     return res.json();
   },
-  mapRow: (item) => ({
-    title: item.name,
-    description: `${item.rating ? item.rating + "★ · " : ""}${item.location}${
-      item.pricePerNight !== "N/A" ? " · " + item.pricePerNight + "/night" : ""
-    }`,
-  }),
-  mapProp: (item) => ({
-    name: item.name,
-    location: item.location,
-    rating: item.rating,
-    imageUrl: item.imageUrl,
-    pricePerNight: item.pricePerNight,
-  }),
-  getItemSummary: (item) => item?.name || "Hotel",
+  mapRow: (item) => {
+    const row = item as HotelSearchRow | null;
+    return {
+      title: row?.name ?? "",
+      description: `${row?.rating ? row.rating + "★ · " : ""}${
+        row?.location ?? ""
+      }${
+        row?.pricePerNight !== "N/A" && row?.pricePerNight
+          ? " · " + row.pricePerNight + "/night"
+          : ""
+      }`,
+    };
+  },
+  mapProp: (item) => {
+    const row = item as HotelSearchRow | null;
+    return {
+      name: row?.name,
+      location: row?.location,
+      rating: row?.rating,
+      imageUrl: row?.imageUrl,
+      pricePerNight: row?.pricePerNight,
+    };
+  },
+  getItemSummary: (item) => {
+    const row = item as HotelSearchRow | null;
+    return row?.name?.trim() || "Hotel";
+  },
 };

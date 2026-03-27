@@ -14,14 +14,17 @@ export const CardGroup: ComponentConfig<CardGroupProps> = {
     title: "",
     items: [],
   },
-  render: ({ title, items: Items }) => {
+  render: ({ title, items: Items, puck }) => {
+    const mode = puck.metadata?.target as string | undefined;
+    const isProposal = mode === "proposal";
+
     return (
       <div>
         {title && (
           <h3
             style={{
-              margin: "0 0 16px",
-              fontSize: 18,
+              margin: isProposal ? "0 0 20px" : "0 0 16px",
+              fontSize: isProposal ? 22 : 18,
               fontWeight: 600,
               color: "#1f2937",
             }}
@@ -33,7 +36,7 @@ export const CardGroup: ComponentConfig<CardGroupProps> = {
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-            gap: 16,
+            gap: isProposal ? 20 : 16,
           }}
         >
           <Items />

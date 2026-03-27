@@ -1,10 +1,17 @@
-import type { ComponentConfig } from "@/core";
+import type { ComponentConfig, Fields } from "@/core";
 import { flightPickerField } from "../../fields/flight-picker";
+import { richTextToSafeHtml } from "../../../lib/render/richtext";
+
+export type SupplierRefField = {
+  name?: string;
+  externalId?: string;
+  source?: string;
+};
 
 export type TransportCardProps = {
-  flightSearch: any;
+  flightSearch: Record<string, unknown> | null;
   type: "flight" | "train" | "transfer" | "ferry" | "carRental";
-  carrier: string;
+  carrier: SupplierRefField;
   timing: { date: string; time: string; duration: string; timezone: string };
   departure: string;
   arrival: string;
@@ -17,6 +24,7 @@ export type TransportCardProps = {
   };
   trainDetails: { trainNumber: string };
   otherDetails: { number: string };
+  carRentalDetails: { leg: "pickUp" | "dropOff" };
   confirmationNumber: string;
   notes: string;
 };
@@ -27,6 +35,57 @@ const typeIcons: Record<TransportCardProps["type"], string> = {
   transfer: "🚐",
   ferry: "⛴",
   carRental: "🚗",
+};
+
+const supplierObjectFields = {
+  name: { type: "text" as const, label: "Name" },
+  externalId: { type: "text" as const, label: "External ID" },
+  source: { type: "text" as const, label: "Source" },
+};
+
+const transportFlightDetailsField = {
+  type: "object" as const,
+  label: "Flight Details",
+  objectFields: {
+    flightNumber: { type: "text" as const, label: "Flight Number" },
+    terminal: { type: "text" as const, label: "Terminal" },
+    gate: { type: "text" as const, label: "Gate" },
+    seatTicketDetails: {
+      type: "text" as const,
+      label: "Seat / Ticket Details",
+    },
+  },
+};
+
+const transportTrainDetailsField = {
+  type: "object" as const,
+  label: "Train Details",
+  objectFields: {
+    trainNumber: { type: "text" as const, label: "Train Number" },
+  },
+};
+
+const transportCarRentalDetailsField = {
+  type: "object" as const,
+  label: "Car rental",
+  objectFields: {
+    leg: {
+      type: "select" as const,
+      label: "Leg",
+      options: [
+        { value: "pickUp", label: "Pick up" },
+        { value: "dropOff", label: "Drop off" },
+      ],
+    },
+  },
+};
+
+const transportOtherDetailsField = {
+  type: "object" as const,
+  label: "Details",
+  objectFields: {
+    number: { type: "text" as const, label: "Reference Number" },
+  },
 };
 
 export const TransportCard: ComponentConfig<TransportCardProps> = {
@@ -41,7 +100,16 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
         { value: "carRental", label: "Car Rental" },
       ],
     },
-    carrier: { type: "text" },
+    flightSearch: flightPickerField,
+    flightDetails: transportFlightDetailsField,
+    trainDetails: transportTrainDetailsField,
+    carRentalDetails: transportCarRentalDetailsField,
+    otherDetails: transportOtherDetailsField,
+    carrier: {
+      type: "object",
+      label: "Carrier / Airline",
+      objectFields: supplierObjectFields,
+    },
     departure: { type: "text", label: "From" },
     arrival: { type: "text", label: "To" },
     timing: {
@@ -64,86 +132,87 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
     notes: { type: "richtext" },
   },
   resolveFields: async (data, { fields }) => {
-    const baseFields = { ...fields };
-    delete baseFields.flightSearch;
-    delete baseFields.flightDetails;
-    delete baseFields.trainDetails;
-    delete baseFields.otherDetails;
+    const {
+      flightSearch: _omitFlightSearch,
+      flightDetails: _omitFlightDetails,
+      trainDetails: _omitTrainDetails,
+      otherDetails: _omitOtherDetails,
+      carRentalDetails: _omitCarRentalDetails,
+      ...baseFields
+    } = fields;
+    void _omitFlightSearch;
+    void _omitFlightDetails;
+    void _omitTrainDetails;
+    void _omitOtherDetails;
+    void _omitCarRentalDetails;
 
     switch (data.props.type) {
       case "flight":
         return {
           ...baseFields,
           flightSearch: flightPickerField,
-          flightDetails: {
-            type: "object" as const,
-            label: "Flight Details",
-            objectFields: {
-              flightNumber: { type: "text" as const, label: "Flight Number" },
-              terminal: { type: "text" as const, label: "Terminal" },
-              gate: { type: "text" as const, label: "Gate" },
-              seatTicketDetails: {
-                type: "text" as const,
-                label: "Seat / Ticket Details",
-              },
-            },
-          },
-        };
+          flightDetails: transportFlightDetailsField,
+        } as Fields<TransportCardProps>;
       case "train":
         return {
           ...baseFields,
-          trainDetails: {
-            type: "object" as const,
-            label: "Train Details",
-            objectFields: {
-              trainNumber: { type: "text" as const, label: "Train Number" },
-            },
-          },
-        };
+          trainDetails: transportTrainDetailsField,
+        } as Fields<TransportCardProps>;
+      case "carRental":
+        return {
+          ...baseFields,
+          carRentalDetails: transportCarRentalDetailsField,
+        } as Fields<TransportCardProps>;
       case "ferry":
       case "transfer":
       default:
         return {
           ...baseFields,
-          otherDetails: {
-            type: "object" as const,
-            label: "Details",
-            objectFields: {
-              number: { type: "text" as const, label: "Reference Number" },
-            },
-          },
-        };
+          otherDetails: transportOtherDetailsField,
+        } as Fields<TransportCardProps>;
     }
   },
   resolveData: async ({ props }, { changed }) => {
     if (!changed.flightSearch || !props.flightSearch) return { props };
+    const fs = props.flightSearch as Record<string, unknown>;
+    const carrierName =
+      typeof fs.carrier === "string" ? fs.carrier : props.carrier?.name || "";
     return {
       props: {
-        carrier: props.flightSearch.carrier || props.carrier,
-        departure: props.flightSearch.departure || props.departure,
-        arrival: props.flightSearch.arrival || props.arrival,
+        carrier: { ...props.carrier, name: carrierName },
+        departure:
+          typeof fs.departure === "string"
+            ? fs.departure
+            : props.departure || "",
+        arrival:
+          typeof fs.arrival === "string" ? fs.arrival : props.arrival || "",
         timing: {
           ...props.timing,
-          time: props.flightSearch.departureTime || props.timing?.time,
+          time:
+            typeof fs.departureTime === "string"
+              ? fs.departureTime
+              : props.timing?.time,
         },
         flightDetails: {
           ...props.flightDetails,
           flightNumber:
-            props.flightSearch.flightNumber ||
-            props.flightDetails?.flightNumber,
+            typeof fs.flightNumber === "string"
+              ? fs.flightNumber
+              : props.flightDetails?.flightNumber,
         },
         price: {
-          amount: props.flightSearch.price || props.price?.amount || 0,
+          amount:
+            typeof fs.price === "number" ? fs.price : props.price?.amount || 0,
           currency: props.price?.currency || "USD",
         },
       },
-      readOnly: { carrier: true, departure: true, arrival: true },
+      readOnly: { departure: true, arrival: true },
     };
   },
   defaultProps: {
     flightSearch: null,
     type: "flight",
-    carrier: "",
+    carrier: { name: "", externalId: "", source: "" },
     timing: { date: "", time: "", duration: "", timezone: "" },
     departure: "",
     arrival: "",
@@ -156,6 +225,7 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
     },
     trainDetails: { trainNumber: "" },
     otherDetails: { number: "" },
+    carRentalDetails: { leg: "pickUp" },
     confirmationNumber: "",
     notes: "",
   },
@@ -169,6 +239,7 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
     flightDetails,
     trainDetails,
     otherDetails,
+    carRentalDetails,
     confirmationNumber,
     notes,
     puck,
@@ -178,13 +249,18 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
     const isItinerary = puck.metadata?.target === "itinerary";
     const hasPrice = price?.amount > 0;
     const hasTiming = timing?.date || timing?.time || timing?.duration;
+    const carrierLabel = carrier?.name?.trim() || "";
 
     const typeDetail =
       type === "flight" && flightDetails?.flightNumber
         ? flightDetails.flightNumber
         : type === "train" && trainDetails?.trainNumber
         ? trainDetails.trainNumber
+        : type === "carRental"
+        ? carRentalDetails?.leg || "pickUp"
         : otherDetails?.number || null;
+
+    const notesHtml = richTextToSafeHtml(notes);
 
     return (
       <div
@@ -257,7 +333,7 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
                 </span>
               )}
             </div>
-            {carrier && (
+            {carrierLabel && (
               <span
                 style={{
                   fontSize: 13,
@@ -265,7 +341,7 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
                   color: "#1e293b",
                 }}
               >
-                {carrier}
+                {carrierLabel}
               </span>
             )}
           </div>
@@ -340,7 +416,7 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
             </span>
           )}
 
-          {notes && (
+          {notesHtml && (
             <div
               style={{
                 marginTop: 2,
@@ -348,7 +424,7 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
                 lineHeight: 1.5,
                 color: "#64748b",
               }}
-              dangerouslySetInnerHTML={{ __html: notes }}
+              dangerouslySetInnerHTML={{ __html: notesHtml }}
             />
           )}
         </div>

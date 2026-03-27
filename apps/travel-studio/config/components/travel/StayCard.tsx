@@ -1,14 +1,17 @@
 import type { ComponentConfig } from "@/core";
 import { hotelPickerField } from "../../fields/hotel-picker";
+import { placePickerField } from "../../fields/place-picker";
 import { imagePickerField } from "../../fields/image-picker";
+import { richTextToSafeHtml } from "../../../lib/render/richtext";
 
 export type StayCardProps = {
-  hotel: any;
+  hotel: Record<string, unknown> | null;
+  place: Record<string, unknown> | null;
   name: string;
   location: string;
   dates: string;
   details: {
-    bookedThrough: string;
+    bookedThrough: { name?: string; externalId?: string; source?: string };
     confirmationNumber: string;
     roomBedType: string;
   };
@@ -20,13 +23,22 @@ export type StayCardProps = {
 export const StayCard: ComponentConfig<StayCardProps> = {
   fields: {
     hotel: hotelPickerField,
+    place: placePickerField,
     name: { type: "text" },
     location: { type: "text" },
     dates: { type: "text", label: "Check-in / Check-out Dates" },
     details: {
       type: "object",
       objectFields: {
-        bookedThrough: { type: "text", label: "Booked Through" },
+        bookedThrough: {
+          type: "object",
+          label: "Booked Through",
+          objectFields: {
+            name: { type: "text", label: "Supplier name" },
+            externalId: { type: "text", label: "External ID" },
+            source: { type: "text", label: "Source" },
+          },
+        },
         confirmationNumber: { type: "text", label: "Confirmation #" },
         roomBedType: { type: "text", label: "Room/Bed Type" },
       },
@@ -36,24 +48,46 @@ export const StayCard: ComponentConfig<StayCardProps> = {
     notes: { type: "richtext" },
   },
   resolveData: async ({ props }, { changed }) => {
-    if (!changed.hotel || !props.hotel) return { props };
-    return {
-      props: {
-        name: props.hotel.name || props.name,
-        location: props.hotel.location || props.location,
-        rating: props.hotel.rating || props.rating,
-        imageUrl: props.hotel.imageUrl || props.imageUrl,
-      },
-      readOnly: { name: true, location: true, rating: true },
-    };
+    const strOr = (v: unknown, fallback: string) =>
+      typeof v === "string" && v.trim() ? v : fallback;
+    const numOr = (v: unknown, fallback: number) =>
+      typeof v === "number" && Number.isFinite(v) ? v : fallback;
+
+    if (changed.hotel && props.hotel) {
+      const h = props.hotel;
+      return {
+        props: {
+          name: strOr(h.name, props.name),
+          location: strOr(h.location, props.location),
+          rating: numOr(h.rating, props.rating),
+          imageUrl: strOr(h.imageUrl, props.imageUrl),
+        },
+        readOnly: { name: true, location: true, rating: true },
+      };
+    }
+
+    if (changed.place && props.place) {
+      const p = props.place;
+      return {
+        props: {
+          name: strOr(p.name, props.name),
+          location: strOr(p.location, props.location),
+          imageUrl: strOr(p.imageUrl, props.imageUrl),
+        },
+        readOnly: { name: true, location: true },
+      };
+    }
+
+    return { props };
   },
   defaultProps: {
     hotel: null,
+    place: null,
     name: "",
     location: "",
     dates: "",
     details: {
-      bookedThrough: "",
+      bookedThrough: { name: "", externalId: "", source: "" },
       confirmationNumber: "",
       roomBedType: "Standard",
     },
@@ -61,7 +95,17 @@ export const StayCard: ComponentConfig<StayCardProps> = {
     imageUrl: "",
     notes: "",
   },
-  render: ({ name, location, dates, details, rating, imageUrl, notes }) => {
+  render: ({
+    name,
+    location,
+    dates,
+    details,
+    rating,
+    imageUrl,
+    notes,
+    puck,
+  }) => {
+    const isClientView = puck.metadata?.target === "client_view";
     const hasImage = typeof imageUrl === "string" && imageUrl.trim().length > 0;
     const stars =
       "★".repeat(Math.min(rating, 5)) + "☆".repeat(5 - Math.min(rating, 5));
@@ -155,7 +199,7 @@ export const StayCard: ComponentConfig<StayCardProps> = {
                 {dates}
               </span>
             )}
-            {details?.roomBedType && (
+            {!isClientView && details?.roomBedType && (
               <span
                 style={{
                   fontSize: 12,
@@ -169,7 +213,7 @@ export const StayCard: ComponentConfig<StayCardProps> = {
                 {details.roomBedType}
               </span>
             )}
-            {details?.confirmationNumber && (
+            {!isClientView && details?.confirmationNumber && (
               <span
                 style={{
                   fontSize: 12,
@@ -185,7 +229,7 @@ export const StayCard: ComponentConfig<StayCardProps> = {
             )}
           </div>
 
-          {details?.bookedThrough && (
+          {!isClientView && details?.bookedThrough?.name && (
             <p
               style={{
                 margin: 0,
@@ -193,7 +237,7 @@ export const StayCard: ComponentConfig<StayCardProps> = {
                 color: "#9ca3af",
               }}
             >
-              Booked through {details.bookedThrough}
+              Booked through {details.bookedThrough.name}
             </p>
           )}
 
@@ -205,7 +249,7 @@ export const StayCard: ComponentConfig<StayCardProps> = {
                 lineHeight: 1.5,
                 color: "#6b7280",
               }}
-              dangerouslySetInnerHTML={{ __html: notes }}
+              dangerouslySetInnerHTML={{ __html: richTextToSafeHtml(notes) }}
             />
           )}
         </div>

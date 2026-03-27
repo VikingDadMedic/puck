@@ -21,7 +21,8 @@ export const TripHeader: ComponentConfig<TripHeaderProps> = {
     heroImage: "",
     travelerCount: 2,
   },
-  render: ({ destination, dateRange, heroImage, travelerCount }) => {
+  render: ({ destination, dateRange, heroImage, travelerCount, puck }) => {
+    const isProposal = puck.metadata?.target === "proposal";
     const hasImage = heroImage.trim().length > 0;
 
     return (
@@ -29,7 +30,7 @@ export const TripHeader: ComponentConfig<TripHeaderProps> = {
         style={{
           position: "relative",
           width: "100%",
-          height: 280,
+          height: isProposal ? 340 : 280,
           borderRadius: 12,
           overflow: "hidden",
           background: hasImage
@@ -54,7 +55,7 @@ export const TripHeader: ComponentConfig<TripHeaderProps> = {
             bottom: 0,
             left: 0,
             right: 0,
-            padding: "32px 28px",
+            padding: isProposal ? "40px 36px" : "32px 28px",
             display: "flex",
             flexDirection: "column",
             gap: 8,
@@ -63,7 +64,7 @@ export const TripHeader: ComponentConfig<TripHeaderProps> = {
           <h1
             style={{
               margin: 0,
-              fontSize: 36,
+              fontSize: isProposal ? 44 : 36,
               fontWeight: 800,
               color: "#ffffff",
               letterSpacing: "-0.02em",

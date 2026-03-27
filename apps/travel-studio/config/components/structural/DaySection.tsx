@@ -29,7 +29,15 @@ export const DaySection: ComponentConfig<DaySectionProps> = {
     morning: Morning,
     afternoon: Afternoon,
     evening: Evening,
+    puck,
   }) => {
+    const mode = puck.metadata?.target as string | undefined;
+    const isProposal = mode === "proposal";
+    const isClientView = mode === "client_view";
+
+    const looksInternal = /^(ref|id|doc)[_-]/i.test(date ?? "");
+    const showDate = date && !(isClientView && looksInternal);
+
     const timeSlots = [
       { name: "Morning", Component: Morning, color: "#3b82f6" },
       { name: "Afternoon", Component: Afternoon, color: "#f59e0b" },
@@ -47,27 +55,33 @@ export const DaySection: ComponentConfig<DaySectionProps> = {
       >
         <div
           style={{
-            padding: "16px 20px",
+            padding: isProposal ? "20px 24px" : "16px 20px",
             borderBottom: "1px solid #e5e7eb",
             display: "flex",
             alignItems: "baseline",
             gap: 12,
           }}
         >
-          <span style={{ fontSize: 18, fontWeight: 700, color: "#111827" }}>
+          <span
+            style={{
+              fontSize: isProposal ? 22 : 18,
+              fontWeight: 700,
+              color: "#111827",
+            }}
+          >
             {label}
           </span>
-          {date && (
+          {showDate && (
             <span style={{ fontSize: 14, color: "#6b7280" }}>{date}</span>
           )}
         </div>
 
         <div
           style={{
-            padding: 20,
+            padding: isProposal ? 24 : 20,
             display: "flex",
             flexDirection: "column",
-            gap: 16,
+            gap: isProposal ? 20 : 16,
           }}
         >
           {timeSlots.map(({ name, Component, color }) => (

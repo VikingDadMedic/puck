@@ -1,4 +1,5 @@
 import type { ComponentConfig } from "@/core";
+import { richTextToSafeHtml } from "../../../lib/render/richtext";
 
 export type TripOverviewProps = {
   summary: string;
@@ -22,17 +23,20 @@ export const TripOverview: ComponentConfig<TripOverviewProps> = {
     duration: "14 nights",
     highlights: [],
   },
-  render: ({ summary, duration, highlights }) => {
+  render: ({ summary, duration, highlights, puck }) => {
+    const isProposal = puck.metadata?.target === "proposal";
+
     return (
       <div
         style={{
           background: "#ffffff",
           borderRadius: 12,
           border: "1px solid #e5e7eb",
-          padding: 24,
+          padding: isProposal ? 32 : 24,
           display: "flex",
           flexDirection: "column",
-          gap: 16,
+          gap: isProposal ? 20 : 16,
+          ...(isProposal && { boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }),
         }}
       >
         <div
@@ -45,7 +49,7 @@ export const TripOverview: ComponentConfig<TripOverviewProps> = {
           <h3
             style={{
               margin: 0,
-              fontSize: 18,
+              fontSize: isProposal ? 22 : 18,
               fontWeight: 700,
               color: "#111827",
             }}
@@ -72,11 +76,11 @@ export const TripOverview: ComponentConfig<TripOverviewProps> = {
           <div
             style={{
               margin: 0,
-              fontSize: 15,
-              lineHeight: 1.6,
+              fontSize: isProposal ? 17 : 15,
+              lineHeight: isProposal ? 1.7 : 1.6,
               color: "#374151",
             }}
-            dangerouslySetInnerHTML={{ __html: summary }}
+            dangerouslySetInnerHTML={{ __html: richTextToSafeHtml(summary) }}
           />
         )}
 

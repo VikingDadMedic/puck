@@ -372,16 +372,16 @@ Any PR introducing or changing public APIs receives additional scrutiny.
 
 ## Development Commands
 
-| Command             | What it does                                                |
-| ------------------- | ----------------------------------------------------------- |
-| `yarn`              | Install all workspace dependencies                          |
-| `yarn dev`          | Clears `packages/core/dist`, starts demo app via Turbo      |
-| `yarn build`        | Build all packages (Turbo, outputs to `dist/` and `.next/`) |
-| `yarn test`         | Run Jest tests (currently only `packages/core`)             |
-| `yarn lint`         | Lint all packages                                           |
-| `yarn format`       | Format with Prettier                                        |
-| `yarn format:check` | Check formatting                                            |
-| `yarn smoke`        | Puppeteer e2e smoke tests (needs dev server on :3000)       |
+| Command             | What it does                                                               |
+| ------------------- | -------------------------------------------------------------------------- |
+| `yarn`              | Install all workspace dependencies                                         |
+| `yarn dev`          | Clears `packages/core/dist`, starts demo app via Turbo                     |
+| `yarn build`        | Build all packages (Turbo, outputs to `dist/` and `.next/`)                |
+| `yarn test`         | Run workspace Jest tests (`packages/core` + `apps/travel-studio`)          |
+| `yarn lint`         | Lint all packages                                                          |
+| `yarn format`       | Format with Prettier                                                       |
+| `yarn format:check` | Check formatting                                                           |
+| `yarn smoke`        | Puppeteer e2e smoke tests (needs demo on :3000 and travel-studio on :3001) |
 
 To work on the demo app directly:
 
@@ -398,17 +398,21 @@ cd apps/demo && yarn dev
 
 ## Testing
 
-- **Framework:** Jest + ts-jest (ESM preset) + jsdom environment.
-- **Assertion/utilities:** `@testing-library/react`, `@testing-library/jest-dom`.
-- **Location:** 28 spec files under `packages/core/`:
+- **Framework:** Jest + ts-jest.
+- **Assertion/utilities:** `@testing-library/react`, `@testing-library/jest-dom` (core package tests).
+- **Core test location:** spec files under `packages/core/`:
   - `lib/__tests__/`, `lib/data/__tests__/`
   - `reducer/actions/__tests__/`
   - `store/slices/__tests__/`
   - `types/__tests__/`
   - `components/Puck/__tests__/`
-- **Config:** `packages/core/jest.config.ts`.
+- **Travel-studio test location:** route and library tests under `apps/travel-studio/**/**.test.ts`.
+- **Configs:** `packages/core/jest.config.ts`, `apps/travel-studio/jest.config.cjs`.
 - **CSS Modules:** Mapped to `identity-obj-proxy` in tests.
-- Run: `yarn test` (from root) or `cd packages/core && yarn test`.
+- Run:
+  - `yarn test` (root, all workspaces with a `test` script)
+  - `yarn workspace travel-studio test`
+  - `cd packages/core && yarn test`
 
 ---
 
@@ -493,38 +497,39 @@ system rather than a generic page builder.
 ### Architecture
 
 - **Layer 1 (Domain)**: TypeScript types in `config/schema.ts` -- TripDocument, DocumentMode, VisibilityRule
-- **Layer 2 (Composition)**: Puck config in `config/index.ts` with 15 travel-specific components organized into 5 categories
+- **Layer 2 (Composition)**: Puck config in `config/index.ts` with 17 travel-specific components organized into 5 categories
 - **Layer 3 (Render)**: Mode-aware rendering via `metadata.target` (itinerary/proposal/client_view)
-- **Layer 4 (Shell)**: Custom `headerActions` override with Save Draft and Preview
+- **Layer 4 (Shell)**: Custom `headerActions` override with save status indicator, autosave (4s debounce), conflict resolution modal, toast notifications, and `beforeunload` guard
 
 ### Component Taxonomy
 
-| Category     | Components                                                             |
-| ------------ | ---------------------------------------------------------------------- |
-| Structure    | DocumentSection, DaySection, SidebarLayout, CardGroup, Spacer, Divider |
-| Trip Content | TripHeader, TripOverview, StayCard, ActivityCard, TransportCard        |
-| Pricing      | PricingSummary                                                         |
-| Context      | AdvisorInsight, IncludedFeatures                                       |
-| Actions      | PrimaryCTA                                                             |
+| Category     | Components                                                                                  |
+| ------------ | ------------------------------------------------------------------------------------------- |
+| Structure    | DocumentSection, DaySection, SidebarLayout, CardGroup, Spacer, Divider                      |
+| Trip Content | TripHeader, TripOverview, StayCard, ActivityCard, TransportCard, RestaurantCard, CruiseCard |
+| Pricing      | PricingSummary                                                                              |
+| Context      | AdvisorInsight, IncludedFeatures                                                            |
+| Actions      | PrimaryCTA                                                                                  |
 
 ### Slot Rules
 
-- DaySection: `morning`/`afternoon`/`evening` slots allow only StayCard, ActivityCard, TransportCard
+- DaySection: `morning`/`afternoon`/`evening` slots allow only card-type components (StayCard, ActivityCard, TransportCard, RestaurantCard, CruiseCard)
 - SidebarLayout: `main` allows narrative content; `sidebar` allows pricing/context/CTA
 - DocumentSection: `content` allows all travel/context/conversion components
-- CardGroup: `items` allows only card-type components
+- CardGroup: `items` allows only card-type components (StayCard, ActivityCard, TransportCard, RestaurantCard, CruiseCard)
 
 ### Key Paths
 
-| What          | Path                                              |
-| ------------- | ------------------------------------------------- |
-| App root      | `apps/travel-studio/`                             |
-| Config barrel | `apps/travel-studio/config/index.ts`              |
-| Root config   | `apps/travel-studio/config/root.tsx`              |
-| Schema types  | `apps/travel-studio/config/schema.ts`             |
-| Seed data     | `apps/travel-studio/config/seed-data.ts`          |
-| Editor client | `apps/travel-studio/app/[...puckPath]/client.tsx` |
-| API route     | `apps/travel-studio/app/api/documents/route.ts`   |
+| What           | Path                                                              |
+| -------------- | ----------------------------------------------------------------- |
+| App root       | `apps/travel-studio/`                                             |
+| Config barrel  | `apps/travel-studio/config/index.ts`                              |
+| Root config    | `apps/travel-studio/config/root.tsx`                              |
+| Schema types   | `apps/travel-studio/config/schema.ts`                             |
+| Seed data      | `apps/travel-studio/config/seed-data.ts`                          |
+| Dashboard page | `apps/travel-studio/app/page.tsx` + `app/dashboard.tsx`           |
+| Editor client  | `apps/travel-studio/app/[...puckPath]/client.tsx`                 |
+| Documents API  | `apps/travel-studio/app/api/documents/route.ts` (GET/POST/DELETE) |
 
 ### Running
 
@@ -532,23 +537,25 @@ system rather than a generic page builder.
 cd apps/travel-studio && yarn dev    # http://localhost:3001
 ```
 
-The home page redirects to `/trip/edit`. Seed data loads a sample "Mediterranean Cruise" document.
+The home page shows a document dashboard listing all saved and seed documents with create/edit/delete actions. Editing a document navigates to `/{path}/edit`. Seed data includes a sample "Mediterranean Cruise" document.
+Operational runbooks live under `docs/devex/runbooks/` for API contracts, cache handling, migrations, and testing/CI workflows.
 
 ### Data Feed Architecture
 
 Components connect to live travel data through a three-layer architecture:
 
-1. **SerpAPI engine wrappers** (`lib/serp/engines/`) -- typed functions for each data source
-   (hotels, flights, activities, restaurants, places, images, explore)
-2. **Next.js API routes** (`app/api/search/`) -- 7 GET endpoints that proxy engine wrappers
+1. **SerpAPI/image engine wrappers** (`lib/serp/engines/`) -- typed functions for each data source
+   (hotels, flights, activities, restaurants, places, images, explore, events, yelp, google-light, maps reviews, opentable reviews, finance)
+2. **Next.js API routes** (`app/api/search/`) -- 13 GET endpoints that proxy engine wrappers
 3. **Puck `external` fields** (`config/fields/`) -- picker configs that call API routes
    via `fetchList` and hydrate component props via `resolveData`
 
-Caching: SerpAPI responses are file-cached for 24 hours in `.cache/serp/` (gitignored).
-Image search (Pexels/Unsplash) is direct (not SerpAPI, not cached).
+Caching: search responses are file-cached in `.cache/serp/` with TTL + stale-if-error fallback semantics.
+Image search (Pexels/Unsplash) also uses the same cache layer.
 
-Components using external fields: `StayCard` (hotel picker), `ActivityCard` (activity picker),
-`TransportCard` (flight picker via resolveFields), `TripHeader` (image picker).
+Components using external fields: `StayCard` (hotel picker), `ActivityCard` (activity picker + event picker),
+`TransportCard` (flight picker via resolveFields), `TripHeader` (image picker),
+`RestaurantCard` (restaurant picker), plus `place-picker` for location enrichment.
 
 Components using richtext: `StayCard.notes`, `ActivityCard.description`, `TransportCard.notes`,
 `AdvisorInsight.content`, `TripOverview.summary`, `PricingSummary.notes`.
@@ -556,7 +563,8 @@ Components using richtext: `StayCard.notes`, `ActivityCard.description`, `Transp
 Components using resolveFields: `TransportCard` (polymorphic detail fields based on transport type).
 
 Components using resolveData: `StayCard` (hydrates from hotel search), `ActivityCard` (hydrates
-from activity search), `TransportCard` (hydrates from flight search).
+from activity search), `TransportCard` (hydrates from flight search), `RestaurantCard` (hydrates
+from restaurant search).
 
 ### Domain Model (Itinerary Event Schema)
 
@@ -604,3 +612,8 @@ types but are not yet fully aligned (see `domain/MAPPING.md` for the gap analysi
 - `.cursor/` has 8 rules, 5 skills, 3 commands, and 2 hooks configured for this workspace
 - `create-reducer-action` skill exists at `.cursor/skills/create-reducer-action/SKILL.md` for adding new PuckAction types
 - Docker build for the demo app cannot use `turbo prune --docker` because `@puckeditor/core` is resolved via tsconfig path aliases, not `package.json` dependencies — requires full monorepo copy instead
+- Travel-studio editor has autosave (4s debounce), `beforeunload` guard, conflict resolution modal on 409, and toast notifications — no external UI dependencies
+- Travel-studio has `error.tsx` and `loading.tsx` at both app root and `[...puckPath]` levels, plus `not-found.tsx` at root
+- Travel-studio documents API supports GET (list all), POST (save with optimistic concurrency), and DELETE — dashboard replaces the old redirect-to-edit flow
+- All 17 travel-studio components are mode-aware via `puck.metadata.target` (itinerary/proposal/client_view)
+- Phase 5+ deferred: real database (Postgres/SQLite), real auth (NextAuth), PDF/email export, map visualization, traveler profiles, sharing/collaboration, design system extraction, offline support

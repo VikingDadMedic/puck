@@ -11,8 +11,11 @@ export const Spacer: ComponentConfig<SpacerProps> = {
   defaultProps: {
     height: 24,
   },
-  render: ({ height }) => {
-    return <div style={{ height }} />;
+  render: ({ height, puck }) => {
+    const mode = puck.metadata?.target as string | undefined;
+    const effective = mode === "proposal" ? Math.round(height * 1.25) : height;
+
+    return <div style={{ height: effective }} />;
   },
 };
 

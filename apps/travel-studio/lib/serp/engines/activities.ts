@@ -18,21 +18,23 @@ type ActivitiesParams = {
 export async function searchActivities(
   params: ActivitiesParams
 ): Promise<ActivityResult[]> {
-  const data = await serpFetch<any>("tripadvisor", {
+  const data = await serpFetch<Record<string, unknown>>("tripadvisor", {
     q: `Things to do in ${params.destination}`,
     ssrc: "A",
     limit: 20,
   });
 
-  const results = data.data || [];
-  return results.slice(0, 20).map((r: any, i: number) => ({
-    id: `activity_${i}_${(r.title || "").replace(/\s+/g, "_").slice(0, 20)}`,
-    name: r.title || "Unknown Activity",
-    description: r.description || "",
-    rating: r.rating ?? 0,
-    reviewCount: r.reviews ?? 0,
-    imageUrl: r.thumbnail || "",
-    link: r.link || "",
-    category: r.category || "Activity",
+  const results = (data.data as Record<string, unknown>[]) || [];
+  return results.slice(0, 20).map((r, i) => ({
+    id: `activity_${i}_${String(r.title ?? "")
+      .replace(/\s+/g, "_")
+      .slice(0, 20)}`,
+    name: String(r.title ?? "Unknown Activity"),
+    description: String(r.description ?? ""),
+    rating: Number(r.rating ?? 0),
+    reviewCount: Number(r.reviews ?? 0),
+    imageUrl: String(r.thumbnail ?? ""),
+    link: String(r.link ?? ""),
+    category: String(r.category ?? "Activity"),
   }));
 }

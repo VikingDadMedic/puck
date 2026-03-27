@@ -1,18 +1,17 @@
-import { NextResponse } from "next/server";
 import { searchImages } from "../../../../lib/serp/engines/images";
+import { runSearchRoute } from "../../../../lib/api";
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const query = searchParams.get("query") || "";
-
-  if (!query) {
-    return NextResponse.json({ error: "query is required" }, { status: 400 });
-  }
-
-  try {
-    const results = await searchImages({ query });
-    return NextResponse.json(results);
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
-  }
+  return runSearchRoute(request, {
+    routePrefix: "search:images",
+    routeLabel: "images",
+    rules: {
+      query: { required: true, maxLength: 300 },
+    },
+    providerErrorMessage: "Image search failed",
+    run: (params) =>
+      searchImages({
+        query: params.query,
+      }),
+  });
 }

@@ -20,25 +20,28 @@ type PlacesParams = {
 export async function searchPlaces(
   params: PlacesParams
 ): Promise<PlaceResult[]> {
-  const data = await serpFetch<any>("google_maps", {
+  const data = await serpFetch<Record<string, unknown>>("google_maps", {
     q: params.query,
     type: "search",
     hl: "en",
   });
 
-  const results = data.local_results || [];
-  return results.slice(0, 20).map((p: any, i: number) => ({
-    id: p.place_id || `place_${i}`,
-    name: p.title || "Unknown Place",
-    address: p.address || "",
-    rating: p.rating ?? 0,
-    reviewCount: p.reviews ?? 0,
-    type: p.type || "",
-    imageUrl: p.thumbnail || "",
-    gps: p.gps_coordinates
-      ? { lat: p.gps_coordinates.latitude, lng: p.gps_coordinates.longitude }
-      : null,
-    phone: p.phone || "",
-    website: p.website || "",
-  }));
+  const results = (data.local_results as Record<string, unknown>[]) || [];
+  return results.slice(0, 20).map((p, i) => {
+    const gps = p.gps_coordinates as Record<string, unknown> | undefined;
+    return {
+      id: String(p.place_id ?? `place_${i}`),
+      name: String(p.title ?? "Unknown Place"),
+      address: String(p.address ?? ""),
+      rating: Number(p.rating ?? 0),
+      reviewCount: Number(p.reviews ?? 0),
+      type: String(p.type ?? ""),
+      imageUrl: String(p.thumbnail ?? ""),
+      gps: gps
+        ? { lat: Number(gps.latitude ?? 0), lng: Number(gps.longitude ?? 0) }
+        : null,
+      phone: String(p.phone ?? ""),
+      website: String(p.website ?? ""),
+    };
+  });
 }

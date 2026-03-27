@@ -1,15 +1,18 @@
 import type { ComponentConfig } from "@/core";
 import { activityPickerField } from "../../fields/activity-picker";
+import { eventPickerField } from "../../fields/event-picker";
 import { imagePickerField } from "../../fields/image-picker";
+import { richTextToSafeHtml } from "../../../lib/render/richtext";
 
 export type ActivityCardProps = {
-  activity: any;
+  activity: Record<string, unknown> | null;
+  event: Record<string, unknown> | null;
   name: string;
   timing: { date: string; time: string; duration: string; timezone: string };
   details: {
-    bookedThrough: string;
+    bookedThrough: { name?: string; externalId?: string; source?: string };
     confirmationNumber: string;
-    provider: string;
+    provider: { name?: string; externalId?: string; source?: string };
   };
   description: string;
   imageUrl: string;
@@ -18,6 +21,7 @@ export type ActivityCardProps = {
 export const ActivityCard: ComponentConfig<ActivityCardProps> = {
   fields: {
     activity: activityPickerField,
+    event: eventPickerField,
     name: { type: "text" },
     timing: {
       type: "object",
@@ -31,9 +35,25 @@ export const ActivityCard: ComponentConfig<ActivityCardProps> = {
     details: {
       type: "object",
       objectFields: {
-        bookedThrough: { type: "text", label: "Booked Through" },
+        bookedThrough: {
+          type: "object",
+          label: "Booked Through",
+          objectFields: {
+            name: { type: "text", label: "Supplier name" },
+            externalId: { type: "text", label: "External ID" },
+            source: { type: "text", label: "Source" },
+          },
+        },
         confirmationNumber: { type: "text", label: "Confirmation #" },
-        provider: { type: "text", label: "Provider" },
+        provider: {
+          type: "object",
+          label: "Provider",
+          objectFields: {
+            name: { type: "text", label: "Name" },
+            externalId: { type: "text", label: "External ID" },
+            source: { type: "text", label: "Source" },
+          },
+        },
       },
     },
     description: { type: "richtext" },
@@ -41,27 +61,55 @@ export const ActivityCard: ComponentConfig<ActivityCardProps> = {
   },
   defaultProps: {
     activity: null,
+    event: null,
     name: "",
     timing: { date: "", time: "", duration: "", timezone: "" },
-    details: { bookedThrough: "", confirmationNumber: "", provider: "" },
+    details: {
+      bookedThrough: { name: "", externalId: "", source: "" },
+      confirmationNumber: "",
+      provider: { name: "", externalId: "", source: "" },
+    },
     description: "",
     imageUrl: "",
   },
   resolveData: async ({ props }, { changed }) => {
-    if (!changed.activity || !props.activity) return { props };
-    return {
-      props: {
-        name: props.activity.name || props.name,
-        description: props.activity.description || props.description,
-        imageUrl: props.activity.imageUrl || props.imageUrl,
-      },
-      readOnly: { name: true },
-    };
+    const strOr = (v: unknown, fallback: string) =>
+      typeof v === "string" && v.trim() ? v : fallback;
+
+    if (changed.activity && props.activity) {
+      const a = props.activity;
+      return {
+        props: {
+          name: strOr(a.name, props.name),
+          description: strOr(a.description, props.description),
+          imageUrl: strOr(a.imageUrl, props.imageUrl),
+        },
+        readOnly: { name: true },
+      };
+    }
+
+    if (changed.event && props.event) {
+      const e = props.event;
+      return {
+        props: {
+          name: strOr(e.name, props.name),
+          description: strOr(e.description, props.description),
+          imageUrl: strOr(e.imageUrl, props.imageUrl),
+        },
+        readOnly: { name: true },
+      };
+    }
+
+    return { props };
   },
-  render: ({ name, timing, details, description, imageUrl }) => {
+  render: ({ name, timing, details, description, imageUrl, puck }) => {
+    const isClientView = puck.metadata?.target === "client_view";
     const hasImage = typeof imageUrl === "string" && imageUrl.trim().length > 0;
     const hasBookingDetails =
-      details.bookedThrough || details.confirmationNumber || details.provider;
+      !isClientView &&
+      (details.bookedThrough?.name ||
+        details.confirmationNumber ||
+        details.provider?.name);
 
     return (
       <div
@@ -133,7 +181,9 @@ export const ActivityCard: ComponentConfig<ActivityCardProps> = {
                 lineHeight: 1.5,
                 color: "#4b5563",
               }}
-              dangerouslySetInnerHTML={{ __html: description }}
+              dangerouslySetInnerHTML={{
+                __html: richTextToSafeHtml(description),
+              }}
             />
           )}
 
@@ -150,10 +200,10 @@ export const ActivityCard: ComponentConfig<ActivityCardProps> = {
                 color: "#6b7280",
               }}
             >
-              {details.bookedThrough && (
+              {details.bookedThrough?.name && (
                 <span>
                   <strong style={{ color: "#374151" }}>Booked via</strong>{" "}
-                  {details.bookedThrough}
+                  {details.bookedThrough.name}
                 </span>
               )}
               {details.confirmationNumber && (
@@ -162,10 +212,10 @@ export const ActivityCard: ComponentConfig<ActivityCardProps> = {
                   {details.confirmationNumber}
                 </span>
               )}
-              {details.provider && (
+              {details.provider?.name && (
                 <span>
                   <strong style={{ color: "#374151" }}>Provider</strong>{" "}
-                  {details.provider}
+                  {details.provider.name}
                 </span>
               )}
             </div>

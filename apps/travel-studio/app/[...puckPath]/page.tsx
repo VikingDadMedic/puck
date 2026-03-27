@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { resolvePath } from "../../lib/resolve-path";
-import { getDocument } from "../../lib/get-document";
+import { getDocumentRecord } from "../../lib/get-document";
+import { ensureEnvValidated } from "../../lib/api";
 import { Client } from "./client";
 
 export async function generateMetadata({
@@ -23,11 +24,15 @@ export default async function Page({
 }: {
   params: Promise<{ puckPath: string[] }>;
 }) {
+  ensureEnvValidated();
+
   const { puckPath } = await params;
   const { isEdit, path } = resolvePath(puckPath);
-  const data = getDocument(path) || {};
+  const { puck, version } = getDocumentRecord(path);
 
-  return <Client isEdit={isEdit} path={path} data={data} />;
+  return (
+    <Client isEdit={isEdit} path={path} data={puck} documentVersion={version} />
+  );
 }
 
 export const dynamic = "force-dynamic";

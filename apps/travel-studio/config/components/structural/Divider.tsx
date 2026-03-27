@@ -11,11 +11,16 @@ export const Divider: ComponentConfig<DividerProps> = {
   defaultProps: {
     label: "",
   },
-  render: ({ label }) => {
+  render: ({ label, puck }) => {
+    const mode = puck.metadata?.target as string | undefined;
+    const isProposal = mode === "proposal";
+
     return (
-      <div style={{ padding: "8px 0" }}>
+      <div style={{ padding: isProposal ? "12px 0" : "8px 0" }}>
         {label && (
-          <div style={{ textAlign: "center", marginBottom: 8 }}>
+          <div
+            style={{ textAlign: "center", marginBottom: isProposal ? 10 : 8 }}
+          >
             <span
               style={{
                 fontSize: 12,

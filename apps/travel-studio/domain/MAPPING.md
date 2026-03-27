@@ -1,66 +1,67 @@
-# Component-to-Schema Mapping
+# Component-to-Schema Mapping (Phase 4.5)
 
-This document maps the current Puck composition components to the canonical
-itinerary event schema. It serves as the roadmap for Phase 2 component refactoring.
+Canonical itinerary data is derived from Puck composition data on **save**:
 
-## Current State
+1. map `Data` -> `ItineraryDocument` using
+   [`lib/itinerary/puck-to-itinerary.ts`](../lib/itinerary/puck-to-itinerary.ts)
+2. validate with JSON Schema using
+   [`lib/itinerary/validate-itinerary-schema.ts`](../lib/itinerary/validate-itinerary-schema.ts)
+3. persist envelope in `travel-data.json`
 
-The travel-studio has 15 Puck components with simple flat props.
-The domain model defines a polymorphic event system with 9 event variants,
-shared base shell, and structured sub-objects (SupplierRef, EventTiming, Money, etc.).
+## Storage envelope and version semantics
 
-## Mapping Table
+Persisted shape (per document path key in `travel-data.json`):
 
-| Current Component  | Schema Type(s)                                                         | Status         | Gap                                                                                                                                                                                                                            |
-| ------------------ | ---------------------------------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `TripHeader`       | `ItineraryDocument` (root-level)                                       | Compatible     | travelerCount maps to doc-level metadata                                                                                                                                                                                       |
-| `TripOverview`     | `ItineraryDocument.description` + custom                               | Compatible     | highlights → future structured field                                                                                                                                                                                           |
-| `StayCard`         | `LodgingEvent`                                                         | Needs refactor | Missing `details.bookedThrough`, `details.confirmationNumber`; flat `name`/`location`/`dates`/`roomType` need restructuring into `details` object; `rating` has no schema equivalent (extend schema or keep as component-only) |
-| `ActivityCard`     | `ActivityEvent`                                                        | Needs refactor | Missing `details.provider`, `details.bookedThrough`, `details.confirmationNumber`; `time`/`duration` should become `EventTiming`                                                                                               |
-| `TransportCard`    | `FlightEvent` / `RailEvent` / `CarRentalEvent` / `OtherTransportEvent` | Needs split    | Currently one component with type select; schema splits into 4 distinct variants with different detail fields. Options: (a) split into 4 components, (b) keep one component with `resolveFields` dynamic fields                |
-| `PricingSummary`   | `ItineraryPrice` + `Money`                                             | Compatible     | `lineItems` pattern works; `currency`/`total` should use `Money` type; `basis` field (perPerson/total) missing                                                                                                                 |
-| `AdvisorInsight`   | Not an event type                                                      | N/A            | Pure composition component, not a domain event. Keep as-is.                                                                                                                                                                    |
-| `IncludedFeatures` | Not an event type                                                      | N/A            | Pure composition component. Keep as-is.                                                                                                                                                                                        |
-| `PrimaryCTA`       | Not an event type                                                      | N/A            | Pure composition component. Keep as-is.                                                                                                                                                                                        |
-| `DocumentSection`  | Structural only                                                        | N/A            | Layout container, not a domain event. Keep as-is.                                                                                                                                                                              |
-| `DaySection`       | Structural only                                                        | N/A            | Layout container. Maps to grouping events by date in the domain model.                                                                                                                                                         |
-| `SidebarLayout`    | Structural only                                                        | N/A            | Layout container. Keep as-is.                                                                                                                                                                                                  |
-| `CardGroup`        | Structural only                                                        | N/A            | Layout container. Keep as-is.                                                                                                                                                                                                  |
-| `Spacer`           | Structural only                                                        | N/A            | Layout utility. Keep as-is.                                                                                                                                                                                                    |
-| `Divider`          | Structural only                                                        | N/A            | Layout utility. Keep as-is.                                                                                                                                                                                                    |
+- `version: number` - optimistic concurrency version
+- `puck: Data` - authoring document used by editor
+- `itinerary: ItineraryDocument` - schema-validated canonical domain document
 
-## Key Decisions for Phase 2
+Legacy rows are still supported:
 
-### A. Transport component strategy
+- legacy raw Puck rows (without envelope) are treated as **version `0`**
+- first save after migration writes canonical envelope at **version `1`**
 
-**Option A (recommended):** Keep one `TransportCard` component but use Puck's
-`resolveFields` to dynamically show/hide fields based on the selected transport
-sub-category. Store data in the `FlightEvent` / `RailEvent` / etc. shape.
+Write contract from [`app/api/documents/route.ts`](../app/api/documents/route.ts):
 
-**Option B:** Split into separate `FlightCard`, `RailCard`, `CarRentalCard`,
-`OtherTransportCard` components. Simpler per-component but more drawer clutter.
+- new document: `expectedVersion` may be omitted or `0`
+- existing envelope (`version >= 1`): `expectedVersion` is required
+- mismatch returns `409 DOCUMENT_CONFLICT`
 
-### B. StayCard restructuring
+## Mapping table
 
-Move flat props into nested `details` object to match `LodgingEvent.details`.
-Add `bookedThrough` and `confirmationNumber` as new fields. The `rating` field
-has no schema equivalent -- keep it as a component-only presentation prop.
+| Component                                | Schema / role                                                          | Status                                                           |
+| ---------------------------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `TripHeader`                             | Trip metadata -- `destination` enriches document name                  | OK -- destination and travelerCount preserved in mapper          |
+| `TripOverview`                           | `ItineraryDocument.description` (richtext)                             | OK                                                               |
+| `StayCard`                               | `LodgingEvent`                                                         | Aligned -- `details.bookedThrough` as `SupplierRef` object       |
+| `ActivityCard`                           | `ActivityEvent` (`subCategory: "activity"`)                            | Aligned -- timing object and supplier objects                    |
+| `TransportCard`                          | `FlightEvent` / `RailEvent` / `CarRentalEvent` / `OtherTransportEvent` | Aligned -- car rental branch + discriminator-safe mapping        |
+| `RestaurantCard`                         | `ActivityEvent` (`subCategory: "foodDrink"`)                           | Aligned -- maps to activity with foodDrink subCategory           |
+| `CruiseCard`                             | `CruiseEvent`                                                          | Aligned -- maps to cruise with carrier, cabin, price             |
+| `PricingSummary`                         | `ItineraryDocument.price` (`ItineraryPrice`)                           | OK -- total, currency, basis extracted into document-level price |
+| Other structural / conversion components | Non-events                                                             | N/A                                                              |
 
-### C. Timing normalization
+## Known remaining modeling limitations
 
-Replace flat `time`/`duration` strings with `EventTiming` object fields.
-Use Puck `object` field type with nested text fields, or a custom field
-for a date/time picker.
+- **Chronology ordering**: event collection is tree-walk order, not strict time sort.
+- **Start date derivation**: `startDate` comes from first `DaySection` date/header text, not dedicated root field.
+- **Union completeness**: `Info` and generic variants are not authored directly; all card types with domain equivalents are now mapped.
 
-### D. Supplier references
+## Backfill and migration guidance
 
-Replace plain text `carrier`/`provider` fields with `SupplierRef` object fields.
-Initially render as text inputs; later upgrade to Puck `external` field with
-`fetchList` for supplier lookup.
+- Existing raw rows can be migrated lazily by opening + saving in editor.
+- For bulk migration, run a script that:
+  - reads each raw row,
+  - maps via `mapPuckDataToItineraryDocument`,
+  - validates schema,
+  - writes `{ version: 1, puck, itinerary }`.
+- On parse corruption, APIs now fail safe (no blind overwrite); recover by fixing JSON before writes resume.
 
-## Schema files
+## Related paths
 
-- JSON Schemas: `apps/travel-studio/schemas/`
-- TypeScript types: `apps/travel-studio/domain/`
-- Type guards: `apps/travel-studio/domain/guards.ts`
-- Barrel export: `apps/travel-studio/domain/index.ts`
+- Schemas: `schemas/`
+- Domain types: `domain/`
+- Save/list/delete route: `app/api/documents/route.ts`
+- Persistence helpers: `lib/persistence/`
+- Seed document: `config/seed-data.ts`
+- Dashboard: `app/page.tsx` + `app/dashboard.tsx`

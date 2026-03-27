@@ -11,6 +11,8 @@ import type { TripOverviewProps } from "./components/travel/TripOverview";
 import type { StayCardProps } from "./components/travel/StayCard";
 import type { ActivityCardProps } from "./components/travel/ActivityCard";
 import type { TransportCardProps } from "./components/travel/TransportCard";
+import type { RestaurantCardProps } from "./components/travel/RestaurantCard";
+import type { CruiseCardProps } from "./components/travel/CruiseCard";
 import type { PricingSummaryProps } from "./components/travel/PricingSummary";
 import type { AdvisorInsightProps } from "./components/context/AdvisorInsight";
 import type { IncludedFeaturesProps } from "./components/context/IncludedFeatures";
@@ -28,6 +30,8 @@ export type Components = {
   StayCard: StayCardProps;
   ActivityCard: ActivityCardProps;
   TransportCard: TransportCardProps;
+  RestaurantCard: RestaurantCardProps;
+  CruiseCard: CruiseCardProps;
   PricingSummary: PricingSummaryProps;
   AdvisorInsight: AdvisorInsightProps;
   IncludedFeatures: IncludedFeaturesProps;

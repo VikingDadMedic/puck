@@ -1,17 +1,34 @@
-import { Data } from "@/core";
-import fs from "fs";
-import path from "path";
+import type { Data } from "@/core";
 import { seedData } from "../config/seed-data";
+import { isTravelStudioEnvelope } from "./persistence/travel-document-types";
+import { readTravelDataFileStrict } from "./persistence/travel-data-store";
 
-const DB_PATH = path.join(process.cwd(), "travel-data.json");
+export type DocumentRecord = {
+  puck: Partial<Data>;
+  version: number;
+};
 
-export function getDocument(docPath: string): Partial<Data> {
-  if (fs.existsSync(DB_PATH)) {
-    const allData: Record<string, Data> = JSON.parse(
-      fs.readFileSync(DB_PATH, "utf-8")
+export function getDocumentRecord(docPath: string): DocumentRecord {
+  const readResult = readTravelDataFileStrict();
+  if (!readResult.ok) {
+    throw new Error(
+      `Failed to read persisted travel documents: ${readResult.error}`
     );
-    if (allData[docPath]) return allData[docPath];
+  }
+  const all = readResult.data;
+  const raw = all[docPath];
+
+  if (raw !== undefined) {
+    if (isTravelStudioEnvelope(raw)) {
+      return { puck: raw.puck, version: raw.version };
+    }
+    return { puck: raw as Partial<Data>, version: 0 };
   }
 
-  return seedData[docPath] || {};
+  const seed = seedData[docPath];
+  return { puck: seed || {}, version: 0 };
+}
+
+export function getDocument(docPath: string): Partial<Data> {
+  return getDocumentRecord(docPath).puck;
 }

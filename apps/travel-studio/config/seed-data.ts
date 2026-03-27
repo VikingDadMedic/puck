@@ -1,6 +1,6 @@
-import type { Data } from "@/core";
+import type { TravelStudioData } from "./types";
 
-export const mediterraneanCruise: Partial<Data> = {
+export const mediterraneanCruise: Partial<TravelStudioData> = {
   root: {
     props: {
       title: "Mediterranean Cruise Escape",
@@ -52,12 +52,32 @@ export const mediterraneanCruise: Partial<Data> = {
                   props: {
                     id: "transport-1",
                     type: "flight",
-                    carrier: "Air France",
+                    flightSearch: null,
+                    carrier: {
+                      name: "Air France",
+                      externalId: "",
+                      source: "",
+                    },
                     departure: "New York (JFK)",
                     arrival: "Nice (NCE)",
-                    departureTime: "7:30 PM",
-                    arrivalTime: "9:15 AM +1",
-                    notes: "Business class, lounge access included",
+                    timing: {
+                      date: "June 15, 2026",
+                      time: "7:30 PM",
+                      duration: "",
+                      timezone: "",
+                    },
+                    price: { amount: 0, currency: "USD" },
+                    flightDetails: {
+                      flightNumber: "",
+                      terminal: "",
+                      gate: "",
+                      seatTicketDetails: "",
+                    },
+                    trainDetails: { trainNumber: "" },
+                    otherDetails: { number: "" },
+                    carRentalDetails: { leg: "pickUp" },
+                    confirmationNumber: "",
+                    notes: "<p>Business class, lounge access included</p>",
                   },
                 },
               ],
@@ -67,14 +87,24 @@ export const mediterraneanCruise: Partial<Data> = {
                   type: "StayCard",
                   props: {
                     id: "stay-1",
+                    hotel: null,
+                    place: null,
                     name: "Hotel Negresco",
                     location: "Nice, France",
                     dates: "June 16–17",
-                    roomType: "Sea View Suite",
+                    details: {
+                      bookedThrough: {
+                        name: "",
+                        externalId: "",
+                        source: "",
+                      },
+                      confirmationNumber: "",
+                      roomBedType: "Sea View Suite",
+                    },
                     rating: 5,
                     imageUrl: "",
                     notes:
-                      "Iconic Belle Époque palace on the Promenade des Anglais",
+                      "<p>Iconic Belle Époque palace on the Promenade des Anglais</p>",
                   },
                 },
               ],
@@ -91,11 +121,30 @@ export const mediterraneanCruise: Partial<Data> = {
                   type: "ActivityCard",
                   props: {
                     id: "activity-1",
+                    activity: null,
+                    event: null,
                     name: "Old Nice Walking Tour",
-                    time: "9:00 AM",
-                    duration: "3 hours",
+                    timing: {
+                      date: "June 16, 2026",
+                      time: "9:00 AM",
+                      duration: "3 hours",
+                      timezone: "",
+                    },
+                    details: {
+                      bookedThrough: {
+                        name: "",
+                        externalId: "",
+                        source: "",
+                      },
+                      confirmationNumber: "",
+                      provider: {
+                        name: "Nice Heritage Walks",
+                        externalId: "",
+                        source: "",
+                      },
+                    },
                     description:
-                      "Explore the charming streets of Vieux Nice with a local historian. Visit the famous flower market, taste socca, and discover hidden baroque chapels.",
+                      "<p>Explore the charming streets of Vieux Nice with a local historian. Visit the famous flower market, taste socca, and discover hidden baroque chapels.</p>",
                     imageUrl: "",
                   },
                 },
@@ -105,16 +154,95 @@ export const mediterraneanCruise: Partial<Data> = {
                   type: "ActivityCard",
                   props: {
                     id: "activity-2",
+                    activity: null,
+                    event: null,
                     name: "Provence Wine Country Excursion",
-                    time: "2:00 PM",
-                    duration: "4 hours",
+                    timing: {
+                      date: "June 16, 2026",
+                      time: "2:00 PM",
+                      duration: "4 hours",
+                      timezone: "",
+                    },
+                    details: {
+                      bookedThrough: {
+                        name: "",
+                        externalId: "",
+                        source: "",
+                      },
+                      confirmationNumber: "",
+                      provider: { name: "", externalId: "", source: "" },
+                    },
                     description:
-                      "Private vineyard tour through the rolling hills of Bellet AOC, one of France's smallest and most exclusive wine regions.",
+                      "<p>Private vineyard tour through the rolling hills of Bellet AOC, one of France's smallest and most exclusive wine regions.</p>",
                     imageUrl: "",
                   },
                 },
               ],
-              evening: [],
+              evening: [
+                {
+                  type: "CruiseCard",
+                  props: {
+                    id: "cruise-1",
+                    name: "MSC Seaview",
+                    carrier: {
+                      name: "MSC Cruises",
+                      externalId: "",
+                      source: "",
+                    },
+                    timing: {
+                      date: "June 17, 2026",
+                      time: "5:00 PM",
+                      duration: "12 nights",
+                      timezone: "",
+                    },
+                    cabinType: "Balcony Suite",
+                    cabinNumber: "12042",
+                    confirmationNumber: "MSC-78432",
+                    price: { amount: 14200, currency: "USD" },
+                    notes:
+                      "<p>Embarkation from Nice port. Suite includes private balcony and butler service.</p>",
+                  },
+                },
+              ],
+            },
+          },
+          {
+            type: "DaySection",
+            props: {
+              id: "day-3",
+              label: "Day 3",
+              date: "June 17, 2026",
+              morning: [],
+              afternoon: [],
+              evening: [
+                {
+                  type: "RestaurantCard",
+                  props: {
+                    id: "restaurant-1",
+                    restaurant: null,
+                    name: "Le Petit Maison",
+                    cuisine: "French Mediterranean",
+                    rating: 4.8,
+                    imageUrl: "",
+                    notes:
+                      "<p>Michelin-starred dining experience. Pre-dinner cocktails on the terrace overlooking the port.</p>",
+                    timing: {
+                      date: "June 17, 2026",
+                      time: "8:00 PM",
+                      duration: "2 hours",
+                      timezone: "",
+                    },
+                    details: {
+                      bookedThrough: {
+                        name: "",
+                        externalId: "",
+                        source: "",
+                      },
+                      confirmationNumber: "LPM-9921",
+                    },
+                  },
+                },
+              ],
             },
           },
         ],
@@ -124,15 +252,16 @@ export const mediterraneanCruise: Partial<Data> = {
             props: {
               id: "pricing-1",
               currency: "USD",
+              basis: "perPerson",
               lineItems: [
-                { description: "Flights (Business)", amount: "8,400" },
-                { description: "Cruise (Suite, 12 nights)", amount: "14,200" },
-                { description: "Pre-cruise hotel (2 nights)", amount: "1,800" },
-                { description: "Shore excursions package", amount: "3,200" },
-                { description: "Travel insurance", amount: "680" },
+                { description: "Flights (Business)", amount: 8400 },
+                { description: "Cruise (Suite, 12 nights)", amount: 14200 },
+                { description: "Pre-cruise hotel (2 nights)", amount: 1800 },
+                { description: "Shore excursions package", amount: 3200 },
+                { description: "Travel insurance", amount: 680 },
               ],
-              total: "28,280",
-              notes: "Per person, based on double occupancy",
+              total: 28280,
+              notes: "<p>Per person, based on double occupancy</p>",
             },
           },
           {
@@ -156,7 +285,7 @@ export const mediterraneanCruise: Partial<Data> = {
             props: {
               id: "advisor-1",
               content:
-                "The Johnsons prefer window-facing dining. Request table 42 in the Grand Dining Room—it has the best sunset view. Also note: Mrs. Johnson is allergic to shellfish, flag this with the maître d'.",
+                "<p>The Johnsons prefer window-facing dining. Request table 42 in the Grand Dining Room—it has the best sunset view. Also note: Mrs. Johnson is allergic to shellfish, flag this with the maître d'.</p>",
               visibility: "advisor_only",
             },
           },
@@ -181,13 +310,13 @@ export const mediterraneanCruise: Partial<Data> = {
       props: {
         id: "advisor-2",
         content:
-          "Client budget ceiling is $65k for the couple. Current quote is well within range. Upsell opportunity: the Amalfi private yacht experience (+$2,400pp) aligns with their anniversary celebration.",
+          "<p>Client budget ceiling is $65k for the couple. Current quote is well within range. Upsell opportunity: the Amalfi private yacht experience (+$2,400pp) aligns with their anniversary celebration.</p>",
         visibility: "advisor_only",
       },
     },
   ],
 };
 
-export const seedData: Record<string, Partial<Data>> = {
+export const seedData: Record<string, Partial<TravelStudioData>> = {
   "/trip": mediterraneanCruise,
 };

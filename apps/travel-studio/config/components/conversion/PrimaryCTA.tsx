@@ -1,4 +1,5 @@
 import type { ComponentConfig } from "@/core";
+import { sanitizeUrl } from "../../../lib/api/sanitize";
 
 export type PrimaryCTAProps = {
   text: string;
@@ -47,7 +48,9 @@ export const PrimaryCTA: ComponentConfig<PrimaryCTAProps> = {
     const target = puck.metadata?.target;
     const isProposal = target === "proposal";
 
-    if (target === "itinerary") return null;
+    if (target === "itinerary") return <></>;
+
+    const safeUrl = sanitizeUrl(url);
 
     return (
       <div
@@ -57,7 +60,7 @@ export const PrimaryCTA: ComponentConfig<PrimaryCTAProps> = {
         }}
       >
         <a
-          href={url}
+          href={safeUrl}
           style={{
             display: "inline-block",
             padding: isProposal ? "16px 48px" : "12px 32px",

@@ -10,6 +10,8 @@ import { TripOverview } from "./components/travel/TripOverview";
 import { StayCard } from "./components/travel/StayCard";
 import { ActivityCard } from "./components/travel/ActivityCard";
 import { TransportCard } from "./components/travel/TransportCard";
+import { RestaurantCard } from "./components/travel/RestaurantCard";
+import { CruiseCard } from "./components/travel/CruiseCard";
 import { PricingSummary } from "./components/travel/PricingSummary";
 import { AdvisorInsight } from "./components/context/AdvisorInsight";
 import { IncludedFeatures } from "./components/context/IncludedFeatures";
@@ -22,6 +24,8 @@ const TRAVEL_CONTENT = [
   "StayCard",
   "ActivityCard",
   "TransportCard",
+  "RestaurantCard",
+  "CruiseCard",
   "PricingSummary",
   "AdvisorInsight",
   "IncludedFeatures",
@@ -30,7 +34,13 @@ const TRAVEL_CONTENT = [
   "Divider",
 ];
 
-const CARD_TYPES = ["StayCard", "ActivityCard", "TransportCard"];
+const CARD_TYPES = [
+  "StayCard",
+  "ActivityCard",
+  "TransportCard",
+  "RestaurantCard",
+  "CruiseCard",
+];
 
 const config: TravelStudioConfig = {
   root: Root,
@@ -54,6 +64,8 @@ const config: TravelStudioConfig = {
         "StayCard",
         "ActivityCard",
         "TransportCard",
+        "RestaurantCard",
+        "CruiseCard",
       ],
     },
     pricing: {
@@ -74,7 +86,7 @@ const config: TravelStudioConfig = {
       ...DocumentSection,
       label: "Section",
       fields: {
-        ...DocumentSection.fields,
+        title: { type: "text" },
         content: {
           type: "slot",
           allow: TRAVEL_CONTENT,
@@ -85,7 +97,8 @@ const config: TravelStudioConfig = {
       ...DaySection,
       label: "Day",
       fields: {
-        ...DaySection.fields,
+        date: { type: "text", label: "Date" },
+        label: { type: "text", label: "Day Label" },
         morning: { type: "slot", allow: CARD_TYPES },
         afternoon: { type: "slot", allow: CARD_TYPES },
         evening: { type: "slot", allow: CARD_TYPES },
@@ -95,7 +108,6 @@ const config: TravelStudioConfig = {
       ...SidebarLayout,
       label: "Sidebar Layout",
       fields: {
-        ...SidebarLayout.fields,
         main: {
           type: "slot",
           allow: [
@@ -122,7 +134,7 @@ const config: TravelStudioConfig = {
       ...CardGroup,
       label: "Card Group",
       fields: {
-        ...CardGroup.fields,
+        title: { type: "text" },
         items: { type: "slot", allow: CARD_TYPES },
       },
     },
@@ -133,6 +145,8 @@ const config: TravelStudioConfig = {
     StayCard: { ...StayCard, label: "Stay / Hotel" },
     ActivityCard: { ...ActivityCard, label: "Activity" },
     TransportCard: { ...TransportCard, label: "Transport" },
+    RestaurantCard: { ...RestaurantCard, label: "Restaurant / Dining" },
+    CruiseCard: { ...CruiseCard, label: "Cruise" },
     PricingSummary: { ...PricingSummary, label: "Pricing Summary" },
     AdvisorInsight: { ...AdvisorInsight, label: "Advisor Insight" },
     IncludedFeatures: { ...IncludedFeatures, label: "Included Features" },

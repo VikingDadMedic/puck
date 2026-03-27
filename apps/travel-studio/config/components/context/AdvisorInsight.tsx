@@ -1,4 +1,5 @@
 import type { ComponentConfig } from "@/core";
+import { richTextToSafeHtml } from "../../../lib/render/richtext";
 
 export type AdvisorInsightProps = {
   content: string;
@@ -25,8 +26,9 @@ export const AdvisorInsight: ComponentConfig<AdvisorInsightProps> = {
     if (
       puck.metadata?.target === "client_view" &&
       visibility === "advisor_only"
-    )
-      return null;
+    ) {
+      return <></>;
+    }
 
     const isAdvisorOnly = visibility === "advisor_only";
     const bg = isAdvisorOnly ? "#fef3c7" : "#eff6ff";
@@ -60,7 +62,9 @@ export const AdvisorInsight: ComponentConfig<AdvisorInsightProps> = {
         </div>
         <div
           style={{ fontSize: 14, color: "#374151", lineHeight: 1.6 }}
-          dangerouslySetInnerHTML={{ __html: content || "" }}
+          dangerouslySetInnerHTML={{
+            __html: richTextToSafeHtml(content || ""),
+          }}
         />
       </div>
     );

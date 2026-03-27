@@ -14,19 +14,22 @@ export const DocumentSection: ComponentConfig<DocumentSectionProps> = {
     title: "",
     content: [],
   },
-  render: ({ title, content: Content }) => {
+  render: ({ title, content: Content, puck }) => {
+    const mode = puck.metadata?.target as string | undefined;
+    const isProposal = mode === "proposal";
+
     return (
       <div
         style={{
-          padding: "24px 0",
+          padding: isProposal ? "32px 0" : "24px 0",
           borderBottom: "1px solid #e5e7eb",
         }}
       >
         {title && (
           <h2
             style={{
-              margin: "0 0 16px",
-              fontSize: 22,
+              margin: isProposal ? "0 0 20px" : "0 0 16px",
+              fontSize: isProposal ? 26 : 22,
               fontWeight: 600,
               color: "#1f2937",
             }}
