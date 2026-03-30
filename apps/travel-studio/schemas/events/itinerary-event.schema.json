@@ -11,6 +11,8 @@
     { "$ref": "./transportation/transportation-rail-event.schema.json" },
     { "$ref": "./transportation/transportation-car-rental-event.schema.json" },
     { "$ref": "./transportation/transportation-other-event.schema.json" },
+    { "$ref": "./tour-event.schema.json" },
+    { "$ref": "./booking-event.schema.json" },
     { "$ref": "./generic/generic-unmodeled-event.schema.json" }
   ]
 }

@@ -22,6 +22,8 @@ export type {
   CarRentalEvent,
   OtherTransportEvent,
 } from "./events/transportation";
+export type { TourEvent } from "./events/tour";
+export type { BookingEvent } from "./events/booking";
 export type { GenericUnmodeledEvent } from "./events/generic";
 
 export type { ItineraryEvent } from "./union";
@@ -35,5 +37,7 @@ export {
   isRailEvent,
   isCarRentalEvent,
   isOtherTransportEvent,
+  isTourEvent,
+  isBookingEvent,
   isGenericEvent,
 } from "./guards";

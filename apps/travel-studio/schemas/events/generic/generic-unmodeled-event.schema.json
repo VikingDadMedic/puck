@@ -6,7 +6,7 @@
     {
       "type": "object",
       "properties": {
-        "category": { "type": "string", "enum": ["smartImport", "tour", "booking"] },
+        "category": { "type": "string", "enum": ["smartImport"] },
         "details": { "type": "object" }
       },
       "required": ["category"],

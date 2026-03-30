@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://voyagersocial.io/schemas/events/booking-event.schema.json",
+  "allOf": [
+    { "$ref": "./event-base.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "category": { "const": "booking" },
+        "subCategory": { "type": "string" },
+        "details": {
+          "type": "object",
+          "properties": {
+            "bookedThrough": { "$ref": "../common/supplier-ref.schema.json" },
+            "confirmationNumber": { "type": "string" },
+            "provider": { "$ref": "../common/supplier-ref.schema.json" },
+            "bookingReference": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "timing": { "$ref": "../common/event-timing.schema.json" },
+        "price": { "$ref": "../common/money.schema.json" }
+      },
+      "required": ["category", "details"],
+      "additionalProperties": true
+    }
+  ]
+}

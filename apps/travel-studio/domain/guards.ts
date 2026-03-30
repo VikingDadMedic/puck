@@ -9,6 +9,8 @@ import type {
   CarRentalEvent,
   OtherTransportEvent,
 } from "./events/transportation";
+import type { TourEvent } from "./events/tour";
+import type { BookingEvent } from "./events/booking";
 import type { GenericUnmodeledEvent } from "./events/generic";
 
 export function isInfoEvent(e: ItineraryEvent): e is InfoEvent {
@@ -45,6 +47,14 @@ export function isOtherTransportEvent(
   return e.category === "transportation" && e.subCategory === "other";
 }
 
+export function isTourEvent(e: ItineraryEvent): e is TourEvent {
+  return e.category === "tour";
+}
+
+export function isBookingEvent(e: ItineraryEvent): e is BookingEvent {
+  return e.category === "booking";
+}
+
 export function isGenericEvent(e: ItineraryEvent): e is GenericUnmodeledEvent {
-  return ["smartImport", "tour", "booking"].includes(e.category);
+  return e.category === "smartImport";
 }

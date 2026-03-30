@@ -8,6 +8,8 @@ import type {
   CarRentalEvent,
   OtherTransportEvent,
 } from "./events/transportation";
+import type { TourEvent } from "./events/tour";
+import type { BookingEvent } from "./events/booking";
 import type { GenericUnmodeledEvent } from "./events/generic";
 
 export type ItineraryEvent =
@@ -19,4 +21,6 @@ export type ItineraryEvent =
   | RailEvent
   | CarRentalEvent
   | OtherTransportEvent
+  | TourEvent
+  | BookingEvent
   | GenericUnmodeledEvent;

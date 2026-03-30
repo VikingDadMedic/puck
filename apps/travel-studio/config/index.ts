@@ -12,6 +12,10 @@ import { ActivityCard } from "./components/travel/ActivityCard";
 import { TransportCard } from "./components/travel/TransportCard";
 import { RestaurantCard } from "./components/travel/RestaurantCard";
 import { CruiseCard } from "./components/travel/CruiseCard";
+import { InfoCard } from "./components/travel/InfoCard";
+import { TourCard } from "./components/travel/TourCard";
+import { BookingCard } from "./components/travel/BookingCard";
+import { ItineraryMap } from "./components/travel/ItineraryMap";
 import { PricingSummary } from "./components/travel/PricingSummary";
 import { AdvisorInsight } from "./components/context/AdvisorInsight";
 import { IncludedFeatures } from "./components/context/IncludedFeatures";
@@ -26,6 +30,10 @@ const TRAVEL_CONTENT = [
   "TransportCard",
   "RestaurantCard",
   "CruiseCard",
+  "InfoCard",
+  "TourCard",
+  "BookingCard",
+  "ItineraryMap",
   "PricingSummary",
   "AdvisorInsight",
   "IncludedFeatures",
@@ -40,6 +48,9 @@ const CARD_TYPES = [
   "TransportCard",
   "RestaurantCard",
   "CruiseCard",
+  "InfoCard",
+  "TourCard",
+  "BookingCard",
 ];
 
 const config: TravelStudioConfig = {
@@ -66,6 +77,10 @@ const config: TravelStudioConfig = {
         "TransportCard",
         "RestaurantCard",
         "CruiseCard",
+        "InfoCard",
+        "TourCard",
+        "BookingCard",
+        "ItineraryMap",
       ],
     },
     pricing: {
@@ -121,6 +136,7 @@ const config: TravelStudioConfig = {
           type: "slot",
           allow: [
             "PricingSummary",
+            "ItineraryMap",
             "IncludedFeatures",
             "AdvisorInsight",
             "PrimaryCTA",
@@ -147,6 +163,10 @@ const config: TravelStudioConfig = {
     TransportCard: { ...TransportCard, label: "Transport" },
     RestaurantCard: { ...RestaurantCard, label: "Restaurant / Dining" },
     CruiseCard: { ...CruiseCard, label: "Cruise" },
+    InfoCard: { ...InfoCard, label: "Info" },
+    TourCard: { ...TourCard, label: "Tour" },
+    BookingCard: { ...BookingCard, label: "Booking" },
+    ItineraryMap: { ...ItineraryMap, label: "Itinerary Map" },
     PricingSummary: { ...PricingSummary, label: "Pricing Summary" },
     AdvisorInsight: { ...AdvisorInsight, label: "Advisor Insight" },
     IncludedFeatures: { ...IncludedFeatures, label: "Included Features" },
