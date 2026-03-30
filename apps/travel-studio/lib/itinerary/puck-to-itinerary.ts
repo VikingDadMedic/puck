@@ -115,16 +115,30 @@ function mergeTiming(
   return out;
 }
 
+function mapMoney(
+  val: unknown
+): { amount: number; currency: string } | undefined {
+  if (val == null || typeof val !== "object") return undefined;
+  const o = val as Record<string, unknown>;
+  if (typeof o.amount !== "number" || !Number.isFinite(o.amount))
+    return undefined;
+  if (o.amount === 0) return undefined;
+  const rawCur =
+    typeof o.currency === "string" ? o.currency.trim().toUpperCase() : "";
+  return { amount: o.amount, currency: rawCur.length === 3 ? rawCur : "USD" };
+}
+
 function mapStayCard(
   props: Record<string, unknown>,
   ctx: { dayDate?: string }
 ): ItineraryEvent {
   const id = typeof props.id === "string" ? props.id : cryptoRandomId("stay");
   const details = (props.details as Record<string, unknown>) || {};
+  const stayType = props.type === "checkOut" ? "checkOut" : "checkIn";
   return stripUndefinedDeep({
     id,
     category: "lodging" as const,
-    type: "checkIn" as const,
+    type: stayType as "checkIn" | "checkOut",
     title: typeof props.name === "string" ? props.name : undefined,
     timing: mergeTiming(props.timing as Record<string, unknown>, ctx.dayDate),
     details: stripUndefinedDeep({
@@ -139,6 +153,7 @@ function mapStayCard(
           ? details.roomBedType.trim()
           : undefined,
     }),
+    price: mapMoney(props.price),
     notes: asRichText(props.notes),
   }) as ItineraryEvent;
 }
@@ -165,6 +180,7 @@ function mapActivityCard(
           : undefined,
       provider: supplierRef(details.provider),
     }),
+    price: mapMoney(props.price),
     notes: asRichText(props.description),
   }) as ItineraryEvent;
 }
@@ -200,15 +216,18 @@ function mapTransportCard(
     props.confirmationNumber.trim()
       ? props.confirmationNumber.trim()
       : undefined;
+  const legValue = props.leg === "arrival" ? "arrival" : "departure";
+  const bookedThroughRef = supplierRef(props.bookedThrough);
 
   if (t === "flight") {
     const fd = (props.flightDetails as Record<string, unknown>) || {};
     return stripUndefinedDeep({
       id,
       category: "flight" as const,
-      type: "departure" as const,
+      type: legValue as "departure" | "arrival",
       timing,
       details: stripUndefinedDeep({
+        bookedThrough: bookedThroughRef,
         confirmationNumber,
         airline: supplierRef(props.carrier),
         flightNumber:
@@ -240,9 +259,10 @@ function mapTransportCard(
       id,
       category: "transportation" as const,
       subCategory: "rail" as const,
-      type: "departure" as const,
+      type: legValue as "departure" | "arrival",
       timing,
       details: stripUndefinedDeep({
+        bookedThrough: bookedThroughRef,
         confirmationNumber,
         carrier: supplierRef(props.carrier),
         trainNumber:
@@ -265,6 +285,7 @@ function mapTransportCard(
       type: leg,
       timing,
       details: stripUndefinedDeep({
+        bookedThrough: bookedThroughRef,
         confirmationNumber,
         carrier: supplierRef(props.carrier),
       }),
@@ -278,9 +299,10 @@ function mapTransportCard(
     id,
     category: "transportation" as const,
     subCategory: "other" as const,
-    type: "departure" as const,
+    type: legValue as "departure" | "arrival",
     timing,
     details: stripUndefinedDeep({
+      bookedThrough: bookedThroughRef,
       confirmationNumber,
       carrier: supplierRef(props.carrier),
       number:
@@ -313,7 +335,9 @@ function mapRestaurantCard(
         details.confirmationNumber.trim()
           ? details.confirmationNumber.trim()
           : undefined,
+      provider: supplierRef(details.provider),
     }),
+    price: mapMoney(props.price),
     notes: asRichText(props.notes),
   }) as ItineraryEvent;
 }
@@ -327,30 +351,17 @@ function mapCruiseCard(
     props.timing as Record<string, unknown>,
     ctx.dayDate
   );
-  const price = props.price as Record<string, unknown> | undefined;
-  let money: { amount: number; currency: string } | undefined;
-  if (
-    price &&
-    typeof price.amount === "number" &&
-    Number.isFinite(price.amount)
-  ) {
-    const rawCur =
-      typeof price.currency === "string"
-        ? price.currency.trim().toUpperCase()
-        : "";
-    money = {
-      amount: price.amount,
-      currency: rawCur.length === 3 ? rawCur : "USD",
-    };
-  }
+  const money = mapMoney(props.price);
 
+  const cruiseType = props.type === "arrival" ? "arrival" : "departure";
   return stripUndefinedDeep({
     id,
     category: "cruise" as const,
-    type: "departure" as const,
+    type: cruiseType as "departure" | "arrival",
     title: typeof props.name === "string" ? props.name : undefined,
     timing,
     details: stripUndefinedDeep({
+      bookedThrough: supplierRef(props.bookedThrough),
       carrier: supplierRef(props.carrier),
       confirmationNumber:
         typeof props.confirmationNumber === "string" &&
@@ -367,6 +378,91 @@ function mapCruiseCard(
           : undefined,
     }),
     price: money,
+    notes: asRichText(props.notes),
+  }) as ItineraryEvent;
+}
+
+function mapInfoCard(
+  props: Record<string, unknown>,
+  _ctx: { dayDate?: string }
+): ItineraryEvent {
+  const id = typeof props.id === "string" ? props.id : cryptoRandomId("info");
+  const sub = props.subCategory === "cityGuide" ? "cityGuide" : "info";
+  return stripUndefinedDeep({
+    id,
+    category: "info" as const,
+    subCategory: sub,
+    title: typeof props.name === "string" ? props.name : undefined,
+    notes: asRichText(props.notes),
+  }) as ItineraryEvent;
+}
+
+function mapTourCard(
+  props: Record<string, unknown>,
+  ctx: { dayDate?: string }
+): ItineraryEvent {
+  const id = typeof props.id === "string" ? props.id : cryptoRandomId("tour");
+  const details = (props.details as Record<string, unknown>) || {};
+  return stripUndefinedDeep({
+    id,
+    category: "tour" as const,
+    title: typeof props.name === "string" ? props.name : undefined,
+    timing: mergeTiming(props.timing as Record<string, unknown>, ctx.dayDate),
+    details: stripUndefinedDeep({
+      bookedThrough: supplierRef(details.bookedThrough),
+      confirmationNumber:
+        typeof details.confirmationNumber === "string" &&
+        details.confirmationNumber.trim()
+          ? details.confirmationNumber.trim()
+          : undefined,
+      provider: supplierRef(details.provider),
+      meetingPoint:
+        typeof details.meetingPoint === "string" && details.meetingPoint.trim()
+          ? details.meetingPoint.trim()
+          : undefined,
+      groupSize:
+        typeof details.groupSize === "number" &&
+        Number.isFinite(details.groupSize) &&
+        details.groupSize > 0
+          ? details.groupSize
+          : undefined,
+      included:
+        typeof details.included === "string" && details.included.trim()
+          ? details.included.trim()
+          : undefined,
+    }),
+    price: mapMoney(props.price),
+    notes: asRichText(props.notes),
+  }) as ItineraryEvent;
+}
+
+function mapBookingCard(
+  props: Record<string, unknown>,
+  ctx: { dayDate?: string }
+): ItineraryEvent {
+  const id =
+    typeof props.id === "string" ? props.id : cryptoRandomId("booking");
+  const details = (props.details as Record<string, unknown>) || {};
+  return stripUndefinedDeep({
+    id,
+    category: "booking" as const,
+    title: typeof props.name === "string" ? props.name : undefined,
+    timing: mergeTiming(props.timing as Record<string, unknown>, ctx.dayDate),
+    details: stripUndefinedDeep({
+      bookedThrough: supplierRef(details.bookedThrough),
+      confirmationNumber:
+        typeof details.confirmationNumber === "string" &&
+        details.confirmationNumber.trim()
+          ? details.confirmationNumber.trim()
+          : undefined,
+      provider: supplierRef(details.provider),
+      bookingReference:
+        typeof details.bookingReference === "string" &&
+        details.bookingReference.trim()
+          ? details.bookingReference.trim()
+          : undefined,
+    }),
+    price: mapMoney(props.price),
     notes: asRichText(props.notes),
   }) as ItineraryEvent;
 }
@@ -391,6 +487,12 @@ function mapCard(
       return mapRestaurantCard(props, ctx);
     case "CruiseCard":
       return mapCruiseCard(props, ctx);
+    case "InfoCard":
+      return mapInfoCard(props, ctx);
+    case "TourCard":
+      return mapTourCard(props, ctx);
+    case "BookingCard":
+      return mapBookingCard(props, ctx);
     default:
       return null;
   }
