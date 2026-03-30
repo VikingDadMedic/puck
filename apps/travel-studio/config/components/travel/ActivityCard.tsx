@@ -2,7 +2,7 @@ import type { ComponentConfig } from "@/core";
 import { activityPickerField } from "../../fields/activity-picker";
 import { eventPickerField } from "../../fields/event-picker";
 import { imagePickerField } from "../../fields/image-picker";
-import { richTextToSafeHtml } from "../../../lib/render/richtext";
+import { color, radius } from "../../tokens";
 
 export type ActivityCardProps = {
   activity: Record<string, unknown> | null;
@@ -14,8 +14,10 @@ export type ActivityCardProps = {
     confirmationNumber: string;
     provider: { name?: string; externalId?: string; source?: string };
   };
+  price: { amount: number; currency: string };
   description: string;
   imageUrl: string;
+  coordinates: { lat: number; lng: number } | null;
 };
 
 export const ActivityCard: ComponentConfig<ActivityCardProps> = {
@@ -56,8 +58,24 @@ export const ActivityCard: ComponentConfig<ActivityCardProps> = {
         },
       },
     },
+    price: {
+      type: "object",
+      label: "Price",
+      objectFields: {
+        amount: { type: "number", label: "Amount" },
+        currency: { type: "text", label: "Currency" },
+      },
+    },
     description: { type: "richtext" },
     imageUrl: imagePickerField,
+    coordinates: {
+      type: "object",
+      label: "Coordinates",
+      objectFields: {
+        lat: { type: "number", label: "Latitude" },
+        lng: { type: "number", label: "Longitude" },
+      },
+    },
   },
   defaultProps: {
     activity: null,
@@ -69,8 +87,10 @@ export const ActivityCard: ComponentConfig<ActivityCardProps> = {
       confirmationNumber: "",
       provider: { name: "", externalId: "", source: "" },
     },
+    price: { amount: 0, currency: "USD" },
     description: "",
     imageUrl: "",
+    coordinates: null,
   },
   resolveData: async ({ props }, { changed }) => {
     const strOr = (v: unknown, fallback: string) =>
@@ -115,11 +135,11 @@ export const ActivityCard: ComponentConfig<ActivityCardProps> = {
       <div
         style={{
           display: "flex",
-          background: "#ffffff",
-          borderRadius: 10,
+          background: color.bg.card,
+          borderRadius: radius.lg,
           overflow: "hidden",
-          border: "1px solid #e5e7eb",
-          borderLeft: "4px solid #10b981",
+          border: `1px solid ${color.border.default}`,
+          borderLeft: `4px solid ${color.accent.greenBright}`,
         }}
       >
         <div
@@ -136,7 +156,7 @@ export const ActivityCard: ComponentConfig<ActivityCardProps> = {
               margin: 0,
               fontSize: 16,
               fontWeight: 700,
-              color: "#111827",
+              color: color.text.primary,
             }}
           >
             {name || "Untitled Activity"}
@@ -148,10 +168,10 @@ export const ActivityCard: ComponentConfig<ActivityCardProps> = {
                 style={{
                   fontSize: 12,
                   fontWeight: 600,
-                  color: "#065f46",
-                  background: "#ecfdf5",
+                  color: color.accent.greenDark,
+                  background: color.bg.greenPale,
                   padding: "3px 10px",
-                  borderRadius: 6,
+                  borderRadius: radius.sm,
                 }}
               >
                 {timing.time}
@@ -162,10 +182,10 @@ export const ActivityCard: ComponentConfig<ActivityCardProps> = {
                 style={{
                   fontSize: 12,
                   fontWeight: 500,
-                  color: "#374151",
-                  background: "#f3f4f6",
+                  color: color.text.secondary,
+                  background: color.bg.muted,
                   padding: "3px 10px",
-                  borderRadius: 6,
+                  borderRadius: radius.sm,
                 }}
               >
                 {timing.duration}
@@ -179,12 +199,11 @@ export const ActivityCard: ComponentConfig<ActivityCardProps> = {
                 margin: 0,
                 fontSize: 14,
                 lineHeight: 1.5,
-                color: "#4b5563",
+                color: color.text.tertiary,
               }}
-              dangerouslySetInnerHTML={{
-                __html: richTextToSafeHtml(description),
-              }}
-            />
+            >
+              {description}
+            </div>
           )}
 
           {hasBookingDetails && (
@@ -192,29 +211,35 @@ export const ActivityCard: ComponentConfig<ActivityCardProps> = {
               style={{
                 marginTop: 4,
                 paddingTop: 8,
-                borderTop: "1px solid #f3f4f6",
+                borderTop: `1px solid ${color.bg.muted}`,
                 display: "flex",
                 gap: 16,
                 flexWrap: "wrap",
                 fontSize: 12,
-                color: "#6b7280",
+                color: color.text.muted,
               }}
             >
               {details.bookedThrough?.name && (
                 <span>
-                  <strong style={{ color: "#374151" }}>Booked via</strong>{" "}
+                  <strong style={{ color: color.text.secondary }}>
+                    Booked via
+                  </strong>{" "}
                   {details.bookedThrough.name}
                 </span>
               )}
               {details.confirmationNumber && (
                 <span>
-                  <strong style={{ color: "#374151" }}>Conf #</strong>{" "}
+                  <strong style={{ color: color.text.secondary }}>
+                    Conf #
+                  </strong>{" "}
                   {details.confirmationNumber}
                 </span>
               )}
               {details.provider?.name && (
                 <span>
-                  <strong style={{ color: "#374151" }}>Provider</strong>{" "}
+                  <strong style={{ color: color.text.secondary }}>
+                    Provider
+                  </strong>{" "}
                   {details.provider.name}
                 </span>
               )}
@@ -224,6 +249,7 @@ export const ActivityCard: ComponentConfig<ActivityCardProps> = {
 
         {hasImage && (
           <div
+            className="ts-card-image"
             style={{
               width: 140,
               flexShrink: 0,

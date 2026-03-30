@@ -1,7 +1,7 @@
 import type { ComponentConfig } from "@/core";
 import { restaurantPickerField } from "../../fields/restaurant-picker";
 import { imagePickerField } from "../../fields/image-picker";
-import { richTextToSafeHtml } from "../../../lib/render/richtext";
+import { color, radius, shadow } from "../../tokens";
 
 export type RestaurantCardProps = {
   restaurant: Record<string, unknown> | null;
@@ -14,7 +14,10 @@ export type RestaurantCardProps = {
   details: {
     bookedThrough: { name?: string; externalId?: string; source?: string };
     confirmationNumber: string;
+    provider: { name?: string; externalId?: string; source?: string };
   };
+  price: { amount: number; currency: string };
+  coordinates: { lat: number; lng: number } | null;
 };
 
 export const RestaurantCard: ComponentConfig<RestaurantCardProps> = {
@@ -45,10 +48,35 @@ export const RestaurantCard: ComponentConfig<RestaurantCardProps> = {
           },
         },
         confirmationNumber: { type: "text", label: "Confirmation #" },
+        provider: {
+          type: "object",
+          label: "Provider",
+          objectFields: {
+            name: { type: "text", label: "Name" },
+            externalId: { type: "text", label: "External ID" },
+            source: { type: "text", label: "Source" },
+          },
+        },
+      },
+    },
+    price: {
+      type: "object",
+      label: "Price",
+      objectFields: {
+        amount: { type: "number", label: "Amount" },
+        currency: { type: "text", label: "Currency" },
       },
     },
     imageUrl: imagePickerField,
     notes: { type: "richtext" },
+    coordinates: {
+      type: "object",
+      label: "Coordinates",
+      objectFields: {
+        lat: { type: "number", label: "Latitude" },
+        lng: { type: "number", label: "Longitude" },
+      },
+    },
   },
   defaultProps: {
     restaurant: null,
@@ -61,7 +89,10 @@ export const RestaurantCard: ComponentConfig<RestaurantCardProps> = {
     details: {
       bookedThrough: { name: "", externalId: "", source: "" },
       confirmationNumber: "",
+      provider: { name: "", externalId: "", source: "" },
     },
+    price: { amount: 0, currency: "USD" },
+    coordinates: null,
   },
   resolveData: async ({ props }, { changed }) => {
     if (!changed.restaurant || !props.restaurant) return { props };
@@ -103,12 +134,12 @@ export const RestaurantCard: ComponentConfig<RestaurantCardProps> = {
       <div
         style={{
           display: "flex",
-          background: "#ffffff",
-          borderRadius: 10,
+          background: color.bg.card,
+          borderRadius: radius.lg,
           overflow: "hidden",
-          border: "1px solid #e5e7eb",
-          borderLeft: "4px solid #f59e0b",
-          ...(isProposal ? { boxShadow: "0 2px 8px rgba(0,0,0,0.06)" } : {}),
+          border: `1px solid ${color.border.default}`,
+          borderLeft: `4px solid ${color.accent.amber}`,
+          ...(isProposal ? { boxShadow: shadow.md } : {}),
         }}
       >
         <div
@@ -123,21 +154,29 @@ export const RestaurantCard: ComponentConfig<RestaurantCardProps> = {
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span style={{ fontSize: 20 }}>🍽</span>
             <div>
-              <div style={{ fontWeight: 600, fontSize: 15, color: "#1f2937" }}>
+              <div
+                style={{
+                  fontWeight: 600,
+                  fontSize: 15,
+                  color: color.text.primary,
+                }}
+              >
                 {name || "Restaurant"}
               </div>
               {cuisine && (
-                <div style={{ fontSize: 12, color: "#6b7280" }}>{cuisine}</div>
+                <div style={{ fontSize: 12, color: color.text.muted }}>
+                  {cuisine}
+                </div>
               )}
             </div>
           </div>
           {stars && (
-            <div style={{ fontSize: 13, color: "#f59e0b", letterSpacing: 1 }}>
+            <div style={{ fontSize: 13, color: color.star, letterSpacing: 1 }}>
               {stars}
             </div>
           )}
           {(timing?.date || timing?.time) && (
-            <div style={{ fontSize: 13, color: "#6b7280" }}>
+            <div style={{ fontSize: 13, color: color.text.muted }}>
               {timing.date}
               {timing.date && timing.time && " · "}
               {timing.time}
@@ -148,10 +187,10 @@ export const RestaurantCard: ComponentConfig<RestaurantCardProps> = {
             <div
               style={{
                 fontSize: 12,
-                color: "#059669",
-                background: "#f0fdf4",
+                color: color.accent.green,
+                background: color.bg.greenLight,
                 padding: "2px 8px",
-                borderRadius: 4,
+                borderRadius: radius.xs,
                 display: "inline-block",
                 width: "fit-content",
               }}
@@ -161,15 +200,18 @@ export const RestaurantCard: ComponentConfig<RestaurantCardProps> = {
           )}
           {notes && (
             <div
-              style={{ fontSize: 13, color: "#374151", lineHeight: 1.5 }}
-              dangerouslySetInnerHTML={{
-                __html: richTextToSafeHtml(notes),
+              style={{
+                fontSize: 13,
+                color: color.text.secondary,
+                lineHeight: 1.5,
               }}
-            />
+            >
+              {notes}
+            </div>
           )}
         </div>
         {hasImage && (
-          <div style={{ width: 140, flexShrink: 0 }}>
+          <div className="ts-card-image" style={{ width: 140, flexShrink: 0 }}>
             <img
               src={imageUrl}
               alt={name}

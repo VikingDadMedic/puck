@@ -1,6 +1,6 @@
 import type { ComponentConfig, Fields } from "@/core";
 import { flightPickerField } from "../../fields/flight-picker";
-import { richTextToSafeHtml } from "../../../lib/render/richtext";
+import { color, radius, shadow } from "../../tokens";
 
 export type SupplierRefField = {
   name?: string;
@@ -11,7 +11,9 @@ export type SupplierRefField = {
 export type TransportCardProps = {
   flightSearch: Record<string, unknown> | null;
   type: "flight" | "train" | "transfer" | "ferry" | "carRental";
+  leg: "departure" | "arrival";
   carrier: SupplierRefField;
+  bookedThrough: SupplierRefField;
   timing: { date: string; time: string; duration: string; timezone: string };
   departure: string;
   arrival: string;
@@ -27,6 +29,8 @@ export type TransportCardProps = {
   carRentalDetails: { leg: "pickUp" | "dropOff" };
   confirmationNumber: string;
   notes: string;
+  departureCoordinates: { lat: number; lng: number } | null;
+  arrivalCoordinates: { lat: number; lng: number } | null;
 };
 
 const typeIcons: Record<TransportCardProps["type"], string> = {
@@ -100,6 +104,14 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
         { value: "carRental", label: "Car Rental" },
       ],
     },
+    leg: {
+      type: "radio",
+      label: "Leg",
+      options: [
+        { value: "departure", label: "Departure" },
+        { value: "arrival", label: "Arrival" },
+      ],
+    },
     flightSearch: flightPickerField,
     flightDetails: transportFlightDetailsField,
     trainDetails: transportTrainDetailsField,
@@ -128,11 +140,33 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
         currency: { type: "text" },
       },
     },
+    bookedThrough: {
+      type: "object",
+      label: "Booked Through",
+      objectFields: supplierObjectFields,
+    },
     confirmationNumber: { type: "text", label: "Confirmation #" },
     notes: { type: "richtext" },
+    departureCoordinates: {
+      type: "object",
+      label: "Departure Coordinates",
+      objectFields: {
+        lat: { type: "number", label: "Latitude" },
+        lng: { type: "number", label: "Longitude" },
+      },
+    },
+    arrivalCoordinates: {
+      type: "object",
+      label: "Arrival Coordinates",
+      objectFields: {
+        lat: { type: "number", label: "Latitude" },
+        lng: { type: "number", label: "Longitude" },
+      },
+    },
   },
   resolveFields: async (data, { fields }) => {
     const {
+      leg: _omitLeg,
       flightSearch: _omitFlightSearch,
       flightDetails: _omitFlightDetails,
       trainDetails: _omitTrainDetails,
@@ -140,22 +174,34 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
       carRentalDetails: _omitCarRentalDetails,
       ...baseFields
     } = fields;
+    void _omitLeg;
     void _omitFlightSearch;
     void _omitFlightDetails;
     void _omitTrainDetails;
     void _omitOtherDetails;
     void _omitCarRentalDetails;
 
+    const legField = {
+      type: "radio" as const,
+      label: "Leg",
+      options: [
+        { value: "departure", label: "Departure" },
+        { value: "arrival", label: "Arrival" },
+      ],
+    };
+
     switch (data.props.type) {
       case "flight":
         return {
           ...baseFields,
+          leg: legField,
           flightSearch: flightPickerField,
           flightDetails: transportFlightDetailsField,
         } as Fields<TransportCardProps>;
       case "train":
         return {
           ...baseFields,
+          leg: legField,
           trainDetails: transportTrainDetailsField,
         } as Fields<TransportCardProps>;
       case "carRental":
@@ -168,6 +214,7 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
       default:
         return {
           ...baseFields,
+          leg: legField,
           otherDetails: transportOtherDetailsField,
         } as Fields<TransportCardProps>;
     }
@@ -212,7 +259,9 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
   defaultProps: {
     flightSearch: null,
     type: "flight",
+    leg: "departure",
     carrier: { name: "", externalId: "", source: "" },
+    bookedThrough: { name: "", externalId: "", source: "" },
     timing: { date: "", time: "", duration: "", timezone: "" },
     departure: "",
     arrival: "",
@@ -228,6 +277,8 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
     carRentalDetails: { leg: "pickUp" },
     confirmationNumber: "",
     notes: "",
+    departureCoordinates: null,
+    arrivalCoordinates: null,
   },
   render: ({
     type,
@@ -260,18 +311,16 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
         ? carRentalDetails?.leg || "pickUp"
         : otherDetails?.number || null;
 
-    const notesHtml = richTextToSafeHtml(notes);
-
     return (
       <div
         style={{
           display: "flex",
           alignItems: "stretch",
-          background: "#ffffff",
-          borderRadius: 10,
+          background: color.bg.card,
+          borderRadius: radius.lg,
           overflow: "hidden",
-          border: "1px solid #e2e8f0",
-          ...(isProposal ? { boxShadow: "0 2px 8px rgba(0,0,0,0.06)" } : {}),
+          border: `1px solid ${color.border.subtle}`,
+          ...(isProposal ? { boxShadow: shadow.md } : {}),
         }}
       >
         <div
@@ -281,7 +330,7 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: "#f1f5f9",
+            background: color.bg.subtle,
             fontSize: isItinerary ? 20 : 24,
           }}
         >
@@ -323,10 +372,10 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
                   style={{
                     fontSize: 11,
                     fontWeight: 600,
-                    color: "#1e40af",
-                    background: "#eff6ff",
+                    color: color.accent.blueDeep,
+                    background: color.bg.blueLight,
                     padding: "2px 8px",
-                    borderRadius: 4,
+                    borderRadius: radius.xs,
                   }}
                 >
                   {typeDetail}
@@ -383,13 +432,13 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
               style={{
                 fontSize: isProposal ? 16 : 14,
                 fontWeight: isProposal ? 700 : 600,
-                color: isProposal ? "#059669" : "#1e293b",
+                color: isProposal ? color.accent.green : "#1e293b",
                 ...(isProposal
                   ? {
                       marginTop: 4,
                       padding: "6px 12px",
-                      background: "#ecfdf5",
-                      borderRadius: 6,
+                      background: color.bg.greenPale,
+                      borderRadius: radius.sm,
                       alignSelf: "flex-start",
                     }
                   : {}),
@@ -406,17 +455,17 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
                 alignSelf: "flex-start",
                 fontSize: 12,
                 fontWeight: 600,
-                color: "#065f46",
-                background: "#ecfdf5",
+                color: color.accent.greenDark,
+                background: color.bg.greenPale,
                 padding: "3px 10px",
-                borderRadius: 6,
+                borderRadius: radius.sm,
               }}
             >
               Conf # {confirmationNumber}
             </span>
           )}
 
-          {notesHtml && (
+          {notes && (
             <div
               style={{
                 marginTop: 2,
@@ -424,8 +473,9 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
                 lineHeight: 1.5,
                 color: "#64748b",
               }}
-              dangerouslySetInnerHTML={{ __html: notesHtml }}
-            />
+            >
+              {notes}
+            </div>
           )}
         </div>
       </div>

@@ -1,9 +1,11 @@
 import type { ComponentConfig } from "@/core";
-import { richTextToSafeHtml } from "../../../lib/render/richtext";
+import { color, radius, shadow } from "../../tokens";
 
 export type CruiseCardProps = {
+  type: "departure" | "arrival";
   name: string;
   carrier: { name?: string; externalId?: string; source?: string };
+  bookedThrough: { name?: string; externalId?: string; source?: string };
   timing: { date: string; time: string; duration: string; timezone: string };
   cabinType: string;
   cabinNumber: string;
@@ -20,10 +22,23 @@ const supplierObjectFields = {
 
 export const CruiseCard: ComponentConfig<CruiseCardProps> = {
   fields: {
+    type: {
+      type: "radio",
+      label: "Type",
+      options: [
+        { value: "departure", label: "Departure" },
+        { value: "arrival", label: "Arrival" },
+      ],
+    },
     name: { type: "text", label: "Cruise / Ship Name" },
     carrier: {
       type: "object",
       label: "Cruise Line",
+      objectFields: supplierObjectFields,
+    },
+    bookedThrough: {
+      type: "object",
+      label: "Booked Through",
       objectFields: supplierObjectFields,
     },
     timing: {
@@ -48,8 +63,10 @@ export const CruiseCard: ComponentConfig<CruiseCardProps> = {
     notes: { type: "richtext" },
   },
   defaultProps: {
+    type: "departure",
     name: "",
     carrier: { name: "", externalId: "", source: "" },
+    bookedThrough: { name: "", externalId: "", source: "" },
     timing: { date: "", time: "", duration: "", timezone: "" },
     cabinType: "",
     cabinNumber: "",
@@ -78,11 +95,11 @@ export const CruiseCard: ComponentConfig<CruiseCardProps> = {
         style={{
           display: "flex",
           alignItems: "stretch",
-          background: "#ffffff",
-          borderRadius: 10,
+          background: color.bg.card,
+          borderRadius: radius.lg,
           overflow: "hidden",
-          border: "1px solid #e2e8f0",
-          ...(isProposal ? { boxShadow: "0 2px 8px rgba(0,0,0,0.06)" } : {}),
+          border: `1px solid ${color.border.subtle}`,
+          ...(isProposal ? { boxShadow: shadow.md } : {}),
         }}
       >
         <div
@@ -92,7 +109,7 @@ export const CruiseCard: ComponentConfig<CruiseCardProps> = {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: "#f1f5f9",
+            background: color.bg.subtle,
             fontSize: 24,
           }}
         >
@@ -117,17 +134,23 @@ export const CruiseCard: ComponentConfig<CruiseCardProps> = {
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontWeight: 600, fontSize: 15, color: "#1f2937" }}>
+              <span
+                style={{
+                  fontWeight: 600,
+                  fontSize: 15,
+                  color: color.text.primary,
+                }}
+              >
                 {name || "Cruise"}
               </span>
               {carrierLabel && (
                 <span
                   style={{
                     fontSize: 12,
-                    color: "#6b7280",
-                    background: "#f3f4f6",
+                    color: color.text.muted,
+                    background: color.bg.muted,
                     padding: "2px 8px",
-                    borderRadius: 4,
+                    borderRadius: radius.xs,
                   }}
                 >
                   {carrierLabel}
@@ -139,7 +162,7 @@ export const CruiseCard: ComponentConfig<CruiseCardProps> = {
                 style={{
                   fontWeight: 600,
                   fontSize: 14,
-                  color: "#1d4ed8",
+                  color: color.accent.blueDark,
                 }}
               >
                 {price.currency} {price.amount.toLocaleString()}
@@ -148,7 +171,7 @@ export const CruiseCard: ComponentConfig<CruiseCardProps> = {
           </div>
 
           {(timing?.date || timing?.time || timing?.duration) && (
-            <div style={{ fontSize: 13, color: "#6b7280" }}>
+            <div style={{ fontSize: 13, color: color.text.muted }}>
               {timing.date}
               {timing.date && timing.time && " · "}
               {timing.time}
@@ -157,7 +180,7 @@ export const CruiseCard: ComponentConfig<CruiseCardProps> = {
           )}
 
           {(cabinType || cabinNumber) && (
-            <div style={{ fontSize: 13, color: "#374151" }}>
+            <div style={{ fontSize: 13, color: color.text.secondary }}>
               {cabinType}
               {cabinType && cabinNumber && " · "}
               {cabinNumber && `Cabin ${cabinNumber}`}
@@ -168,10 +191,10 @@ export const CruiseCard: ComponentConfig<CruiseCardProps> = {
             <div
               style={{
                 fontSize: 12,
-                color: "#059669",
-                background: "#f0fdf4",
+                color: color.accent.green,
+                background: color.bg.greenLight,
                 padding: "2px 8px",
-                borderRadius: 4,
+                borderRadius: radius.xs,
                 display: "inline-block",
                 width: "fit-content",
               }}
@@ -182,11 +205,14 @@ export const CruiseCard: ComponentConfig<CruiseCardProps> = {
 
           {notes && (
             <div
-              style={{ fontSize: 13, color: "#374151", lineHeight: 1.5 }}
-              dangerouslySetInnerHTML={{
-                __html: richTextToSafeHtml(notes),
+              style={{
+                fontSize: 13,
+                color: color.text.secondary,
+                lineHeight: 1.5,
               }}
-            />
+            >
+              {notes}
+            </div>
           )}
         </div>
       </div>

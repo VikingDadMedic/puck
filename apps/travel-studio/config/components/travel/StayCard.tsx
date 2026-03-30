@@ -2,31 +2,54 @@ import type { ComponentConfig } from "@/core";
 import { hotelPickerField } from "../../fields/hotel-picker";
 import { placePickerField } from "../../fields/place-picker";
 import { imagePickerField } from "../../fields/image-picker";
-import { richTextToSafeHtml } from "../../../lib/render/richtext";
+import { color, radius, shadow } from "../../tokens";
 
 export type StayCardProps = {
   hotel: Record<string, unknown> | null;
   place: Record<string, unknown> | null;
+  type: "checkIn" | "checkOut";
   name: string;
   location: string;
+  /** @deprecated Use timing instead */
   dates: string;
+  timing: { date: string; time: string; duration: string; timezone: string };
   details: {
     bookedThrough: { name?: string; externalId?: string; source?: string };
     confirmationNumber: string;
     roomBedType: string;
   };
+  price: { amount: number; currency: string };
   rating: number;
   imageUrl: string;
   notes: string;
+  coordinates: { lat: number; lng: number } | null;
 };
 
 export const StayCard: ComponentConfig<StayCardProps> = {
   fields: {
     hotel: hotelPickerField,
     place: placePickerField,
+    type: {
+      type: "radio",
+      label: "Type",
+      options: [
+        { value: "checkIn", label: "Check-in" },
+        { value: "checkOut", label: "Check-out" },
+      ],
+    },
     name: { type: "text" },
     location: { type: "text" },
-    dates: { type: "text", label: "Check-in / Check-out Dates" },
+    dates: { type: "text", label: "Dates (legacy)", visible: false },
+    timing: {
+      type: "object",
+      label: "Timing",
+      objectFields: {
+        date: { type: "text", label: "Date" },
+        time: { type: "text", label: "Time" },
+        duration: { type: "text", label: "Duration" },
+        timezone: { type: "text", label: "Timezone" },
+      },
+    },
     details: {
       type: "object",
       objectFields: {
@@ -43,9 +66,25 @@ export const StayCard: ComponentConfig<StayCardProps> = {
         roomBedType: { type: "text", label: "Room/Bed Type" },
       },
     },
+    price: {
+      type: "object",
+      label: "Price",
+      objectFields: {
+        amount: { type: "number", label: "Amount" },
+        currency: { type: "text", label: "Currency" },
+      },
+    },
     rating: { type: "number", min: 1, max: 5 },
     imageUrl: imagePickerField,
     notes: { type: "richtext" },
+    coordinates: {
+      type: "object",
+      label: "Coordinates",
+      objectFields: {
+        lat: { type: "number", label: "Latitude" },
+        lng: { type: "number", label: "Longitude" },
+      },
+    },
   },
   resolveData: async ({ props }, { changed }) => {
     const strOr = (v: unknown, fallback: string) =>
@@ -68,11 +107,17 @@ export const StayCard: ComponentConfig<StayCardProps> = {
 
     if (changed.place && props.place) {
       const p = props.place;
+      const coords =
+        p.coordinates &&
+        typeof (p.coordinates as Record<string, unknown>).lat === "number"
+          ? (p.coordinates as { lat: number; lng: number })
+          : props.coordinates;
       return {
         props: {
           name: strOr(p.name, props.name),
           location: strOr(p.location, props.location),
           imageUrl: strOr(p.imageUrl, props.imageUrl),
+          coordinates: coords,
         },
         readOnly: { name: true, location: true },
       };
@@ -83,17 +128,21 @@ export const StayCard: ComponentConfig<StayCardProps> = {
   defaultProps: {
     hotel: null,
     place: null,
+    type: "checkIn",
     name: "",
     location: "",
     dates: "",
+    timing: { date: "", time: "", duration: "", timezone: "" },
     details: {
       bookedThrough: { name: "", externalId: "", source: "" },
       confirmationNumber: "",
       roomBedType: "Standard",
     },
+    price: { amount: 0, currency: "USD" },
     rating: 4,
     imageUrl: "",
     notes: "",
+    coordinates: null,
   },
   render: ({
     name,
@@ -114,15 +163,16 @@ export const StayCard: ComponentConfig<StayCardProps> = {
       <div
         style={{
           display: "flex",
-          background: "#ffffff",
-          borderRadius: 12,
+          background: color.bg.card,
+          borderRadius: radius.xl,
           overflow: "hidden",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06)",
-          border: "1px solid #f3f4f6",
+          boxShadow: shadow.sm,
+          border: `1px solid ${color.bg.muted}`,
         }}
       >
         {hasImage && (
           <div
+            className="ts-card-image"
             style={{
               width: 200,
               minHeight: 180,
@@ -155,7 +205,7 @@ export const StayCard: ComponentConfig<StayCardProps> = {
                   margin: 0,
                   fontSize: 17,
                   fontWeight: 700,
-                  color: "#111827",
+                  color: color.text.primary,
                 }}
               >
                 {name || "Untitled Stay"}
@@ -165,7 +215,7 @@ export const StayCard: ComponentConfig<StayCardProps> = {
                   style={{
                     margin: "2px 0 0",
                     fontSize: 14,
-                    color: "#6b7280",
+                    color: color.text.muted,
                   }}
                 >
                   {location}
@@ -175,7 +225,7 @@ export const StayCard: ComponentConfig<StayCardProps> = {
             <span
               style={{
                 fontSize: 16,
-                color: "#f59e0b",
+                color: color.star,
                 letterSpacing: 2,
                 flexShrink: 0,
               }}
@@ -190,10 +240,10 @@ export const StayCard: ComponentConfig<StayCardProps> = {
                 style={{
                   fontSize: 12,
                   fontWeight: 500,
-                  color: "#374151",
-                  background: "#f3f4f6",
+                  color: color.text.secondary,
+                  background: color.bg.muted,
                   padding: "3px 10px",
-                  borderRadius: 6,
+                  borderRadius: radius.sm,
                 }}
               >
                 {dates}
@@ -204,10 +254,10 @@ export const StayCard: ComponentConfig<StayCardProps> = {
                 style={{
                   fontSize: 12,
                   fontWeight: 500,
-                  color: "#1e40af",
-                  background: "#eff6ff",
+                  color: color.accent.blueDeep,
+                  background: color.bg.blueLight,
                   padding: "3px 10px",
-                  borderRadius: 6,
+                  borderRadius: radius.sm,
                 }}
               >
                 {details.roomBedType}
@@ -218,10 +268,10 @@ export const StayCard: ComponentConfig<StayCardProps> = {
                 style={{
                   fontSize: 12,
                   fontWeight: 600,
-                  color: "#065f46",
-                  background: "#ecfdf5",
+                  color: color.accent.greenDark,
+                  background: color.bg.greenPale,
                   padding: "3px 10px",
-                  borderRadius: 6,
+                  borderRadius: radius.sm,
                 }}
               >
                 Conf # {details.confirmationNumber}
@@ -234,7 +284,7 @@ export const StayCard: ComponentConfig<StayCardProps> = {
               style={{
                 margin: 0,
                 fontSize: 12,
-                color: "#9ca3af",
+                color: color.text.faint,
               }}
             >
               Booked through {details.bookedThrough.name}
@@ -247,10 +297,11 @@ export const StayCard: ComponentConfig<StayCardProps> = {
                 marginTop: 4,
                 fontSize: 13,
                 lineHeight: 1.5,
-                color: "#6b7280",
+                color: color.text.muted,
               }}
-              dangerouslySetInnerHTML={{ __html: richTextToSafeHtml(notes) }}
-            />
+            >
+              {notes}
+            </div>
           )}
         </div>
       </div>
