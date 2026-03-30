@@ -497,39 +497,53 @@ system rather than a generic page builder.
 ### Architecture
 
 - **Layer 1 (Domain)**: TypeScript types in `config/schema.ts` -- TripDocument, DocumentMode, VisibilityRule
-- **Layer 2 (Composition)**: Puck config in `config/index.ts` with 17 travel-specific components organized into 5 categories
+- **Layer 2 (Composition)**: Puck config in `config/index.ts` with 21 travel-specific components organized into 5 categories
 - **Layer 3 (Render)**: Mode-aware rendering via `metadata.target` (itinerary/proposal/client_view)
 - **Layer 4 (Shell)**: Custom `headerActions` override with save status indicator, autosave (4s debounce), conflict resolution modal, toast notifications, and `beforeunload` guard
+- **Layer 5 (Design System)**: Design tokens in `config/tokens.ts` with CSS custom properties and dark mode support
+- **Layer 6 (Template/Fill Mode)**: `documentType` discriminator (`"template"` vs `"itinerary"`) in root props; permissions-based structural lock in fill mode; `cloneAndReId` for template instantiation
+- **Layer 7 (Editor UX Polish)**: Dark editor chrome via `--puck-color-grey-*` overrides in `styles.css`; canvas dot grid background; Cmd+S manual save shortcut; Escape-to-deselect; drawer search filter via Puck `drawer` override; `DrawerSearchWrapper` + `FilteredDrawer` using `Drawer.Item` for draggable results
 
 ### Component Taxonomy
 
-| Category     | Components                                                                                  |
-| ------------ | ------------------------------------------------------------------------------------------- |
-| Structure    | DocumentSection, DaySection, SidebarLayout, CardGroup, Spacer, Divider                      |
-| Trip Content | TripHeader, TripOverview, StayCard, ActivityCard, TransportCard, RestaurantCard, CruiseCard |
-| Pricing      | PricingSummary                                                                              |
-| Context      | AdvisorInsight, IncludedFeatures                                                            |
-| Actions      | PrimaryCTA                                                                                  |
+| Category     | Components                                                                                                                                 |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Structure    | DocumentSection, DaySection, SidebarLayout, CardGroup, Spacer, Divider                                                                     |
+| Trip Content | TripHeader, TripOverview, StayCard, ActivityCard, TransportCard, RestaurantCard, CruiseCard, ItineraryMap, InfoCard, TourCard, BookingCard |
+| Pricing      | PricingSummary                                                                                                                             |
+| Context      | AdvisorInsight, IncludedFeatures                                                                                                           |
+| Actions      | PrimaryCTA                                                                                                                                 |
 
 ### Slot Rules
 
-- DaySection: `morning`/`afternoon`/`evening` slots allow only card-type components (StayCard, ActivityCard, TransportCard, RestaurantCard, CruiseCard)
+- DaySection: `morning`/`afternoon`/`evening` slots allow only card-type components (StayCard, ActivityCard, TransportCard, RestaurantCard, CruiseCard, InfoCard, TourCard, BookingCard)
 - SidebarLayout: `main` allows narrative content; `sidebar` allows pricing/context/CTA
 - DocumentSection: `content` allows all travel/context/conversion components
-- CardGroup: `items` allows only card-type components (StayCard, ActivityCard, TransportCard, RestaurantCard, CruiseCard)
+- CardGroup: `items` allows only card-type components (StayCard, ActivityCard, TransportCard, RestaurantCard, CruiseCard, InfoCard, TourCard, BookingCard)
 
 ### Key Paths
 
-| What           | Path                                                              |
-| -------------- | ----------------------------------------------------------------- |
-| App root       | `apps/travel-studio/`                                             |
-| Config barrel  | `apps/travel-studio/config/index.ts`                              |
-| Root config    | `apps/travel-studio/config/root.tsx`                              |
-| Schema types   | `apps/travel-studio/config/schema.ts`                             |
-| Seed data      | `apps/travel-studio/config/seed-data.ts`                          |
-| Dashboard page | `apps/travel-studio/app/page.tsx` + `app/dashboard.tsx`           |
-| Editor client  | `apps/travel-studio/app/[...puckPath]/client.tsx`                 |
-| Documents API  | `apps/travel-studio/app/api/documents/route.ts` (GET/POST/DELETE) |
+| What             | Path                                                              |
+| ---------------- | ----------------------------------------------------------------- |
+| App root         | `apps/travel-studio/`                                             |
+| Config barrel    | `apps/travel-studio/config/index.ts`                              |
+| Root config      | `apps/travel-studio/config/root.tsx`                              |
+| Schema types     | `apps/travel-studio/config/schema.ts`                             |
+| Seed data        | `apps/travel-studio/config/seed-data.ts`                          |
+| Dashboard page   | `apps/travel-studio/app/page.tsx` + `app/dashboard.tsx`           |
+| Editor client    | `apps/travel-studio/app/[...puckPath]/client.tsx`                 |
+| Documents API    | `apps/travel-studio/app/api/documents/route.ts` (GET/POST/DELETE) |
+| Design tokens    | `apps/travel-studio/config/tokens.ts`                             |
+| ItineraryMap     | `apps/travel-studio/config/components/travel/ItineraryMap.tsx`    |
+| Geocode API      | `apps/travel-studio/app/api/geocode/route.ts`                     |
+| Login page       | `apps/travel-studio/app/auth/login/page.tsx`                      |
+| Docker Compose   | `docker-compose.travel-studio.yml`                                |
+| DB migrations    | `docker/travel-studio/migrations/`                                |
+| Directus client  | `apps/travel-studio/lib/directus/client.ts`                       |
+| Directus adapter | `apps/travel-studio/lib/persistence/directus-adapter.ts`          |
+| Supabase client  | `apps/travel-studio/lib/supabase/client.ts`                       |
+| Auth middleware  | `apps/travel-studio/lib/auth/middleware.ts`                       |
+| cloneAndReId     | `apps/travel-studio/lib/get-document.ts`                          |
 
 ### Running
 
@@ -537,7 +551,16 @@ system rather than a generic page builder.
 cd apps/travel-studio && yarn dev    # http://localhost:3001
 ```
 
-The home page shows a document dashboard listing all saved and seed documents with create/edit/delete actions. Editing a document navigates to `/{path}/edit`. Seed data includes a sample "Mediterranean Cruise" document.
+Docker Compose (full stack with Postgres, Directus, Supabase, Redis):
+
+```sh
+docker compose -f docker-compose.travel-studio.yml up -d
+```
+
+The home page shows a document dashboard with separate **Templates** and **Itineraries** sections. "Use Template" clones a template with fresh IDs (via `cloneAndReId`) and sets `documentType` to `"itinerary"`. Editing a document navigates to `/{path}/edit`. Seed data includes 7 templates (all `documentType: "template"`): "Mediterranean Cruise Escape" (`/trip`, luxury/itinerary), "Weekend in Paris" (`/city-break`, default/itinerary), "Tokyo Client Meeting" (`/business-proposal`, default/proposal), "Greek Islands Cruise" (`/cruise-adventure`, luxury/itinerary), "Cancun Family Getaway" (`/family-beach`, adventure/itinerary), "European Rail Adventure" (`/rail-europe`, default/itinerary), "Maldives Honeymoon" (`/honeymoon`, luxury/proposal).
+
+**Fill mode** (itineraries): structural operations are locked (drag/delete/duplicate/insert disabled) while field editing remains enabled, enforced via Puck global permissions `{ drag: false, delete: false, duplicate: false, insert: false, edit: true }`. The Drawer is hidden in fill mode via a Puck `drawer` override. Visual mode badges appear in the header: amber "TEMPLATE" badge in design mode, blue "ITINERARY" badge in fill mode.
+
 Operational runbooks live under `docs/devex/runbooks/` for API contracts, cache handling, migrations, and testing/CI workflows.
 
 ### Data Feed Architecture
@@ -546,12 +569,12 @@ Components connect to live travel data through a three-layer architecture:
 
 1. **SerpAPI/image engine wrappers** (`lib/serp/engines/`) -- typed functions for each data source
    (hotels, flights, activities, restaurants, places, images, explore, events, yelp, google-light, maps reviews, opentable reviews, finance)
-2. **Next.js API routes** (`app/api/search/`) -- 13 GET endpoints that proxy engine wrappers
+2. **Next.js API routes** (`app/api/search/` + `app/api/`) -- 16 endpoints (13 search + documents + health + geocode)
 3. **Puck `external` fields** (`config/fields/`) -- picker configs that call API routes
    via `fetchList` and hydrate component props via `resolveData`
 
 Caching: search responses are file-cached in `.cache/serp/` with TTL + stale-if-error fallback semantics.
-Image search (Pexels/Unsplash) also uses the same cache layer.
+Image search (Pexels/Unsplash) also uses the shared file cache layer.
 
 Components using external fields: `StayCard` (hotel picker), `ActivityCard` (activity picker + event picker),
 `TransportCard` (flight picker via resolveFields), `TripHeader` (image picker),
@@ -604,6 +627,7 @@ types but are not yet fully aligned (see `domain/MAPPING.md` for the gap analysi
 - Values iterative refinement — multiple "step back and evaluate" passes after implementation
 - Wants comprehensive `.cursor/` configuration (rules, skills, hooks, commands) for AI agent productivity
 - Imports external domain analysis (e.g., ChatGPT schema discussions) into Cursor as structured input for architecture and modeling work
+- Follows structured phase workflow with intermediate stabilization sub-phases (e.g., 5.5, 5.5b) and post-implementation audits before advancing
 
 ## Learned Workspace Facts
 
@@ -612,8 +636,18 @@ types but are not yet fully aligned (see `domain/MAPPING.md` for the gap analysi
 - `.cursor/` has 8 rules, 5 skills, 3 commands, and 2 hooks configured for this workspace
 - `create-reducer-action` skill exists at `.cursor/skills/create-reducer-action/SKILL.md` for adding new PuckAction types
 - Docker build for the demo app cannot use `turbo prune --docker` because `@puckeditor/core` is resolved via tsconfig path aliases, not `package.json` dependencies — requires full monorepo copy instead
-- Travel-studio editor has autosave (4s debounce), `beforeunload` guard, conflict resolution modal on 409, and toast notifications — no external UI dependencies
-- Travel-studio has `error.tsx` and `loading.tsx` at both app root and `[...puckPath]` levels, plus `not-found.tsx` at root
-- Travel-studio documents API supports GET (list all), POST (save with optimistic concurrency), and DELETE — dashboard replaces the old redirect-to-edit flow
-- All 17 travel-studio components are mode-aware via `puck.metadata.target` (itinerary/proposal/client_view)
-- Phase 5+ deferred: real database (Postgres/SQLite), real auth (NextAuth), PDF/email export, map visualization, traveler profiles, sharing/collaboration, design system extraction, offline support
+- Travel-studio app shell: autosave (4s debounce), `beforeunload` guard, conflict resolution modal on 409, toast notifications, `error.tsx`/`loading.tsx` at both levels, documents API (GET/POST/DELETE) with dashboard
+- All 18 travel-studio components are mode-aware via `puck.metadata.target`; design tokens in `config/tokens.ts` with `--ts-*` CSS custom properties and `[data-theme="dark"]` dark mode
+- Travel-studio Docker Compose (9 services: Postgres, Kong, GoTrue, Realtime, Storage, Studio, Redis, Directus, travel-studio); Directus adapter falls back to file-based when `DIRECTUS_URL` unset; Supabase auth falls back to API-key when unconfigured
+- Mapbox integration: ItineraryMap uses `react-map-gl` (v7 root import, not `/mapbox` subpath) with dynamic import; geocode route proxies Mapbox server-side geocoding
+- Azure deployment: resource group `rg-travel-studio-westus`, ACR `travstudiocr.azurecr.io`, Container App `travel-studio` at `travel-studio.bravepebble-29dca480.westus.azurecontainerapps.io`; deploy via `az acr build` + `az containerapp update --revision-suffix`
+- Puck core CSS imports Inter font from `https://rsms.me/inter/inter.css` — deployed Puck apps must allow `https://rsms.me` in both `style-src` and `font-src` CSP directives
+- Travel-studio Dockerfile uses `node:22-alpine` (not 20) because `@directus/sdk@19.1.0` requires Node 22; Azure ACR builds don't support glob patterns in Dockerfile COPY
+- Puck's RichTextRender handles string HTML values natively (parses via `generateJSON` from `@tiptap/html`); components should render richtext as JSX children `{value}` not `dangerouslySetInnerHTML`
+- Template/itinerary split: `documentType` in `root.props` discriminates; fill mode uses Puck global permissions `{ drag: false, delete: false, duplicate: false, insert: false, edit: true }`
+- `lib/render/richtext.ts` was deleted (dead code after richtext rendering fix)
+- Travel-studio test suite: ~73 tests across 8 test files; `cloneAndReId` has 8 dedicated test cases
+- Editor dark mode: override Puck's `--puck-color-grey-*` CSS custom properties within `[data-puck-editor]` selector -- do NOT modify Puck core CSS files
+- Drawer search: Puck's `drawer` override wraps the component list; `Drawer.Item` from `@/core` is required for drag-and-drop (plain divs are not draggable)
+- Keyboard shortcuts: `Cmd+S`/`Ctrl+S` for save and `Escape` for deselect are implemented in HeaderActions via `useEffect` + `window.addEventListener("keydown")`; the `dispatch({ type: "setUi", ui: { itemSelector: null } })` pattern deselects the active component
+- Puck-to-itinerary mapper (`lib/itinerary/puck-to-itinerary.ts`): `mapCard` switch dispatches per component type; `mapMoney`/`supplierRef` helpers for common conversions; pipeline test at `lib/itinerary/pipeline.test.ts` exercises all card types

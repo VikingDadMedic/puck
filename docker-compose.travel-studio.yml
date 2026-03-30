@@ -1,0 +1,236 @@
+# =============================================================================
+# Travel Composition Studio — full platform stack
+#
+# Usage:
+#   docker compose -f docker-compose.travel-studio.yml --env-file .env.travel-studio up -d
+#
+# Services:
+#   db            Postgres 15 (shared by Supabase + Directus)
+#   kong          API gateway — exposes Supabase REST/Auth/Realtime on :8000
+#   auth          Supabase GoTrue — email/password & OAuth
+#   realtime      Supabase Realtime — Postgres changes over WebSockets
+#   storage       Supabase Storage — S3-compatible file storage
+#   studio        Supabase Studio — admin dashboard on :3100
+#   redis         Cache layer for Directus
+#   directus      Headless CMS on :8055
+#   travel-studio Next.js composition editor on :3001
+# =============================================================================
+
+name: travel-studio-platform
+
+services:
+  # ---------------------------------------------------------------------------
+  # Postgres — single instance, two databases (postgres + directus)
+  # ---------------------------------------------------------------------------
+  db:
+    image: supabase/postgres:15.8.1.160
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/travel-studio/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # Kong — Supabase API gateway
+  # ---------------------------------------------------------------------------
+  kong:
+    image: kong:2.8.1
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+      - "8443:8443"
+    environment:
+      KONG_DATABASE: ${KONG_DATABASE:-off}
+      KONG_DECLARATIVE_CONFIG: ${KONG_DECLARATIVE_CONFIG:-/var/lib/kong/kong.yml}
+      KONG_DNS_ORDER: ${KONG_DNS_ORDER:-LAST,A,CNAME}
+      KONG_PLUGINS: ${KONG_PLUGINS:-request-transformer,cors,key-auth,acl}
+      KONG_NGINX_PROXY_PROXY_BUFFER_SIZE: 160k
+      KONG_NGINX_PROXY_PROXY_BUFFERS: 64 160k
+    volumes:
+      - ./docker/travel-studio/kong.yml:/var/lib/kong/kong.yml:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ---------------------------------------------------------------------------
+  # GoTrue — Supabase authentication
+  # ---------------------------------------------------------------------------
+  auth:
+    image: supabase/gotrue:v2.175.0
+    restart: unless-stopped
+    environment:
+      GOTRUE_SITE_URL: ${GOTRUE_SITE_URL:-http://localhost:3001}
+      GOTRUE_URI_ALLOW_LIST: ${GOTRUE_URI_ALLOW_LIST:-http://localhost:3001}
+      GOTRUE_JWT_SECRET: ${JWT_SECRET}
+      GOTRUE_JWT_EXP: ${GOTRUE_JWT_EXP:-3600}
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-postgres}?sslmode=disable
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: ${GOTRUE_EXTERNAL_EMAIL_ENABLED:-true}
+      GOTRUE_MAILER_AUTOCONFIRM: ${GOTRUE_MAILER_AUTOCONFIRM:-true}
+      GOTRUE_SMTP_ADMIN_EMAIL: ${GOTRUE_SMTP_ADMIN_EMAIL:-admin@travel-studio.local}
+      GOTRUE_DISABLE_SIGNUP: ${GOTRUE_DISABLE_SIGNUP:-false}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ---------------------------------------------------------------------------
+  # Realtime — Postgres changes over WebSockets
+  # ---------------------------------------------------------------------------
+  realtime:
+    image: supabase/realtime:v2.34.48
+    restart: unless-stopped
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB:-postgres}
+      DB_SSL: "false"
+      PORT: 4000
+      SECRET_KEY_BASE: ${REALTIME_SECRET_KEY_BASE}
+      ERL_AFLAGS: "-proto_dist inet_tcp"
+      DNS_NODES: "''"
+      RLIMIT_NOFILE: "10000"
+      APP_NAME: realtime
+      SEED_SELF_HOST: "true"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ---------------------------------------------------------------------------
+  # Storage — S3-compatible file storage
+  # ---------------------------------------------------------------------------
+  storage:
+    image: supabase/storage-api:v1.14.6
+    restart: unless-stopped
+    environment:
+      ANON_KEY: ${ANON_KEY}
+      SERVICE_KEY: ${SERVICE_ROLE_KEY}
+      POSTGREST_URL: http://kong:8000/rest/v1
+      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-postgres}?sslmode=disable
+      FILE_SIZE_LIMIT: "52428800"
+      STORAGE_BACKEND: ${STORAGE_BACKEND:-file}
+      FILE_STORAGE_BACKEND_PATH: /var/lib/storage
+      TENANT_ID: stub
+      REGION: local
+      GLOBAL_S3_BUCKET: stub
+      IS_MULTITENANT: "false"
+      PGRST_JWT_SECRET: ${JWT_SECRET}
+    volumes:
+      - storage-data:/var/lib/storage
+    depends_on:
+      db:
+        condition: service_healthy
+      kong:
+        condition: service_started
+
+  # ---------------------------------------------------------------------------
+  # Supabase Studio — admin dashboard
+  # ---------------------------------------------------------------------------
+  studio:
+    image: supabase/studio:20250317-af01f62
+    restart: unless-stopped
+    ports:
+      - "3100:3000"
+    environment:
+      STUDIO_PG_META_URL: http://kong:8000/pg
+      SUPABASE_URL: http://kong:8000
+      SUPABASE_PUBLIC_URL: ${SUPABASE_PUBLIC_URL:-http://localhost:8000}
+      SUPABASE_ANON_KEY: ${ANON_KEY}
+      SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY}
+      DEFAULT_ORGANIZATION_NAME: ${STUDIO_DEFAULT_ORGANIZATION:-Travel Studio}
+      DEFAULT_PROJECT_NAME: ${STUDIO_DEFAULT_PROJECT:-travel-studio}
+    depends_on:
+      kong:
+        condition: service_started
+
+  # ---------------------------------------------------------------------------
+  # Redis — cache backend for Directus
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # ---------------------------------------------------------------------------
+  # Directus — headless CMS for travel content
+  # ---------------------------------------------------------------------------
+  directus:
+    image: directus/directus:11.5.0
+    restart: unless-stopped
+    ports:
+      - "8055:8055"
+    environment:
+      KEY: ${DIRECTUS_KEY}
+      SECRET: ${DIRECTUS_SECRET}
+      DB_CLIENT: pg
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: directus
+      DB_USER: directus
+      DB_PASSWORD: directus
+      ADMIN_EMAIL: ${DIRECTUS_ADMIN_EMAIL:-admin@travel-studio.local}
+      ADMIN_PASSWORD: ${DIRECTUS_ADMIN_PASSWORD:-change-me-in-production}
+      WEBSOCKETS_ENABLED: ${DIRECTUS_WEBSOCKETS_ENABLED:-true}
+      CACHE_ENABLED: ${DIRECTUS_CACHE_ENABLED:-true}
+      CACHE_STORE: ${DIRECTUS_CACHE_STORE:-redis}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      PUBLIC_URL: http://localhost:8055
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # ---------------------------------------------------------------------------
+  # Travel Studio — Next.js composition editor
+  # ---------------------------------------------------------------------------
+  travel-studio:
+    build:
+      context: .
+      dockerfile: apps/travel-studio/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    env_file:
+      - .env.travel-studio
+    environment:
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: 1
+      DIRECTUS_URL: http://directus:8055
+      NEXT_PUBLIC_SUPABASE_URL: http://kong:8000
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
+    depends_on:
+      directus:
+        condition: service_started
+      kong:
+        condition: service_started
+
+volumes:
+  pgdata:
+    driver: local
+  storage-data:
+    driver: local
+  redis-data:
+    driver: local
