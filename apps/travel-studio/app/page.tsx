@@ -11,6 +11,7 @@ export type DashboardDocument = {
   version: number;
   source: "saved" | "seed";
   mode?: string;
+  documentType?: string;
 };
 
 function extractDocInfo(
@@ -21,6 +22,7 @@ function extractDocInfo(
   let name = "Untitled";
   let version = 0;
   let mode: string | undefined;
+  let documentType: string | undefined;
 
   if (isTravelStudioEnvelope(raw)) {
     version = raw.version;
@@ -28,14 +30,16 @@ function extractDocInfo(
       ?.props;
     name = (rootProps?.title as string) || name;
     mode = (rootProps?.documentMode as string) || undefined;
+    documentType = (rootProps?.documentType as string) || "template";
   } else if (raw && typeof raw === "object") {
     const d = raw as Record<string, unknown>;
     const rootProps = (d.root as { props?: Record<string, unknown> })?.props;
     name = (rootProps?.title as string) || name;
     mode = (rootProps?.documentMode as string) || undefined;
+    documentType = (rootProps?.documentType as string) || "template";
   }
 
-  return { path, name, version, source, mode };
+  return { path, name, version, source, mode, documentType };
 }
 
 export default function HomePage() {

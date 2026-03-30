@@ -1,7 +1,7 @@
 "use client";
 
 import type { Data } from "@/core";
-import { Puck, Render, createUsePuck } from "@/core";
+import { Puck, Render, Drawer, createUsePuck } from "@/core";
 import config from "../../config";
 import {
   Save,
@@ -11,6 +11,7 @@ import {
   Loader2,
   X,
   Home,
+  Search,
 } from "lucide-react";
 import {
   useCallback,
@@ -312,6 +313,105 @@ function SaveStatusBadge({ status }: { status: SaveStatus }) {
   );
 }
 
+function DrawerSearchWrapper({ children }: { children: ReactNode }) {
+  const [query, setQuery] = useState("");
+
+  return (
+    <div>
+      <div style={{ padding: "8px 12px" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "6px 10px",
+            background: "var(--puck-color-grey-12, #fafafa)",
+            border: "1px solid var(--puck-color-grey-09, #dcdcdc)",
+            borderRadius: 6,
+            fontSize: 13,
+          }}
+        >
+          <Search size={14} style={{ opacity: 0.5, flexShrink: 0 }} />
+          <input
+            type="text"
+            placeholder="Search components..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            style={{
+              border: "none",
+              background: "transparent",
+              outline: "none",
+              fontSize: 13,
+              width: "100%",
+              color: "inherit",
+              fontFamily: "inherit",
+            }}
+          />
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: 0,
+                lineHeight: 0,
+                opacity: 0.5,
+              }}
+            >
+              <X size={12} />
+            </button>
+          )}
+        </div>
+      </div>
+      {query ? (
+        <div style={{ padding: "0 12px 8px" }}>
+          <FilteredDrawer query={query} />
+        </div>
+      ) : (
+        children
+      )}
+    </div>
+  );
+}
+
+function FilteredDrawer({ query }: { query: string }) {
+  const configFromPuck = usePuck((s) => s.config);
+  const lowerQuery = query.toLowerCase();
+
+  const components = configFromPuck?.components || {};
+  const matches = Object.entries(components).filter(([key, comp]) => {
+    const label =
+      (comp as { label?: string }).label?.toLowerCase() || key.toLowerCase();
+    return label.includes(lowerQuery) || key.toLowerCase().includes(lowerQuery);
+  });
+
+  if (matches.length === 0) {
+    return (
+      <div
+        style={{
+          padding: "16px 0",
+          textAlign: "center",
+          fontSize: 13,
+          color: "var(--puck-color-grey-05, #767676)",
+        }}
+      >
+        No components match "{query}"
+      </div>
+    );
+  }
+
+  return (
+    <Drawer>
+      {matches.map(([key, comp]) => {
+        const label = (comp as { label?: string }).label || key;
+        return <Drawer.Item key={key} name={key} label={label} />;
+      })}
+    </Drawer>
+  );
+}
+
 const AUTOSAVE_DELAY_MS = 4000;
 
 function dataFingerprint(data: unknown): string {
@@ -338,6 +438,7 @@ function HeaderActions({
   doSaveRef: React.MutableRefObject<(forceVersion?: number) => Promise<void>>;
 }) {
   const appState = usePuck((s) => s.appState);
+  const dispatch = usePuck((s) => s.dispatch);
   const lastSavedRef = useRef<string>(dataFingerprint(appState.data));
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isMountedRef = useRef(true);
@@ -347,6 +448,23 @@ function HeaderActions({
       isMountedRef.current = false;
     };
   }, []);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "s") {
+        e.preventDefault();
+        doSaveRef.current();
+      }
+      if (e.key === "Escape" && !e.metaKey && !e.ctrlKey && !e.shiftKey) {
+        dispatch({
+          type: "setUi",
+          ui: { itemSelector: null },
+        });
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [dispatch, doSaveRef]);
 
   const doSave = useCallback(
     async (forceVersion?: number) => {
@@ -517,7 +635,9 @@ export function Client({
   );
   const rootProps = (data?.root as { props?: Record<string, unknown> })?.props;
   const documentMode = (rootProps?.documentMode as string) || "itinerary";
-  const metadata = { target: documentMode };
+  const documentType = (rootProps?.documentType as string) || "template";
+  const isFillMode = documentType === "itinerary";
+  const metadata = { target: documentMode, documentType };
 
   useEffect(() => {
     if (!isEdit) return;
@@ -564,6 +684,17 @@ export function Client({
         <Puck
           config={config}
           data={data}
+          permissions={
+            isFillMode
+              ? {
+                  drag: false,
+                  delete: false,
+                  duplicate: false,
+                  insert: false,
+                  edit: true,
+                }
+              : undefined
+          }
           onPublish={async (publishData: Data) => {
             try {
               const res = await fetch("/api/documents", {
@@ -599,17 +730,56 @@ export function Client({
           }}
           overrides={{
             headerActions: () => (
-              <HeaderActions
-                path={path}
-                version={version}
-                setVersion={setVersion}
-                saveStatus={saveStatus}
-                setSaveStatus={setSaveStatus}
-                addToast={addToast}
-                setShowConflict={setShowConflict}
-                doSaveRef={doSaveRef}
-              />
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                {isFillMode && (
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 600,
+                      padding: "3px 8px",
+                      borderRadius: 4,
+                      background: "#dbeafe",
+                      color: "#1d4ed8",
+                      letterSpacing: "0.03em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Itinerary
+                  </span>
+                )}
+                {!isFillMode && (
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 600,
+                      padding: "3px 8px",
+                      borderRadius: 4,
+                      background: "#fef3c7",
+                      color: "#92400e",
+                      letterSpacing: "0.03em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Template
+                  </span>
+                )}
+                <HeaderActions
+                  path={path}
+                  version={version}
+                  setVersion={setVersion}
+                  saveStatus={saveStatus}
+                  setSaveStatus={setSaveStatus}
+                  addToast={addToast}
+                  setShowConflict={setShowConflict}
+                  doSaveRef={doSaveRef}
+                />
+              </div>
             ),
+            drawer: isFillMode
+              ? () => <></>
+              : ({ children }: { children: ReactNode }) => (
+                  <DrawerSearchWrapper>{children}</DrawerSearchWrapper>
+                ),
           }}
           headerPath={path}
           metadata={metadata}

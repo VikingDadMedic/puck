@@ -1,4 +1,5 @@
 import type { ComponentConfig } from "@/core";
+import { color } from "../../tokens";
 
 export type IncludedFeaturesProps = {
   title: string;
@@ -36,9 +37,9 @@ export const IncludedFeatures: ComponentConfig<IncludedFeaturesProps> = {
     return (
       <div
         style={{
-          background: "#ffffff",
+          background: color.bg.card,
           borderRadius: isProposal ? 12 : 8,
-          border: "1px solid #e5e7eb",
+          border: `1px solid ${color.border.default}`,
           overflow: "hidden",
           ...(isProposal && { boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }),
         }}
@@ -46,7 +47,7 @@ export const IncludedFeatures: ComponentConfig<IncludedFeaturesProps> = {
         <div
           style={{
             padding: isProposal ? "16px 20px" : "12px 16px",
-            background: "#f0fdf4",
+            background: color.bg.greenLight,
             borderBottom: "2px solid #22c55e",
           }}
         >
@@ -54,7 +55,7 @@ export const IncludedFeatures: ComponentConfig<IncludedFeaturesProps> = {
             style={{
               fontSize: isProposal ? 18 : 16,
               fontWeight: 700,
-              color: "#166534",
+              color: color.accent.greenLeaf,
             }}
           >
             {title}
@@ -70,16 +71,18 @@ export const IncludedFeatures: ComponentConfig<IncludedFeaturesProps> = {
                 alignItems: "center",
                 gap: 10,
                 fontSize: isProposal ? 15 : 14,
-                color: "#374151",
+                color: color.text.secondary,
                 borderBottom:
-                  i < features.length - 1 ? "1px solid #f3f4f6" : "none",
+                  i < features.length - 1
+                    ? `1px solid ${color.bg.muted}`
+                    : "none",
               }}
             >
               <span
                 style={{
                   fontSize: 16,
                   fontWeight: 700,
-                  color: feature.included ? "#16a34a" : "#dc2626",
+                  color: feature.included ? "#16a34a" : color.accent.red,
                   flexShrink: 0,
                 }}
               >

@@ -1,5 +1,6 @@
 import type { ComponentConfig } from "@/core";
-import { richTextToSafeHtml } from "../../../lib/render/richtext";
+
+import { color, radius } from "../../tokens";
 
 export type PricingSummaryProps = {
   currency: string;
@@ -55,10 +56,10 @@ export const PricingSummary: ComponentConfig<PricingSummaryProps> = {
     return (
       <div
         style={{
-          background: "#ffffff",
-          borderRadius: 12,
+          background: color.bg.card,
+          borderRadius: radius.xl,
           overflow: "hidden",
-          border: "1px solid #e5e7eb",
+          border: `1px solid ${color.border.default}`,
           boxShadow: isProposal
             ? "0 4px 12px rgba(0,0,0,0.08)"
             : "0 1px 3px rgba(0,0,0,0.06)",
@@ -66,7 +67,7 @@ export const PricingSummary: ComponentConfig<PricingSummaryProps> = {
       >
         <div
           style={{
-            background: "#1e40af",
+            background: color.accent.blueDeep,
             padding: isProposal ? "16px 24px" : "10px 20px",
             display: "flex",
             justifyContent: "space-between",
@@ -78,7 +79,7 @@ export const PricingSummary: ComponentConfig<PricingSummaryProps> = {
               margin: 0,
               fontSize: isProposal ? 18 : 15,
               fontWeight: 700,
-              color: "#ffffff",
+              color: color.text.inverse,
             }}
           >
             Pricing Summary
@@ -106,11 +107,14 @@ export const PricingSummary: ComponentConfig<PricingSummaryProps> = {
             >
               <tbody>
                 {lineItems.map((item, i) => (
-                  <tr key={i} style={{ borderBottom: "1px solid #f3f4f6" }}>
+                  <tr
+                    key={i}
+                    style={{ borderBottom: `1px solid ${color.bg.muted}` }}
+                  >
                     <td
                       style={{
                         padding: isProposal ? "10px 0" : "8px 0",
-                        color: "#374151",
+                        color: color.text.secondary,
                       }}
                     >
                       {item.description}
@@ -120,7 +124,7 @@ export const PricingSummary: ComponentConfig<PricingSummaryProps> = {
                         padding: isProposal ? "10px 0" : "8px 0",
                         textAlign: "right",
                         fontWeight: 500,
-                        color: "#111827",
+                        color: color.text.primary,
                         whiteSpace: "nowrap",
                       }}
                     >
@@ -138,7 +142,7 @@ export const PricingSummary: ComponentConfig<PricingSummaryProps> = {
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                borderTop: "2px solid #1e40af",
+                borderTop: `2px solid ${color.accent.blueDeep}`,
                 marginTop: lineItems.length > 0 ? 4 : 0,
                 paddingTop: isProposal ? 14 : 10,
               }}
@@ -147,7 +151,7 @@ export const PricingSummary: ComponentConfig<PricingSummaryProps> = {
                 style={{
                   fontSize: isProposal ? 17 : 15,
                   fontWeight: 700,
-                  color: "#111827",
+                  color: color.text.primary,
                 }}
               >
                 Total
@@ -156,7 +160,7 @@ export const PricingSummary: ComponentConfig<PricingSummaryProps> = {
                 style={{
                   fontSize: isProposal ? 22 : 17,
                   fontWeight: 800,
-                  color: "#1e40af",
+                  color: color.accent.blueDeep,
                 }}
               >
                 {formatAmount(total)}
@@ -170,11 +174,12 @@ export const PricingSummary: ComponentConfig<PricingSummaryProps> = {
                 margin: "12px 0 0",
                 fontSize: 13,
                 lineHeight: 1.5,
-                color: "#6b7280",
+                color: color.text.muted,
                 fontStyle: "italic",
               }}
-              dangerouslySetInnerHTML={{ __html: richTextToSafeHtml(notes) }}
-            />
+            >
+              {notes}
+            </div>
           )}
         </div>
       </div>

@@ -7,15 +7,22 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "jest"
+    "test": "jest",
+    "docker:up": "docker compose -f ../../docker-compose.travel-studio.yml --env-file ../../.env.travel-studio up -d",
+    "docker:down": "docker compose -f ../../docker-compose.travel-studio.yml down",
+    "docker:logs": "docker compose -f ../../docker-compose.travel-studio.yml logs -f"
   },
   "dependencies": {
+    "@directus/sdk": "^19.1.0",
+    "@supabase/supabase-js": "^2.49.0",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "lucide-react": "^0.468.0",
+    "mapbox-gl": "^3.9.0",
     "next": "^16.0.8",
     "react": "^19.2.1",
-    "react-dom": "^19.2.1"
+    "react-dom": "^19.2.1",
+    "react-map-gl": "^7.1.9"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",

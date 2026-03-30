@@ -1,4 +1,5 @@
 import type { ComponentConfig } from "@/core";
+import { color } from "../../tokens";
 
 export type DividerProps = {
   label: string;
@@ -24,7 +25,7 @@ export const Divider: ComponentConfig<DividerProps> = {
             <span
               style={{
                 fontSize: 12,
-                color: "#9ca3af",
+                color: color.text.faint,
                 textTransform: "uppercase",
                 letterSpacing: "0.05em",
               }}
@@ -36,7 +37,7 @@ export const Divider: ComponentConfig<DividerProps> = {
         <hr
           style={{
             border: "none",
-            borderTop: "1px solid #e5e7eb",
+            borderTop: `1px solid ${color.border.default}`,
             margin: 0,
           }}
         />

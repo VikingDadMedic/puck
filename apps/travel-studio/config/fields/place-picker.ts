@@ -7,6 +7,7 @@ type PlaceSearchRow = {
   rating?: number;
   type?: string;
   imageUrl?: string;
+  gps?: { lat: number; lng: number } | null;
 };
 
 export const placePickerField: ExternalField<Record<string, unknown> | null> = {
@@ -38,6 +39,7 @@ export const placePickerField: ExternalField<Record<string, unknown> | null> = {
       name: row?.name,
       location: row?.address,
       imageUrl: row?.imageUrl,
+      coordinates: row?.gps ?? null,
     };
   },
   getItemSummary: (item) => {

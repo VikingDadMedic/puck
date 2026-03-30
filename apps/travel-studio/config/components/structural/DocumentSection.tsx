@@ -1,4 +1,5 @@
 import type { ComponentConfig, Slot } from "@/core";
+import { color } from "../../tokens";
 
 export type DocumentSectionProps = {
   title: string;
@@ -22,7 +23,7 @@ export const DocumentSection: ComponentConfig<DocumentSectionProps> = {
       <div
         style={{
           padding: isProposal ? "32px 0" : "24px 0",
-          borderBottom: "1px solid #e5e7eb",
+          borderBottom: `1px solid ${color.border.default}`,
         }}
       >
         {title && (
@@ -31,13 +32,15 @@ export const DocumentSection: ComponentConfig<DocumentSectionProps> = {
               margin: isProposal ? "0 0 20px" : "0 0 16px",
               fontSize: isProposal ? 26 : 22,
               fontWeight: 600,
-              color: "#1f2937",
+              color: color.text.primary,
             }}
           >
             {title}
           </h2>
         )}
-        <Content />
+        <Content
+          style={{ display: "flex", flexDirection: "column", gap: 16 }}
+        />
       </div>
     );
   },

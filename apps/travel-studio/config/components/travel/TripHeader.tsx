@@ -1,5 +1,6 @@
 import type { ComponentConfig } from "@/core";
 import { imagePickerField } from "../../fields/image-picker";
+import { color, radius } from "../../tokens";
 
 export type TripHeaderProps = {
   destination: string;
@@ -31,7 +32,7 @@ export const TripHeader: ComponentConfig<TripHeaderProps> = {
           position: "relative",
           width: "100%",
           height: isProposal ? 340 : 280,
-          borderRadius: 12,
+          borderRadius: radius.xl,
           overflow: "hidden",
           background: hasImage
             ? `url(${heroImage}) center/cover no-repeat`
@@ -66,7 +67,7 @@ export const TripHeader: ComponentConfig<TripHeaderProps> = {
               margin: 0,
               fontSize: isProposal ? 44 : 36,
               fontWeight: 800,
-              color: "#ffffff",
+              color: color.text.inverse,
               letterSpacing: "-0.02em",
               lineHeight: 1.1,
             }}
@@ -96,11 +97,11 @@ export const TripHeader: ComponentConfig<TripHeaderProps> = {
               style={{
                 fontSize: 13,
                 fontWeight: 600,
-                color: "#ffffff",
+                color: color.text.inverse,
                 background: "rgba(255,255,255,0.2)",
                 backdropFilter: "blur(4px)",
                 padding: "4px 12px",
-                borderRadius: 20,
+                borderRadius: radius.pill,
               }}
             >
               {travelerCount} {travelerCount === 1 ? "traveler" : "travelers"}

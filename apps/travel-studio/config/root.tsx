@@ -1,6 +1,10 @@
 import type { DefaultRootProps, RootConfig } from "@/core";
+import { color } from "./tokens";
+
+export type DocumentType = "template" | "itinerary";
 
 export type RootProps = DefaultRootProps & {
+  documentType: DocumentType;
   documentMode: "itinerary" | "proposal" | "client_view";
   brandTheme: "default" | "luxury" | "adventure";
 };
@@ -8,11 +12,20 @@ export type RootProps = DefaultRootProps & {
 const Root: RootConfig<{ props: RootProps }> = {
   defaultProps: {
     title: "Untitled Trip",
+    documentType: "template",
     documentMode: "itinerary",
     brandTheme: "default",
   },
   fields: {
     title: { type: "text", label: "Document Title" },
+    documentType: {
+      type: "select",
+      label: "Document Type",
+      options: [
+        { value: "template", label: "Template" },
+        { value: "itinerary", label: "Itinerary" },
+      ],
+    },
     documentMode: {
       type: "select",
       label: "Document Mode",
@@ -35,9 +48,9 @@ const Root: RootConfig<{ props: RootProps }> = {
   render: ({ title, brandTheme, puck, children }) => {
     const { isEditing } = puck;
     const themeColors: Record<string, { accent: string; bg: string }> = {
-      default: { accent: "#2563eb", bg: "#f8fafc" },
-      luxury: { accent: "#854d0e", bg: "#fefce8" },
-      adventure: { accent: "#166534", bg: "#f0fdf4" },
+      default: { accent: color.accent.blue, bg: color.bg.page },
+      luxury: { accent: color.accent.amberBrown, bg: color.bg.amberPale },
+      adventure: { accent: color.accent.greenLeaf, bg: color.bg.greenLight },
     };
 
     const theme = themeColors[brandTheme] || themeColors.default;

@@ -20,6 +20,7 @@ export const SidebarLayout: ComponentConfig<SidebarLayoutProps> = {
 
     return (
       <div
+        className="ts-sidebar-layout"
         style={{
           display: "flex",
           gap: isProposal ? 32 : 24,
@@ -27,10 +28,12 @@ export const SidebarLayout: ComponentConfig<SidebarLayoutProps> = {
         }}
       >
         <div style={{ flex: "1 1 0%", minWidth: 0 }}>
-          <Main />
+          <Main style={{ display: "flex", flexDirection: "column", gap: 16 }} />
         </div>
         <div style={{ flex: "0 0 30%", minWidth: 280 }}>
-          <Sidebar />
+          <Sidebar
+            style={{ display: "flex", flexDirection: "column", gap: 16 }}
+          />
         </div>
       </div>
     );

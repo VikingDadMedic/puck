@@ -1,4 +1,5 @@
 import type { ComponentConfig, Slot } from "@/core";
+import { color } from "../../tokens";
 
 export type DaySectionProps = {
   date: string;
@@ -39,9 +40,9 @@ export const DaySection: ComponentConfig<DaySectionProps> = {
     const showDate = date && !(isClientView && looksInternal);
 
     const timeSlots = [
-      { name: "Morning", Component: Morning, color: "#3b82f6" },
-      { name: "Afternoon", Component: Afternoon, color: "#f59e0b" },
-      { name: "Evening", Component: Evening, color: "#8b5cf6" },
+      { name: "Morning", Component: Morning, slotColor: color.morning },
+      { name: "Afternoon", Component: Afternoon, slotColor: color.afternoon },
+      { name: "Evening", Component: Evening, slotColor: color.evening },
     ] as const;
 
     return (
@@ -49,14 +50,14 @@ export const DaySection: ComponentConfig<DaySectionProps> = {
         style={{
           background: "#f9fafb",
           borderRadius: 12,
-          border: "1px solid #e5e7eb",
+          border: `1px solid ${color.border.default}`,
           overflow: "hidden",
         }}
       >
         <div
           style={{
             padding: isProposal ? "20px 24px" : "16px 20px",
-            borderBottom: "1px solid #e5e7eb",
+            borderBottom: `1px solid ${color.border.default}`,
             display: "flex",
             alignItems: "baseline",
             gap: 12,
@@ -66,17 +67,20 @@ export const DaySection: ComponentConfig<DaySectionProps> = {
             style={{
               fontSize: isProposal ? 22 : 18,
               fontWeight: 700,
-              color: "#111827",
+              color: color.text.primary,
             }}
           >
             {label}
           </span>
           {showDate && (
-            <span style={{ fontSize: 14, color: "#6b7280" }}>{date}</span>
+            <span style={{ fontSize: 14, color: color.text.muted }}>
+              {date}
+            </span>
           )}
         </div>
 
         <div
+          className="ts-day-slots"
           style={{
             padding: isProposal ? 24 : 20,
             display: "flex",
@@ -84,11 +88,11 @@ export const DaySection: ComponentConfig<DaySectionProps> = {
             gap: isProposal ? 20 : 16,
           }}
         >
-          {timeSlots.map(({ name, Component, color }) => (
+          {timeSlots.map(({ name, Component, slotColor }) => (
             <div
               key={name}
               style={{
-                borderLeft: `3px solid ${color}`,
+                borderLeft: `3px solid ${slotColor}`,
                 paddingLeft: 16,
               }}
             >
@@ -96,7 +100,7 @@ export const DaySection: ComponentConfig<DaySectionProps> = {
                 style={{
                   fontSize: 13,
                   fontWeight: 600,
-                  color: "#6b7280",
+                  color: color.text.muted,
                   textTransform: "uppercase",
                   letterSpacing: "0.05em",
                   marginBottom: 8,
@@ -104,7 +108,9 @@ export const DaySection: ComponentConfig<DaySectionProps> = {
               >
                 {name}
               </div>
-              <Component />
+              <Component
+                style={{ display: "flex", flexDirection: "column", gap: 12 }}
+              />
             </div>
           ))}
         </div>

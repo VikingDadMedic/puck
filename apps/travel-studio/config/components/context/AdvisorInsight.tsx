@@ -1,5 +1,6 @@
 import type { ComponentConfig } from "@/core";
-import { richTextToSafeHtml } from "../../../lib/render/richtext";
+
+import { color } from "../../tokens";
 
 export type AdvisorInsightProps = {
   content: string;
@@ -31,9 +32,11 @@ export const AdvisorInsight: ComponentConfig<AdvisorInsightProps> = {
     }
 
     const isAdvisorOnly = visibility === "advisor_only";
-    const bg = isAdvisorOnly ? "#fef3c7" : "#eff6ff";
+    const bg = isAdvisorOnly ? color.bg.amberLight : color.bg.blueLight;
     const border = isAdvisorOnly ? "#fcd34d" : "#bfdbfe";
-    const labelColor = isAdvisorOnly ? "#92400e" : "#1e40af";
+    const labelColor = isAdvisorOnly
+      ? color.accent.amberDeep
+      : color.accent.blueDeep;
 
     return (
       <div
@@ -61,11 +64,10 @@ export const AdvisorInsight: ComponentConfig<AdvisorInsightProps> = {
           Advisor Insight
         </div>
         <div
-          style={{ fontSize: 14, color: "#374151", lineHeight: 1.6 }}
-          dangerouslySetInnerHTML={{
-            __html: richTextToSafeHtml(content || ""),
-          }}
-        />
+          style={{ fontSize: 14, color: color.text.secondary, lineHeight: 1.6 }}
+        >
+          {content}
+        </div>
       </div>
     );
   },

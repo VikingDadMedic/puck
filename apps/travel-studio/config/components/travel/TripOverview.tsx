@@ -1,5 +1,5 @@
 import type { ComponentConfig } from "@/core";
-import { richTextToSafeHtml } from "../../../lib/render/richtext";
+import { color, radius, shadow } from "../../tokens";
 
 export type TripOverviewProps = {
   summary: string;
@@ -29,14 +29,14 @@ export const TripOverview: ComponentConfig<TripOverviewProps> = {
     return (
       <div
         style={{
-          background: "#ffffff",
-          borderRadius: 12,
-          border: "1px solid #e5e7eb",
+          background: color.bg.card,
+          borderRadius: radius.xl,
+          border: `1px solid ${color.border.default}`,
           padding: isProposal ? 32 : 24,
           display: "flex",
           flexDirection: "column",
           gap: isProposal ? 20 : 16,
-          ...(isProposal && { boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }),
+          ...(isProposal && { boxShadow: shadow.md }),
         }}
       >
         <div
@@ -51,7 +51,7 @@ export const TripOverview: ComponentConfig<TripOverviewProps> = {
               margin: 0,
               fontSize: isProposal ? 22 : 18,
               fontWeight: 700,
-              color: "#111827",
+              color: color.text.primary,
             }}
           >
             Trip Overview
@@ -61,10 +61,10 @@ export const TripOverview: ComponentConfig<TripOverviewProps> = {
               style={{
                 fontSize: 13,
                 fontWeight: 600,
-                color: "#1e40af",
-                background: "#eff6ff",
+                color: color.accent.blueDeep,
+                background: color.bg.blueLight,
                 padding: "4px 12px",
-                borderRadius: 20,
+                borderRadius: radius.pill,
               }}
             >
               {duration}
@@ -78,10 +78,11 @@ export const TripOverview: ComponentConfig<TripOverviewProps> = {
               margin: 0,
               fontSize: isProposal ? 17 : 15,
               lineHeight: isProposal ? 1.7 : 1.6,
-              color: "#374151",
+              color: color.text.secondary,
             }}
-            dangerouslySetInnerHTML={{ __html: richTextToSafeHtml(summary) }}
-          />
+          >
+            {summary}
+          </div>
         )}
 
         {highlights.length > 0 && (
@@ -103,13 +104,13 @@ export const TripOverview: ComponentConfig<TripOverviewProps> = {
                   alignItems: "flex-start",
                   gap: 10,
                   fontSize: 14,
-                  color: "#374151",
+                  color: color.text.secondary,
                   lineHeight: 1.5,
                 }}
               >
                 <span
                   style={{
-                    color: "#10b981",
+                    color: color.accent.greenBright,
                     fontWeight: 700,
                     flexShrink: 0,
                     marginTop: 1,

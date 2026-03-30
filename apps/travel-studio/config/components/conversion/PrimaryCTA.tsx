@@ -1,5 +1,6 @@
 import type { ComponentConfig } from "@/core";
 import { sanitizeUrl } from "../../../lib/api/sanitize";
+import { color } from "../../tokens";
 
 export type PrimaryCTAProps = {
   text: string;
@@ -9,19 +10,19 @@ export type PrimaryCTAProps = {
 
 const variantStyles: Record<PrimaryCTAProps["variant"], React.CSSProperties> = {
   primary: {
-    background: "#2563eb",
-    color: "#ffffff",
-    border: "2px solid #2563eb",
+    background: color.accent.blue,
+    color: color.text.inverse,
+    border: `2px solid ${color.accent.blue}`,
   },
   secondary: {
     background: "#16a34a",
-    color: "#ffffff",
+    color: color.text.inverse,
     border: "2px solid #16a34a",
   },
   outline: {
     background: "transparent",
-    color: "#2563eb",
-    border: "2px solid #2563eb",
+    color: color.accent.blue,
+    border: `2px solid ${color.accent.blue}`,
   },
 };
 
