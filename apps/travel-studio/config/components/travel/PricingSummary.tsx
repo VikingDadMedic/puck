@@ -1,6 +1,6 @@
 import type { ComponentConfig } from "@/core";
 
-import { color, radius } from "../../tokens";
+import { color, fontSize, radius, shadow } from "../../tokens";
 
 export type PricingSummaryProps = {
   currency: string;
@@ -60,9 +60,7 @@ export const PricingSummary: ComponentConfig<PricingSummaryProps> = {
           borderRadius: radius.xl,
           overflow: "hidden",
           border: `1px solid ${color.border.default}`,
-          boxShadow: isProposal
-            ? "0 4px 12px rgba(0,0,0,0.08)"
-            : "0 1px 3px rgba(0,0,0,0.06)",
+          boxShadow: isProposal ? shadow.md : shadow.sm,
         }}
       >
         <div
@@ -109,7 +107,9 @@ export const PricingSummary: ComponentConfig<PricingSummaryProps> = {
                 {lineItems.map((item, i) => (
                   <tr
                     key={i}
-                    style={{ borderBottom: `1px solid ${color.bg.muted}` }}
+                    style={{
+                      borderBottom: `1px solid ${color.border.default}`,
+                    }}
                   >
                     <td
                       style={{
@@ -149,7 +149,7 @@ export const PricingSummary: ComponentConfig<PricingSummaryProps> = {
             >
               <span
                 style={{
-                  fontSize: isProposal ? 17 : 15,
+                  fontSize: isProposal ? fontSize["2xl"] : fontSize.lg,
                   fontWeight: 700,
                   color: color.text.primary,
                 }}
@@ -158,7 +158,7 @@ export const PricingSummary: ComponentConfig<PricingSummaryProps> = {
               </span>
               <span
                 style={{
-                  fontSize: isProposal ? 22 : 17,
+                  fontSize: isProposal ? fontSize["3xl"] : fontSize["2xl"],
                   fontWeight: 800,
                   color: color.accent.blueDeep,
                 }}

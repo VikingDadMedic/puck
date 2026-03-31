@@ -21,6 +21,7 @@ import {
   type ReactNode,
 } from "react";
 import { travelStudioApiHeaders } from "../../config/travel-studio-fetch";
+import { color, radius, shadow } from "../../config/tokens";
 
 const usePuck = createUsePuck();
 
@@ -68,9 +69,9 @@ function ToastContainer({
     ToastMessage["variant"],
     { bg: string; border: string }
   > = {
-    success: { bg: "#f0fdf4", border: "#86efac" },
-    error: { bg: "#fef2f2", border: "#fca5a5" },
-    warning: { bg: "#fffbeb", border: "#fcd34d" },
+    success: { bg: color.bg.greenLight, border: color.border.green },
+    error: { bg: color.bg.redLight, border: color.border.red },
+    warning: { bg: color.bg.amberWarm, border: color.border.amber },
   };
 
   return (
@@ -97,12 +98,12 @@ function ToastContainer({
               padding: "10px 14px",
               background: c.bg,
               border: `1px solid ${c.border}`,
-              borderRadius: 8,
+              borderRadius: radius.md,
               fontSize: 13,
               display: "flex",
               alignItems: "center",
               gap: 8,
-              boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+              boxShadow: shadow.md,
             }}
           >
             <span style={{ flex: 1 }}>{t.text}</span>
@@ -174,12 +175,12 @@ function ConflictModal({
     >
       <div
         style={{
-          background: "#fff",
-          borderRadius: 12,
+          background: color.bg.card,
+          borderRadius: radius.xl,
           padding: 24,
           maxWidth: 420,
           width: "100%",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+          boxShadow: shadow.lg,
         }}
       >
         <div
@@ -190,7 +191,7 @@ function ConflictModal({
             marginBottom: 12,
           }}
         >
-          <AlertTriangle size={20} style={{ color: "#d97706" }} />
+          <AlertTriangle size={20} style={{ color: color.accent.amberDark }} />
           <h3
             id="conflict-modal-title"
             style={{ margin: 0, fontSize: 16, fontWeight: 600 }}
@@ -200,7 +201,11 @@ function ConflictModal({
         </div>
         <p
           id="conflict-modal-desc"
-          style={{ margin: "0 0 20px", fontSize: 14, color: "#4b5563" }}
+          style={{
+            margin: "0 0 20px",
+            fontSize: 14,
+            color: color.text.tertiary,
+          }}
         >
           This document was modified elsewhere since you last loaded it. You can
           reload the latest version (your unsaved changes will be lost) or force
@@ -213,9 +218,9 @@ function ConflictModal({
             onClick={onDismiss}
             style={{
               padding: "8px 16px",
-              border: "1px solid #d1d5db",
-              borderRadius: 6,
-              background: "#fff",
+              border: `1px solid ${color.border.muted}`,
+              borderRadius: radius.sm,
+              background: color.bg.card,
               cursor: "pointer",
               fontSize: 13,
             }}
@@ -227,10 +232,10 @@ function ConflictModal({
             onClick={onReload}
             style={{
               padding: "8px 16px",
-              border: "1px solid #2563eb",
-              borderRadius: 6,
-              background: "#eff6ff",
-              color: "#1d4ed8",
+              border: `1px solid ${color.accent.blue}`,
+              borderRadius: radius.sm,
+              background: color.bg.blueLight,
+              color: color.accent.blueDark,
               cursor: "pointer",
               fontSize: 13,
             }}
@@ -243,9 +248,9 @@ function ConflictModal({
             style={{
               padding: "8px 16px",
               border: "none",
-              borderRadius: 6,
-              background: "#dc2626",
-              color: "#fff",
+              borderRadius: radius.sm,
+              background: color.accent.red,
+              color: color.text.inverse,
               cursor: "pointer",
               fontSize: 13,
             }}
@@ -269,27 +274,27 @@ function SaveStatusBadge({ status }: { status: SaveStatus }) {
       icon: (
         <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} />
       ),
-      color: "#6b7280",
+      color: color.text.muted,
     },
     saved: {
       label: "Saved",
       icon: <Check size={12} />,
-      color: "#059669",
+      color: color.accent.green,
     },
     dirty: {
       label: "Unsaved changes",
       icon: <AlertTriangle size={12} />,
-      color: "#d97706",
+      color: color.accent.amberDark,
     },
     error: {
       label: "Save failed",
       icon: <AlertTriangle size={12} />,
-      color: "#dc2626",
+      color: color.accent.red,
     },
     conflict: {
       label: "Conflict",
       icon: <AlertTriangle size={12} />,
-      color: "#dc2626",
+      color: color.accent.red,
     },
   };
 
@@ -562,8 +567,8 @@ function HeaderActions({
           justifyContent: "center",
           width: 30,
           height: 30,
-          borderRadius: 6,
-          color: "#6b7280",
+          borderRadius: radius.sm,
+          color: color.text.muted,
           textDecoration: "none",
         }}
       >
@@ -579,9 +584,9 @@ function HeaderActions({
           alignItems: "center",
           gap: 4,
           padding: "6px 12px",
-          background: "#f1f5f9",
-          border: "1px solid #cbd5e1",
-          borderRadius: 6,
+          background: color.bg.subtle,
+          border: `1px solid ${color.border.strong}`,
+          borderRadius: radius.sm,
           cursor: saveStatus === "saving" ? "default" : "pointer",
           fontSize: 13,
           opacity: saveStatus === "saving" ? 0.6 : 1,
@@ -599,9 +604,9 @@ function HeaderActions({
           alignItems: "center",
           gap: 4,
           padding: "6px 12px",
-          background: "#f1f5f9",
-          border: "1px solid #cbd5e1",
-          borderRadius: 6,
+          background: color.bg.subtle,
+          border: `1px solid ${color.border.strong}`,
+          borderRadius: radius.sm,
           cursor: "pointer",
           fontSize: 13,
           textDecoration: "none",
@@ -737,9 +742,9 @@ export function Client({
                       fontSize: 11,
                       fontWeight: 600,
                       padding: "3px 8px",
-                      borderRadius: 4,
-                      background: "#dbeafe",
-                      color: "#1d4ed8",
+                      borderRadius: radius.xs,
+                      background: color.bg.blueSubtle,
+                      color: color.accent.blueDark,
                       letterSpacing: "0.03em",
                       textTransform: "uppercase",
                     }}
@@ -753,9 +758,9 @@ export function Client({
                       fontSize: 11,
                       fontWeight: 600,
                       padding: "3px 8px",
-                      borderRadius: 4,
-                      background: "#fef3c7",
-                      color: "#92400e",
+                      borderRadius: radius.xs,
+                      background: color.bg.amberLight,
+                      color: color.accent.amberDeep,
                       letterSpacing: "0.03em",
                       textTransform: "uppercase",
                     }}

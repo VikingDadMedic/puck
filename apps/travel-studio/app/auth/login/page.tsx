@@ -6,6 +6,7 @@ import {
   getSupabaseClient,
   isSupabaseConfigured,
 } from "../../../lib/supabase/client";
+import { color, fontFamily, radius, shadow } from "../../../config/tokens";
 
 export const dynamic = "force-dynamic";
 
@@ -22,15 +23,15 @@ export default function LoginPage() {
         style={{
           padding: 40,
           textAlign: "center",
-          fontFamily: "var(--ts-font-family)",
+          fontFamily,
         }}
       >
         <h2>Authentication Not Configured</h2>
-        <p style={{ color: "var(--ts-text-muted)" }}>
+        <p style={{ color: color.text.muted }}>
           Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to
           enable login.
         </p>
-        <a href="/" style={{ color: "var(--ts-accent-blue)" }}>
+        <a href="/" style={{ color: color.accent.blue }}>
           Back to Dashboard
         </a>
       </div>
@@ -122,8 +123,8 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: "center",
     justifyContent: "center",
     padding: "1rem",
-    background: "var(--ts-bg-page)",
-    fontFamily: "var(--ts-font-family)",
+    background: color.bg.page,
+    fontFamily,
   },
   card: {
     width: "100%",
@@ -132,10 +133,10 @@ const styles: Record<string, React.CSSProperties> = {
     flexDirection: "column",
     gap: "1.25rem",
     padding: "2rem",
-    background: "var(--ts-bg-card)",
-    border: "1px solid var(--ts-border-default)",
-    borderRadius: "var(--ts-radius-xl)",
-    boxShadow: "var(--ts-shadow-lg)",
+    background: color.bg.card,
+    border: `1px solid ${color.border.default}`,
+    borderRadius: radius.xl,
+    boxShadow: shadow.lg,
   },
   header: {
     textAlign: "center" as const,
@@ -145,12 +146,12 @@ const styles: Record<string, React.CSSProperties> = {
     margin: 0,
     fontSize: "1.5rem",
     fontWeight: 700,
-    color: "var(--ts-text-primary)",
+    color: color.text.primary,
   },
   subtitle: {
     margin: "0.25rem 0 0",
     fontSize: "0.875rem",
-    color: "var(--ts-text-muted)",
+    color: color.text.muted,
   },
   errorBanner: {
     display: "flex",
@@ -158,9 +159,9 @@ const styles: Record<string, React.CSSProperties> = {
     gap: "0.5rem",
     padding: "0.75rem 1rem",
     fontSize: "0.875rem",
-    color: "var(--ts-accent-red)",
-    background: "var(--ts-bg-red-light)",
-    borderRadius: "var(--ts-radius-md)",
+    color: color.accent.red,
+    background: color.bg.redLight,
+    borderRadius: radius.md,
   },
   errorIcon: {
     display: "inline-flex",
@@ -171,8 +172,8 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: "0.75rem",
     fontWeight: 700,
     borderRadius: "50%",
-    background: "var(--ts-accent-red)",
-    color: "#fff",
+    background: color.accent.red,
+    color: color.text.inverse,
     flexShrink: 0,
   },
   label: {
@@ -181,15 +182,15 @@ const styles: Record<string, React.CSSProperties> = {
     gap: "0.375rem",
     fontSize: "0.875rem",
     fontWeight: 500,
-    color: "var(--ts-text-secondary)",
+    color: color.text.secondary,
   },
   input: {
     padding: "0.625rem 0.75rem",
     fontSize: "0.875rem",
-    border: "1px solid var(--ts-border-default)",
-    borderRadius: "var(--ts-radius-md)",
-    background: "var(--ts-bg-card)",
-    color: "var(--ts-text-primary)",
+    border: `1px solid ${color.border.default}`,
+    borderRadius: radius.md,
+    background: color.bg.card,
+    color: color.text.primary,
     outline: "none",
     transition: "border-color 0.15s",
   },
@@ -197,10 +198,10 @@ const styles: Record<string, React.CSSProperties> = {
     padding: "0.75rem",
     fontSize: "0.875rem",
     fontWeight: 600,
-    color: "var(--ts-text-inverse)",
-    background: "var(--ts-accent-blue)",
+    color: color.text.inverse,
+    background: color.accent.blue,
     border: "none",
-    borderRadius: "var(--ts-radius-md)",
+    borderRadius: radius.md,
     cursor: "pointer",
     transition: "background 0.15s",
     marginTop: "0.25rem",

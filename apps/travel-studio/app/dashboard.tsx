@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import type { DashboardDocument } from "./page";
 import { travelStudioApiHeaders } from "../config/travel-studio-fetch";
+import { color, fontFamily, radius } from "../config/tokens";
 
 const slugify = (value: string) =>
   value
@@ -44,9 +45,9 @@ function CreateDocumentForm({
   return (
     <div
       style={{
-        background: "var(--ts-bg-card)",
-        border: "1px solid var(--ts-border-default)",
-        borderRadius: 12,
+        background: color.bg.card,
+        border: `1px solid ${color.border.default}`,
+        borderRadius: radius.xl,
         padding: 24,
         maxWidth: 480,
       }}
@@ -55,7 +56,9 @@ function CreateDocumentForm({
         New Template
       </h3>
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <label style={{ fontSize: 13, fontWeight: 500, color: "#374151" }}>
+        <label
+          style={{ fontSize: 13, fontWeight: 500, color: color.text.secondary }}
+        >
           Path slug
           <input
             type="text"
@@ -67,24 +70,28 @@ function CreateDocumentForm({
               width: "100%",
               marginTop: 4,
               padding: "8px 12px",
-              border: `1px solid ${isDuplicate ? "#fca5a5" : "#d1d5db"}`,
-              borderRadius: 6,
+              border: `1px solid ${
+                isDuplicate ? color.border.red : color.border.muted
+              }`,
+              borderRadius: radius.sm,
               fontSize: 14,
               boxSizing: "border-box",
             }}
           />
           {isDuplicate ? (
-            <span style={{ fontSize: 12, color: "#dc2626" }}>
+            <span style={{ fontSize: 12, color: color.accent.red }}>
               A document already exists at {normalizedPath} -- it will be opened
               for editing.
             </span>
           ) : (
-            <span style={{ fontSize: 12, color: "#9ca3af" }}>
+            <span style={{ fontSize: 12, color: color.text.faint }}>
               Will create: {normalizedPath}
             </span>
           )}
         </label>
-        <label style={{ fontSize: 13, fontWeight: 500, color: "#374151" }}>
+        <label
+          style={{ fontSize: 13, fontWeight: 500, color: color.text.secondary }}
+        >
           Title
           <input
             type="text"
@@ -96,14 +103,16 @@ function CreateDocumentForm({
               width: "100%",
               marginTop: 4,
               padding: "8px 12px",
-              border: "1px solid #d1d5db",
-              borderRadius: 6,
+              border: `1px solid ${color.border.muted}`,
+              borderRadius: radius.sm,
               fontSize: 14,
               boxSizing: "border-box",
             }}
           />
         </label>
-        <label style={{ fontSize: 13, fontWeight: 500, color: "#374151" }}>
+        <label
+          style={{ fontSize: 13, fontWeight: 500, color: color.text.secondary }}
+        >
           Document mode
           <select
             value={mode}
@@ -113,8 +122,8 @@ function CreateDocumentForm({
               width: "100%",
               marginTop: 4,
               padding: "8px 12px",
-              border: "1px solid #d1d5db",
-              borderRadius: 6,
+              border: `1px solid ${color.border.muted}`,
+              borderRadius: radius.sm,
               fontSize: 14,
               boxSizing: "border-box",
             }}
@@ -138,9 +147,9 @@ function CreateDocumentForm({
           onClick={onCancel}
           style={{
             padding: "8px 16px",
-            border: "1px solid #d1d5db",
-            borderRadius: 6,
-            background: "var(--ts-bg-card)",
+            border: `1px solid ${color.border.muted}`,
+            borderRadius: radius.sm,
+            background: color.bg.card,
             cursor: "pointer",
             fontSize: 13,
           }}
@@ -154,9 +163,9 @@ function CreateDocumentForm({
           style={{
             padding: "8px 16px",
             border: "none",
-            borderRadius: 6,
-            background: isDuplicate ? "#93c5fd" : "var(--ts-accent-blue)",
-            color: "#fff",
+            borderRadius: radius.sm,
+            background: isDuplicate ? color.bg.blueSubtle : color.accent.blue,
+            color: color.text.inverse,
             cursor: isDuplicate ? "not-allowed" : "pointer",
             fontSize: 13,
           }}
@@ -197,9 +206,9 @@ function UseTemplateForm({
       style={{
         marginTop: 12,
         padding: 14,
-        background: "#f8fafc",
-        border: "1px solid #e2e8f0",
-        borderRadius: 8,
+        background: color.bg.page,
+        border: `1px solid ${color.border.subtle}`,
+        borderRadius: radius.md,
       }}
     >
       <p
@@ -207,7 +216,7 @@ function UseTemplateForm({
           margin: "0 0 10px",
           fontSize: 12,
           fontWeight: 600,
-          color: "#475569",
+          color: color.text.tertiary,
         }}
       >
         Create itinerary from this template
@@ -216,7 +225,7 @@ function UseTemplateForm({
         style={{
           fontSize: 12,
           fontWeight: 500,
-          color: "#374151",
+          color: color.text.secondary,
           display: "block",
         }}
       >
@@ -231,8 +240,10 @@ function UseTemplateForm({
             width: "100%",
             marginTop: 4,
             padding: "6px 10px",
-            border: `1px solid ${isDuplicate ? "#fca5a5" : "#d1d5db"}`,
-            borderRadius: 5,
+            border: `1px solid ${
+              isDuplicate ? color.border.red : color.border.muted
+            }`,
+            borderRadius: radius.sm,
             fontSize: 13,
             boxSizing: "border-box",
           }}
@@ -244,7 +255,7 @@ function UseTemplateForm({
             display: "block",
             fontSize: 11,
             marginTop: 4,
-            color: isDuplicate ? "#dc2626" : "#9ca3af",
+            color: isDuplicate ? color.accent.red : color.text.faint,
           }}
         >
           {isDuplicate
@@ -258,9 +269,9 @@ function UseTemplateForm({
           onClick={onCancel}
           style={{
             padding: "5px 12px",
-            border: "1px solid #d1d5db",
-            borderRadius: 5,
-            background: "#fff",
+            border: `1px solid ${color.border.muted}`,
+            borderRadius: radius.sm,
+            background: color.bg.card,
             cursor: "pointer",
             fontSize: 12,
           }}
@@ -274,9 +285,10 @@ function UseTemplateForm({
           style={{
             padding: "5px 12px",
             border: "none",
-            borderRadius: 5,
-            background: !name.trim() || isDuplicate ? "#93c5fd" : "#7c3aed",
-            color: "#fff",
+            borderRadius: radius.sm,
+            background:
+              !name.trim() || isDuplicate ? color.bg.blueSubtle : "#7c3aed",
+            color: color.text.inverse,
             cursor: !name.trim() || isDuplicate ? "not-allowed" : "pointer",
             fontSize: 12,
             fontWeight: 500,
@@ -312,7 +324,7 @@ function SectionHeader({
       <span
         style={{
           fontSize: 12,
-          color: "#9ca3af",
+          color: color.text.faint,
           fontWeight: 400,
         }}
       >
@@ -393,8 +405,7 @@ export function Dashboard({
         maxWidth: 960,
         margin: "0 auto",
         padding: "40px 24px",
-        fontFamily:
-          '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        fontFamily,
       }}
     >
       {/* Header */}
@@ -413,7 +424,7 @@ export function Dashboard({
           <p
             style={{
               margin: "4px 0 0",
-              color: "var(--ts-text-muted)",
+              color: color.text.muted,
               fontSize: 14,
             }}
           >
@@ -430,10 +441,10 @@ export function Dashboard({
             alignItems: "center",
             gap: 6,
             padding: "10px 18px",
-            background: "var(--ts-accent-blue)",
-            color: "#fff",
+            background: color.accent.blue,
+            color: color.text.inverse,
             border: "none",
-            borderRadius: 8,
+            borderRadius: radius.md,
             cursor: "pointer",
             fontSize: 14,
             fontWeight: 500,
@@ -460,11 +471,11 @@ export function Dashboard({
           style={{
             padding: "10px 14px",
             marginBottom: 16,
-            background: "#fef2f2",
-            border: "1px solid #fca5a5",
-            borderRadius: 8,
+            background: color.bg.redLight,
+            border: `1px solid ${color.border.red}`,
+            borderRadius: radius.md,
             fontSize: 13,
-            color: "#dc2626",
+            color: color.accent.red,
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -478,7 +489,7 @@ export function Dashboard({
               background: "none",
               border: "none",
               cursor: "pointer",
-              color: "#dc2626",
+              color: color.accent.red,
               fontSize: 13,
             }}
           >
@@ -490,22 +501,26 @@ export function Dashboard({
       {/* ── Templates Section ── */}
       <div
         style={{
-          background: "#f8fafc",
-          border: "1px solid #e2e8f0",
-          borderRadius: 12,
+          background: color.bg.page,
+          border: `1px solid ${color.border.subtle}`,
+          borderRadius: radius.xl,
           padding: "24px 24px 28px",
           marginBottom: 32,
         }}
       >
         <SectionHeader
-          icon={<Layout size={18} style={{ color: "#6366f1" }} />}
+          icon={<Layout size={18} style={{ color: color.accent.blue }} />}
           title="Templates"
           count={templates.length}
         />
 
         {templates.length === 0 ? (
           <div
-            style={{ textAlign: "center", padding: "40px 0", color: "#9ca3af" }}
+            style={{
+              textAlign: "center",
+              padding: "40px 0",
+              color: color.text.faint,
+            }}
           >
             <FileText size={36} style={{ marginBottom: 8, opacity: 0.4 }} />
             <p style={{ fontSize: 14, margin: 0 }}>
@@ -524,9 +539,9 @@ export function Dashboard({
               <div
                 key={doc.path}
                 style={{
-                  background: "var(--ts-bg-card)",
-                  border: "1px solid var(--ts-border-default)",
-                  borderRadius: 10,
+                  background: color.bg.card,
+                  border: `1px solid ${color.border.default}`,
+                  borderRadius: radius.lg,
                   padding: 20,
                   display: "flex",
                   flexDirection: "column",
@@ -539,7 +554,7 @@ export function Dashboard({
                       margin: 0,
                       fontSize: 15,
                       fontWeight: 600,
-                      color: "var(--ts-text-primary)",
+                      color: color.text.primary,
                     }}
                   >
                     {doc.name}
@@ -548,7 +563,7 @@ export function Dashboard({
                     style={{
                       margin: "2px 0 0",
                       fontSize: 12,
-                      color: "#9ca3af",
+                      color: color.text.faint,
                       fontFamily: "monospace",
                     }}
                   >
@@ -562,9 +577,9 @@ export function Dashboard({
                       style={{
                         fontSize: 11,
                         padding: "2px 8px",
-                        borderRadius: 10,
-                        background: "#eff6ff",
-                        color: "#1d4ed8",
+                        borderRadius: radius.pill,
+                        background: color.bg.blueLight,
+                        color: color.accent.blueDark,
                         fontWeight: 500,
                       }}
                     >
@@ -575,9 +590,15 @@ export function Dashboard({
                     style={{
                       fontSize: 11,
                       padding: "2px 8px",
-                      borderRadius: 10,
-                      background: doc.source === "seed" ? "#fef3c7" : "#f0fdf4",
-                      color: doc.source === "seed" ? "#92400e" : "#065f46",
+                      borderRadius: radius.pill,
+                      background:
+                        doc.source === "seed"
+                          ? color.bg.amberLight
+                          : color.bg.greenLight,
+                      color:
+                        doc.source === "seed"
+                          ? color.accent.amberDeep
+                          : color.accent.greenDark,
                       fontWeight: 500,
                     }}
                   >
@@ -600,9 +621,9 @@ export function Dashboard({
                       alignItems: "center",
                       gap: 4,
                       padding: "6px 12px",
-                      background: "var(--ts-accent-blue)",
-                      color: "#fff",
-                      borderRadius: 6,
+                      background: color.accent.blue,
+                      color: color.text.inverse,
+                      borderRadius: radius.sm,
                       fontSize: 12,
                       textDecoration: "none",
                       fontWeight: 500,
@@ -628,7 +649,7 @@ export function Dashboard({
                       border: `1px solid ${
                         useTemplatePath === doc.path ? "#a78bfa" : "#c4b5fd"
                       }`,
-                      borderRadius: 6,
+                      borderRadius: radius.sm,
                       fontSize: 12,
                       cursor: "pointer",
                       color: "#6d28d9",
@@ -647,9 +668,9 @@ export function Dashboard({
                       alignItems: "center",
                       gap: 4,
                       padding: "6px 12px",
-                      background: "#f1f5f9",
-                      border: "1px solid #cbd5e1",
-                      borderRadius: 6,
+                      background: color.bg.subtle,
+                      border: `1px solid ${color.border.strong}`,
+                      borderRadius: radius.sm,
                       fontSize: 12,
                       textDecoration: "none",
                       color: "inherit",
@@ -676,21 +697,27 @@ export function Dashboard({
       {/* ── Itineraries Section ── */}
       <div
         style={{
-          background: "#fefce8",
-          border: "1px solid #fde68a",
-          borderRadius: 12,
+          background: color.bg.amberPale,
+          border: `1px solid ${color.border.amber}`,
+          borderRadius: radius.xl,
           padding: "24px 24px 28px",
         }}
       >
         <SectionHeader
-          icon={<FileText size={18} style={{ color: "#d97706" }} />}
+          icon={
+            <FileText size={18} style={{ color: color.accent.amberDark }} />
+          }
           title="Itineraries"
           count={itineraries.length}
         />
 
         {itineraries.length === 0 ? (
           <div
-            style={{ textAlign: "center", padding: "40px 0", color: "#9ca3af" }}
+            style={{
+              textAlign: "center",
+              padding: "40px 0",
+              color: color.text.faint,
+            }}
           >
             <FileText size={36} style={{ marginBottom: 8, opacity: 0.4 }} />
             <p style={{ fontSize: 14, margin: 0 }}>
@@ -709,9 +736,9 @@ export function Dashboard({
               <div
                 key={doc.path}
                 style={{
-                  background: "var(--ts-bg-card)",
-                  border: "1px solid var(--ts-border-default)",
-                  borderRadius: 10,
+                  background: color.bg.card,
+                  border: `1px solid ${color.border.default}`,
+                  borderRadius: radius.lg,
                   padding: 20,
                   display: "flex",
                   flexDirection: "column",
@@ -724,7 +751,7 @@ export function Dashboard({
                       margin: 0,
                       fontSize: 15,
                       fontWeight: 600,
-                      color: "var(--ts-text-primary)",
+                      color: color.text.primary,
                     }}
                   >
                     {doc.name}
@@ -733,7 +760,7 @@ export function Dashboard({
                     style={{
                       margin: "2px 0 0",
                       fontSize: 12,
-                      color: "#9ca3af",
+                      color: color.text.faint,
                       fontFamily: "monospace",
                     }}
                   >
@@ -747,9 +774,9 @@ export function Dashboard({
                       style={{
                         fontSize: 11,
                         padding: "2px 8px",
-                        borderRadius: 10,
-                        background: "#eff6ff",
-                        color: "#1d4ed8",
+                        borderRadius: radius.pill,
+                        background: color.bg.blueLight,
+                        color: color.accent.blueDark,
                         fontWeight: 500,
                       }}
                     >
@@ -760,9 +787,9 @@ export function Dashboard({
                     style={{
                       fontSize: 11,
                       padding: "2px 8px",
-                      borderRadius: 10,
-                      background: "#fef3c7",
-                      color: "#92400e",
+                      borderRadius: radius.pill,
+                      background: color.bg.amberLight,
+                      color: color.accent.amberDeep,
                       fontWeight: 500,
                     }}
                   >
@@ -773,9 +800,9 @@ export function Dashboard({
                       style={{
                         fontSize: 11,
                         padding: "2px 8px",
-                        borderRadius: 10,
-                        background: "#f0fdf4",
-                        color: "#065f46",
+                        borderRadius: radius.pill,
+                        background: color.bg.greenLight,
+                        color: color.accent.greenDark,
                         fontWeight: 500,
                       }}
                     >
@@ -792,9 +819,9 @@ export function Dashboard({
                       alignItems: "center",
                       gap: 4,
                       padding: "6px 12px",
-                      background: "var(--ts-accent-blue)",
-                      color: "#fff",
-                      borderRadius: 6,
+                      background: color.accent.blue,
+                      color: color.text.inverse,
+                      borderRadius: radius.sm,
                       fontSize: 12,
                       textDecoration: "none",
                       fontWeight: 500,
@@ -812,9 +839,9 @@ export function Dashboard({
                       alignItems: "center",
                       gap: 4,
                       padding: "6px 12px",
-                      background: "#f1f5f9",
-                      border: "1px solid #cbd5e1",
-                      borderRadius: 6,
+                      background: color.bg.subtle,
+                      border: `1px solid ${color.border.strong}`,
+                      borderRadius: radius.sm,
                       fontSize: 12,
                       textDecoration: "none",
                       color: "inherit",
@@ -833,12 +860,12 @@ export function Dashboard({
                         alignItems: "center",
                         gap: 4,
                         padding: "6px 12px",
-                        background: "#fef2f2",
-                        border: "1px solid #fca5a5",
-                        borderRadius: 6,
+                        background: color.bg.redLight,
+                        border: `1px solid ${color.border.red}`,
+                        borderRadius: radius.sm,
                         fontSize: 12,
                         cursor: "pointer",
-                        color: "#dc2626",
+                        color: color.accent.red,
                         opacity: deleting === doc.path ? 0.5 : 1,
                       }}
                     >

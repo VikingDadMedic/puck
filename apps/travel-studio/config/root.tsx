@@ -1,5 +1,5 @@
 import type { DefaultRootProps, RootConfig } from "@/core";
-import { color } from "./tokens";
+import { color, fontFamily } from "./tokens";
 
 export type DocumentType = "template" | "itinerary";
 
@@ -60,8 +60,7 @@ const Root: RootConfig<{ props: RootProps }> = {
         style={{
           minHeight: "100vh",
           background: theme.bg,
-          fontFamily:
-            '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+          fontFamily,
         }}
       >
         {!isEditing && title && (

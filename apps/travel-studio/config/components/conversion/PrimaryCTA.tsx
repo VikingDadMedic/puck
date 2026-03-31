@@ -1,6 +1,6 @@
 import type { ComponentConfig } from "@/core";
 import { sanitizeUrl } from "../../../lib/api/sanitize";
-import { color } from "../../tokens";
+import { color, fontSize, radius } from "../../tokens";
 
 export type PrimaryCTAProps = {
   text: string;
@@ -15,9 +15,9 @@ const variantStyles: Record<PrimaryCTAProps["variant"], React.CSSProperties> = {
     border: `2px solid ${color.accent.blue}`,
   },
   secondary: {
-    background: "#16a34a",
+    background: color.accent.greenMedium,
     color: color.text.inverse,
-    border: "2px solid #16a34a",
+    border: `2px solid ${color.accent.greenMedium}`,
   },
   outline: {
     background: "transparent",
@@ -65,9 +65,9 @@ export const PrimaryCTA: ComponentConfig<PrimaryCTAProps> = {
           style={{
             display: "inline-block",
             padding: isProposal ? "16px 48px" : "12px 32px",
-            fontSize: isProposal ? 20 : 16,
+            fontSize: isProposal ? fontSize["2xl"] : fontSize.xl,
             fontWeight: 700,
-            borderRadius: 8,
+            borderRadius: radius.md,
             textDecoration: "none",
             cursor: "pointer",
             transition: "opacity 0.2s",

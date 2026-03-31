@@ -1,5 +1,5 @@
 import type { ComponentConfig, Slot } from "@/core";
-import { color } from "../../tokens";
+import { color, radius } from "../../tokens";
 
 export type DaySectionProps = {
   date: string;
@@ -48,8 +48,8 @@ export const DaySection: ComponentConfig<DaySectionProps> = {
     return (
       <div
         style={{
-          background: "#f9fafb",
-          borderRadius: 12,
+          background: color.bg.page,
+          borderRadius: radius.xl,
           border: `1px solid ${color.border.default}`,
           overflow: "hidden",
         }}

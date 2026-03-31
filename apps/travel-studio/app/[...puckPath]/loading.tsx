@@ -1,3 +1,5 @@
+import { color, fontFamily } from "../../config/tokens";
+
 export default function PuckPathLoading() {
   return (
     <div
@@ -6,11 +8,12 @@ export default function PuckPathLoading() {
         alignItems: "center",
         justifyContent: "center",
         minHeight: "60vh",
-        fontFamily:
-          '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        fontFamily,
       }}
     >
-      <p style={{ color: "#6b7280", fontSize: 14 }}>Loading document...</p>
+      <p style={{ color: color.text.muted, fontSize: 14 }}>
+        Loading document...
+      </p>
     </div>
   );
 }

@@ -1,81 +1,12 @@
 :root {
   --ts-text-primary: #111827;
-  --ts-text-secondary: #374151;
-  --ts-text-tertiary: #4b5563;
   --ts-text-muted: #6b7280;
-  --ts-text-faint: #9ca3af;
-  --ts-text-inverse: #ffffff;
-
   --ts-accent-blue: #2563eb;
-  --ts-accent-blue-dark: #1d4ed8;
-  --ts-accent-green: #059669;
-  --ts-accent-green-bright: #10b981;
-  --ts-accent-amber: #f59e0b;
-  --ts-accent-amber-dark: #d97706;
-  --ts-accent-red: #dc2626;
-
   --ts-bg-page: #f8fafc;
   --ts-bg-card: #ffffff;
-  --ts-bg-muted: #f3f4f6;
-  --ts-bg-subtle: #f1f5f9;
-  --ts-bg-blue-light: #eff6ff;
-  --ts-bg-green-light: #f0fdf4;
-  --ts-bg-amber-light: #fef3c7;
-  --ts-bg-red-light: #fef2f2;
-
   --ts-border-default: #e5e7eb;
-  --ts-border-subtle: #e2e8f0;
-  --ts-border-muted: #d1d5db;
-  --ts-border-strong: #cbd5e1;
-
-  --ts-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
-  --ts-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
-  --ts-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
-
   --ts-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     sans-serif;
-
-  --ts-radius-sm: 6px;
-  --ts-radius-md: 8px;
-  --ts-radius-lg: 10px;
-  --ts-radius-xl: 12px;
-
-  color-scheme: light dark;
-}
-
-[data-theme="dark"] {
-  --ts-text-primary: #f3f4f6;
-  --ts-text-secondary: #d1d5db;
-  --ts-text-tertiary: #9ca3af;
-  --ts-text-muted: #6b7280;
-  --ts-text-faint: #4b5563;
-  --ts-text-inverse: #111827;
-
-  --ts-accent-blue: #60a5fa;
-  --ts-accent-blue-dark: #3b82f6;
-  --ts-accent-green: #34d399;
-  --ts-accent-green-bright: #6ee7b7;
-  --ts-accent-amber: #fbbf24;
-  --ts-accent-amber-dark: #f59e0b;
-  --ts-accent-red: #f87171;
-
-  --ts-bg-page: #0f172a;
-  --ts-bg-card: #1e293b;
-  --ts-bg-muted: #1e293b;
-  --ts-bg-subtle: #334155;
-  --ts-bg-blue-light: #1e3a5f;
-  --ts-bg-green-light: #14332a;
-  --ts-bg-amber-light: #422006;
-  --ts-bg-red-light: #450a0a;
-
-  --ts-border-default: #334155;
-  --ts-border-subtle: #475569;
-  --ts-border-muted: #475569;
-  --ts-border-strong: #64748b;
-
-  --ts-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-  --ts-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.25);
-  --ts-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 body {
@@ -131,12 +62,6 @@ body {
 @media (max-width: 640px) {
   .ts-day-slots {
     flex-direction: column !important;
-  }
-}
-
-@media (max-width: 600px) {
-  .ts-dashboard-grid {
-    grid-template-columns: 1fr !important;
   }
 }
 

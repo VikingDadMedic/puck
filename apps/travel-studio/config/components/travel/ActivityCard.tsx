@@ -199,7 +199,7 @@ export const ActivityCard: ComponentConfig<ActivityCardProps> = {
                 margin: 0,
                 fontSize: 14,
                 lineHeight: 1.5,
-                color: color.text.tertiary,
+                color: color.text.muted,
               }}
             >
               {description}
@@ -211,7 +211,7 @@ export const ActivityCard: ComponentConfig<ActivityCardProps> = {
               style={{
                 marginTop: 4,
                 paddingTop: 8,
-                borderTop: `1px solid ${color.bg.muted}`,
+                borderTop: `1px solid ${color.border.default}`,
                 display: "flex",
                 gap: 16,
                 flexWrap: "wrap",

@@ -1,6 +1,6 @@
 import type { ComponentConfig, Fields } from "@/core";
 import { flightPickerField } from "../../fields/flight-picker";
-import { color, radius, shadow } from "../../tokens";
+import { color, fontSize, radius, shadow } from "../../tokens";
 
 export type SupplierRefField = {
   name?: string;
@@ -319,7 +319,7 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
           background: color.bg.card,
           borderRadius: radius.lg,
           overflow: "hidden",
-          border: `1px solid ${color.border.subtle}`,
+          border: `1px solid ${color.border.default}`,
           ...(isProposal ? { boxShadow: shadow.md } : {}),
         }}
       >
@@ -340,7 +340,7 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
         <div
           style={{
             flex: 1,
-            padding: isItinerary ? "10px 16px" : "14px 20px",
+            padding: "16px 20px",
             display: "flex",
             flexDirection: "column",
             gap: isItinerary ? 4 : 8,
@@ -358,9 +358,9 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <span
                 style={{
-                  fontSize: 11,
+                  fontSize: fontSize.xs,
                   fontWeight: 600,
-                  color: "#475569",
+                  color: color.text.tertiary,
                   textTransform: "uppercase",
                   letterSpacing: "0.05em",
                 }}
@@ -387,7 +387,7 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
                 style={{
                   fontSize: 13,
                   fontWeight: 600,
-                  color: "#1e293b",
+                  color: color.text.primary,
                 }}
               >
                 {carrierLabel}
@@ -400,13 +400,15 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
               display: "flex",
               alignItems: "center",
               gap: 12,
-              fontSize: isItinerary ? 14 : 15,
+              fontSize: isItinerary ? fontSize.md : fontSize.lg,
               fontWeight: 600,
-              color: "#1e293b",
+              color: color.text.primary,
             }}
           >
             <span>{departure || "—"}</span>
-            <span style={{ color: "#94a3b8", fontSize: 14 }}>→</span>
+            <span style={{ color: color.text.faint, fontSize: fontSize.md }}>
+              →
+            </span>
             <span>{arrival || "—"}</span>
           </div>
 
@@ -416,13 +418,15 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
                 display: "flex",
                 gap: 16,
                 fontSize: 13,
-                color: "#64748b",
+                color: color.text.muted,
               }}
             >
               {timing.date && <span>{timing.date}</span>}
               {timing.time && <span>{timing.time}</span>}
               {timing.duration && (
-                <span style={{ color: "#94a3b8" }}>({timing.duration})</span>
+                <span style={{ color: color.text.faint }}>
+                  ({timing.duration})
+                </span>
               )}
             </div>
           )}
@@ -432,7 +436,7 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
               style={{
                 fontSize: isProposal ? 16 : 14,
                 fontWeight: isProposal ? 700 : 600,
-                color: isProposal ? color.accent.green : "#1e293b",
+                color: isProposal ? color.accent.green : color.text.primary,
                 ...(isProposal
                   ? {
                       marginTop: 4,
@@ -471,7 +475,7 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
                 marginTop: 2,
                 fontSize: 13,
                 lineHeight: 1.5,
-                color: "#64748b",
+                color: color.text.muted,
               }}
             >
               {notes}

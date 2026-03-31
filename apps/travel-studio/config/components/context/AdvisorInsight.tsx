@@ -1,6 +1,6 @@
 import type { ComponentConfig } from "@/core";
 
-import { color } from "../../tokens";
+import { color, radius, spacing } from "../../tokens";
 
 export type AdvisorInsightProps = {
   content: string;
@@ -33,7 +33,7 @@ export const AdvisorInsight: ComponentConfig<AdvisorInsightProps> = {
 
     const isAdvisorOnly = visibility === "advisor_only";
     const bg = isAdvisorOnly ? color.bg.amberLight : color.bg.blueLight;
-    const border = isAdvisorOnly ? "#fcd34d" : "#bfdbfe";
+    const border = isAdvisorOnly ? color.border.amber : color.bg.blueSubtle;
     const labelColor = isAdvisorOnly
       ? color.accent.amberDeep
       : color.accent.blueDeep;
@@ -43,8 +43,8 @@ export const AdvisorInsight: ComponentConfig<AdvisorInsightProps> = {
         style={{
           background: bg,
           border: `1px solid ${border}`,
-          borderRadius: 8,
-          padding: 16,
+          borderRadius: radius.md,
+          padding: spacing.xl,
         }}
       >
         <div

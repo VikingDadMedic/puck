@@ -2,7 +2,7 @@ import type { ComponentConfig } from "@/core";
 import { hotelPickerField } from "../../fields/hotel-picker";
 import { placePickerField } from "../../fields/place-picker";
 import { imagePickerField } from "../../fields/image-picker";
-import { color, radius, shadow } from "../../tokens";
+import { color, fontSize, radius, shadow } from "../../tokens";
 
 export type StayCardProps = {
   hotel: Record<string, unknown> | null;
@@ -164,10 +164,10 @@ export const StayCard: ComponentConfig<StayCardProps> = {
         style={{
           display: "flex",
           background: color.bg.card,
-          borderRadius: radius.xl,
+          borderRadius: radius.lg,
           overflow: "hidden",
           boxShadow: shadow.sm,
-          border: `1px solid ${color.bg.muted}`,
+          border: `1px solid ${color.border.default}`,
         }}
       >
         {hasImage && (
@@ -185,7 +185,7 @@ export const StayCard: ComponentConfig<StayCardProps> = {
         <div
           style={{
             flex: 1,
-            padding: 20,
+            padding: "16px 20px",
             display: "flex",
             flexDirection: "column",
             gap: 8,
@@ -203,7 +203,7 @@ export const StayCard: ComponentConfig<StayCardProps> = {
               <h4
                 style={{
                   margin: 0,
-                  fontSize: 17,
+                  fontSize: fontSize.xl,
                   fontWeight: 700,
                   color: color.text.primary,
                 }}

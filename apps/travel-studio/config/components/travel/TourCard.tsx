@@ -1,6 +1,6 @@
 import type { ComponentConfig } from "@/core";
 import { imagePickerField } from "../../fields/image-picker";
-import { color, radius, shadow } from "../../tokens";
+import { color, radius } from "../../tokens";
 
 export type TourCardProps = {
   name: string;

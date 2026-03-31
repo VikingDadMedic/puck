@@ -500,7 +500,7 @@ system rather than a generic page builder.
 - **Layer 2 (Composition)**: Puck config in `config/index.ts` with 21 travel-specific components organized into 5 categories
 - **Layer 3 (Render)**: Mode-aware rendering via `metadata.target` (itinerary/proposal/client_view)
 - **Layer 4 (Shell)**: Custom `headerActions` override with save status indicator, autosave (4s debounce), conflict resolution modal, toast notifications, and `beforeunload` guard
-- **Layer 5 (Design System)**: Design tokens in `config/tokens.ts` with CSS custom properties and dark mode support
+- **Layer 5 (Design System)**: Design tokens in `config/tokens.ts` — pure JS constants (`color`, `radius`, `spacing`, `fontSize`, `shadow`, `fontFamily`) consumed as inline `style={{}}` props across all components. No CSS custom properties emitted from `tokens.ts`, no dark mode.
 - **Layer 6 (Template/Fill Mode)**: `documentType` discriminator (`"template"` vs `"itinerary"`) in root props; permissions-based structural lock in fill mode; `cloneAndReId` for template instantiation
 - **Layer 7 (Editor UX Polish)**: Dark editor chrome via `--puck-color-grey-*` overrides in `styles.css`; canvas dot grid background; Cmd+S manual save shortcut; Escape-to-deselect; drawer search filter via Puck `drawer` override; `DrawerSearchWrapper` + `FilteredDrawer` using `Drawer.Item` for draggable results
 
@@ -628,6 +628,7 @@ types but are not yet fully aligned (see `domain/MAPPING.md` for the gap analysi
 - Wants comprehensive `.cursor/` configuration (rules, skills, hooks, commands) for AI agent productivity
 - Imports external domain analysis (e.g., ChatGPT schema discussions) into Cursor as structured input for architecture and modeling work
 - Follows structured phase workflow with intermediate stabilization sub-phases (e.g., 5.5, 5.5b) and post-implementation audits before advancing
+- Prefers full build verification (`yarn turbo run build`) before committing changes
 
 ## Learned Workspace Facts
 
@@ -637,7 +638,7 @@ types but are not yet fully aligned (see `domain/MAPPING.md` for the gap analysi
 - `create-reducer-action` skill exists at `.cursor/skills/create-reducer-action/SKILL.md` for adding new PuckAction types
 - Docker build for the demo app cannot use `turbo prune --docker` because `@puckeditor/core` is resolved via tsconfig path aliases, not `package.json` dependencies — requires full monorepo copy instead
 - Travel-studio app shell: autosave (4s debounce), `beforeunload` guard, conflict resolution modal on 409, toast notifications, `error.tsx`/`loading.tsx` at both levels, documents API (GET/POST/DELETE) with dashboard
-- All 18 travel-studio components are mode-aware via `puck.metadata.target`; design tokens in `config/tokens.ts` with `--ts-*` CSS custom properties and `[data-theme="dark"]` dark mode
+- All 21 travel-studio components are mode-aware via `puck.metadata.target`; design tokens are pure JS constants in `config/tokens.ts` consumed via inline `style={{}}` (no CSS custom properties, no dark mode)
 - Travel-studio Docker Compose (9 services: Postgres, Kong, GoTrue, Realtime, Storage, Studio, Redis, Directus, travel-studio); Directus adapter falls back to file-based when `DIRECTUS_URL` unset; Supabase auth falls back to API-key when unconfigured
 - Mapbox integration: ItineraryMap uses `react-map-gl` (v7 root import, not `/mapbox` subpath) with dynamic import; geocode route proxies Mapbox server-side geocoding
 - Azure deployment: resource group `rg-travel-studio-westus`, ACR `travstudiocr.azurecr.io`, Container App `travel-studio` at `travel-studio.bravepebble-29dca480.westus.azurecontainerapps.io`; deploy via `az acr build` + `az containerapp update --revision-suffix`
@@ -651,3 +652,5 @@ types but are not yet fully aligned (see `domain/MAPPING.md` for the gap analysi
 - Drawer search: Puck's `drawer` override wraps the component list; `Drawer.Item` from `@/core` is required for drag-and-drop (plain divs are not draggable)
 - Keyboard shortcuts: `Cmd+S`/`Ctrl+S` for save and `Escape` for deselect are implemented in HeaderActions via `useEffect` + `window.addEventListener("keydown")`; the `dispatch({ type: "setUi", ui: { itemSelector: null } })` pattern deselects the active component
 - Puck-to-itinerary mapper (`lib/itinerary/puck-to-itinerary.ts`): `mapCard` switch dispatches per component type; `mapMoney`/`supplierRef` helpers for common conversions; pipeline test at `lib/itinerary/pipeline.test.ts` exercises all card types
+- Travel-studio design system uses `config/tokens.ts` as the single source of truth (JS constants, not CSS vars). `app/styles.css` contains only: a minimal `:root` stub with 7 `--ts-*` vars used by the `body` rule and `auth/login/page.tsx`, the `[data-puck-editor]` dark editor chrome overrides, the canvas dot grid, and 3 responsive `@media` rules. No `[data-theme="dark"]` block exists.
+- TourEvent and BookingEvent are now fully typed domain events (promoted from GenericUnmodeledEvent); GenericUnmodeledEvent covers only `"smartImport"`

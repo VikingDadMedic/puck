@@ -1,5 +1,5 @@
 import type { ComponentConfig } from "@/core";
-import { color } from "../../tokens";
+import { color, radius, shadow } from "../../tokens";
 
 export type IncludedFeaturesProps = {
   title: string;
@@ -38,17 +38,17 @@ export const IncludedFeatures: ComponentConfig<IncludedFeaturesProps> = {
       <div
         style={{
           background: color.bg.card,
-          borderRadius: isProposal ? 12 : 8,
+          borderRadius: isProposal ? radius.xl : radius.md,
           border: `1px solid ${color.border.default}`,
           overflow: "hidden",
-          ...(isProposal && { boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }),
+          ...(isProposal && { boxShadow: shadow.md }),
         }}
       >
         <div
           style={{
             padding: isProposal ? "16px 20px" : "12px 16px",
             background: color.bg.greenLight,
-            borderBottom: "2px solid #22c55e",
+            borderBottom: `2px solid ${color.accent.greenBright}`,
           }}
         >
           <span
@@ -74,7 +74,7 @@ export const IncludedFeatures: ComponentConfig<IncludedFeaturesProps> = {
                 color: color.text.secondary,
                 borderBottom:
                   i < features.length - 1
-                    ? `1px solid ${color.bg.muted}`
+                    ? `1px solid ${color.border.default}`
                     : "none",
               }}
             >
@@ -82,7 +82,9 @@ export const IncludedFeatures: ComponentConfig<IncludedFeaturesProps> = {
                 style={{
                   fontSize: 16,
                   fontWeight: 700,
-                  color: feature.included ? "#16a34a" : color.accent.red,
+                  color: feature.included
+                    ? color.accent.greenMedium
+                    : color.accent.red,
                   flexShrink: 0,
                 }}
               >

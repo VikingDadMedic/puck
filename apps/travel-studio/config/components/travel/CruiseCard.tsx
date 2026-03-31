@@ -1,5 +1,5 @@
 import type { ComponentConfig } from "@/core";
-import { color, radius, shadow } from "../../tokens";
+import { color, fontSize, radius, shadow } from "../../tokens";
 
 export type CruiseCardProps = {
   type: "departure" | "arrival";
@@ -98,7 +98,7 @@ export const CruiseCard: ComponentConfig<CruiseCardProps> = {
           background: color.bg.card,
           borderRadius: radius.lg,
           overflow: "hidden",
-          border: `1px solid ${color.border.subtle}`,
+          border: `1px solid ${color.border.default}`,
           ...(isProposal ? { boxShadow: shadow.md } : {}),
         }}
       >
@@ -118,7 +118,7 @@ export const CruiseCard: ComponentConfig<CruiseCardProps> = {
         <div
           style={{
             flex: 1,
-            padding: "14px 20px",
+            padding: "16px 20px",
             display: "flex",
             flexDirection: "column",
             gap: 6,
@@ -137,7 +137,7 @@ export const CruiseCard: ComponentConfig<CruiseCardProps> = {
               <span
                 style={{
                   fontWeight: 600,
-                  fontSize: 15,
+                  fontSize: fontSize.xl,
                   color: color.text.primary,
                 }}
               >
@@ -207,7 +207,7 @@ export const CruiseCard: ComponentConfig<CruiseCardProps> = {
             <div
               style={{
                 fontSize: 13,
-                color: color.text.secondary,
+                color: color.text.muted,
                 lineHeight: 1.5,
               }}
             >

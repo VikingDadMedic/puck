@@ -64,7 +64,7 @@ export const InfoCard: ComponentConfig<InfoCardProps> = {
             style={{
               fontSize: 14,
               lineHeight: 1.6,
-              color: color.text.secondary,
+              color: color.text.muted,
             }}
           >
             {notes}

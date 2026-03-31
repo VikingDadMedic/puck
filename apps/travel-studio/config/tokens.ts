@@ -1,3 +1,24 @@
+/**
+ * Travel Studio design tokens — single source of truth for all component styles.
+ *
+ * **Why JS constants instead of CSS custom properties?**
+ * Travel Studio components render inside Puck's iframe. Using inline `style={{}}`
+ * props with JS values works regardless of the CSS cascade context, making tokens
+ * reliable across both the editor canvas and the public-facing render. CSS class-based
+ * approaches would require stylesheet injection into the iframe.
+ *
+ * **Why are spacing, radius, and fontSize plain numbers (not strings)?**
+ * React automatically appends "px" to numeric values on numeric CSS properties
+ * (e.g. `style={{ padding: 16 }}` → `padding: 16px`). This enables arithmetic
+ * without string manipulation: `gap: spacing.md` just works.
+ *
+ * **Usage:**
+ * ```tsx
+ * import { color, radius, spacing } from "../../tokens";
+ * <div style={{ background: color.bg.card, borderRadius: radius.lg, padding: spacing.xl }}>
+ * ```
+ */
+
 export const color = {
   text: {
     primary: "#111827",
@@ -15,6 +36,7 @@ export const color = {
     greenDark: "#065f46",
     greenBright: "#10b981",
     greenLeaf: "#166534",
+    greenMedium: "#16a34a",
     amber: "#f59e0b",
     amberDark: "#d97706",
     amberDeep: "#92400e",
@@ -27,6 +49,7 @@ export const color = {
     muted: "#f3f4f6",
     subtle: "#f1f5f9",
     blueLight: "#eff6ff",
+    blueSubtle: "#dbeafe",
     greenLight: "#f0fdf4",
     greenPale: "#ecfdf5",
     amberLight: "#fef3c7",
@@ -40,6 +63,9 @@ export const color = {
     subtle: "#e2e8f0",
     muted: "#d1d5db",
     strong: "#cbd5e1",
+    red: "#fca5a5",
+    amber: "#fde68a",
+    green: "#86efac",
   },
   badge: {
     blue: { text: "#1d4ed8", bg: "#eff6ff" },
@@ -49,6 +75,7 @@ export const color = {
     red: { text: "#dc2626", bg: "#fef2f2" },
   },
   star: "#f59e0b",
+  /** Semantic colors for DaySection time-slot border accents. */
   morning: "#3b82f6",
   afternoon: "#f59e0b",
   evening: "#8b5cf6",
@@ -86,6 +113,10 @@ export const fontSize = {
   "3xl": 22,
   "4xl": 24,
   "5xl": 28,
+  /** Display size — used by TripHeader in itinerary mode. */
+  "6xl": 36,
+  /** Display size — used by TripHeader in proposal mode. */
+  "7xl": 44,
 } as const;
 
 export const shadow = {

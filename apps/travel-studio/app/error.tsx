@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { color, fontFamily, radius } from "../config/tokens";
 
 export default function RootError({
   error,
@@ -18,8 +19,7 @@ export default function RootError({
         justifyContent: "center",
         minHeight: "80vh",
         padding: 32,
-        fontFamily:
-          '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        fontFamily,
       }}
     >
       <h1 style={{ fontSize: 24, fontWeight: 700, margin: "0 0 8px" }}>
@@ -27,7 +27,7 @@ export default function RootError({
       </h1>
       <p
         style={{
-          color: "#6b7280",
+          color: color.text.muted,
           fontSize: 14,
           margin: "0 0 8px",
           maxWidth: 480,
@@ -40,7 +40,7 @@ export default function RootError({
       {error.digest && (
         <p
           style={{
-            color: "#9ca3af",
+            color: color.text.faint,
             fontSize: 12,
             margin: "0 0 24px",
             fontFamily: "monospace",
@@ -55,10 +55,10 @@ export default function RootError({
           onClick={reset}
           style={{
             padding: "10px 20px",
-            background: "#2563eb",
-            color: "#fff",
+            background: color.accent.blue,
+            color: color.text.inverse,
             border: "none",
-            borderRadius: 8,
+            borderRadius: radius.md,
             cursor: "pointer",
             fontSize: 14,
           }}
@@ -69,10 +69,10 @@ export default function RootError({
           href="/"
           style={{
             padding: "10px 20px",
-            background: "#f1f5f9",
-            color: "#374151",
-            border: "1px solid #d1d5db",
-            borderRadius: 8,
+            background: color.bg.subtle,
+            color: color.text.secondary,
+            border: `1px solid ${color.border.muted}`,
+            borderRadius: radius.md,
             textDecoration: "none",
             fontSize: 14,
           }}

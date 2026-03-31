@@ -1,7 +1,7 @@
 import type { ComponentConfig } from "@/core";
 import { restaurantPickerField } from "../../fields/restaurant-picker";
 import { imagePickerField } from "../../fields/image-picker";
-import { color, radius, shadow } from "../../tokens";
+import { color, fontSize, radius, shadow } from "../../tokens";
 
 export type RestaurantCardProps = {
   restaurant: Record<string, unknown> | null;
@@ -157,7 +157,7 @@ export const RestaurantCard: ComponentConfig<RestaurantCardProps> = {
               <div
                 style={{
                   fontWeight: 600,
-                  fontSize: 15,
+                  fontSize: fontSize.xl,
                   color: color.text.primary,
                 }}
               >
@@ -202,7 +202,7 @@ export const RestaurantCard: ComponentConfig<RestaurantCardProps> = {
             <div
               style={{
                 fontSize: 13,
-                color: color.text.secondary,
+                color: color.text.muted,
                 lineHeight: 1.5,
               }}
             >

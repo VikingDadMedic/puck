@@ -1,6 +1,6 @@
 import type { ComponentConfig } from "@/core";
 import { imagePickerField } from "../../fields/image-picker";
-import { color, radius } from "../../tokens";
+import { color, fontSize, radius } from "../../tokens";
 
 export type TripHeaderProps = {
   destination: string;
@@ -36,7 +36,7 @@ export const TripHeader: ComponentConfig<TripHeaderProps> = {
           overflow: "hidden",
           background: hasImage
             ? `url(${heroImage}) center/cover no-repeat`
-            : "linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)",
+            : `linear-gradient(135deg, ${color.accent.blueDeep} 0%, ${color.morning} 100%)`,
         }}
       >
         {hasImage && (
@@ -65,7 +65,7 @@ export const TripHeader: ComponentConfig<TripHeaderProps> = {
           <h1
             style={{
               margin: 0,
-              fontSize: isProposal ? 44 : 36,
+              fontSize: isProposal ? fontSize["7xl"] : fontSize["6xl"],
               fontWeight: 800,
               color: color.text.inverse,
               letterSpacing: "-0.02em",
