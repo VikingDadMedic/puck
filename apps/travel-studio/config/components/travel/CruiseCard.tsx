@@ -1,5 +1,7 @@
 import type { ComponentConfig } from "@/core";
+import { imagePickerField } from "../../fields/image-picker";
 import { color, fontSize, radius, shadow } from "../../tokens";
+import { formatPrice } from "../../format";
 
 export type CruiseCardProps = {
   type: "departure" | "arrival";
@@ -11,6 +13,7 @@ export type CruiseCardProps = {
   cabinNumber: string;
   confirmationNumber: string;
   price: { amount: number; currency: string };
+  imageUrl: string;
   notes: string;
 };
 
@@ -60,6 +63,7 @@ export const CruiseCard: ComponentConfig<CruiseCardProps> = {
         currency: { type: "text" },
       },
     },
+    imageUrl: imagePickerField,
     notes: { type: "richtext" },
   },
   defaultProps: {
@@ -72,8 +76,10 @@ export const CruiseCard: ComponentConfig<CruiseCardProps> = {
     cabinNumber: "",
     confirmationNumber: "",
     price: { amount: 0, currency: "USD" },
+    imageUrl: "",
     notes: "",
   },
+  resolveData: async ({ props }) => ({ props }),
   render: ({
     name,
     carrier,
@@ -82,13 +88,15 @@ export const CruiseCard: ComponentConfig<CruiseCardProps> = {
     cabinNumber,
     confirmationNumber,
     price,
+    imageUrl,
     notes,
     puck,
   }) => {
     const isClientView = puck.metadata?.target === "client_view";
     const isProposal = puck.metadata?.target === "proposal";
     const carrierLabel = carrier?.name?.trim() || "";
-    const hasPrice = price?.amount > 0;
+    const showPrice = puck.metadata?.showPricing !== false && price?.amount > 0;
+    const hasImage = typeof imageUrl === "string" && imageUrl.trim().length > 0;
 
     return (
       <div
@@ -102,19 +110,29 @@ export const CruiseCard: ComponentConfig<CruiseCardProps> = {
           ...(isProposal ? { boxShadow: shadow.md } : {}),
         }}
       >
-        <div
-          style={{
-            width: 52,
-            flexShrink: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: color.bg.subtle,
-            fontSize: 24,
-          }}
-        >
-          ⛴
-        </div>
+        {hasImage ? (
+          <div className="ts-card-image" style={{ width: 120, flexShrink: 0 }}>
+            <img
+              src={imageUrl}
+              alt={name || "Cruise"}
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          </div>
+        ) : (
+          <div
+            style={{
+              width: 52,
+              flexShrink: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: color.bg.subtle,
+              fontSize: 24,
+            }}
+          >
+            ⛴
+          </div>
+        )}
         <div
           style={{
             flex: 1,
@@ -157,7 +175,7 @@ export const CruiseCard: ComponentConfig<CruiseCardProps> = {
                 </span>
               )}
             </div>
-            {hasPrice && !isClientView && (
+            {showPrice && (
               <span
                 style={{
                   fontWeight: 600,
@@ -165,7 +183,7 @@ export const CruiseCard: ComponentConfig<CruiseCardProps> = {
                   color: color.accent.blueDark,
                 }}
               >
-                {price.currency} {price.amount.toLocaleString()}
+                {formatPrice(price.amount, price.currency)}
               </span>
             )}
           </div>

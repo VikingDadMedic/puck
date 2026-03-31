@@ -1,6 +1,7 @@
 import type { ComponentConfig } from "@/core";
 
 import { color, fontSize, radius, shadow } from "../../tokens";
+import { formatPrice } from "../../format";
 
 export type PricingSummaryProps = {
   currency: string;
@@ -46,12 +47,9 @@ export const PricingSummary: ComponentConfig<PricingSummaryProps> = {
     const isProposal = puck.metadata?.target === "proposal";
     const basisLabel = basis === "perPerson" ? "per person" : "total";
 
-    const formatAmount = (amount: number) => {
-      if (!amount) return `${currency} 0`;
-      return `${currency} ${amount.toLocaleString("en-US", {
-        minimumFractionDigits: 0,
-      })}`;
-    };
+    if (puck.metadata?.showPricing === false) return <></>;
+
+    const formatAmount = (amount: number) => formatPrice(amount, currency);
 
     return (
       <div

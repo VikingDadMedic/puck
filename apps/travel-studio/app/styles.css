@@ -1,10 +1,6 @@
 :root {
   --ts-text-primary: #111827;
-  --ts-text-muted: #6b7280;
-  --ts-accent-blue: #2563eb;
   --ts-bg-page: #f8fafc;
-  --ts-bg-card: #ffffff;
-  --ts-border-default: #e5e7eb;
   --ts-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     sans-serif;
 }

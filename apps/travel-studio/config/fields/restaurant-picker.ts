@@ -45,6 +45,8 @@ export const restaurantPickerField: ExternalField<Record<
       cuisine: row?.cuisine,
       rating: row?.rating,
       imageUrl: row?.imageUrl,
+      priceLevel: row?.priceLevel,
+      reviewCount: row?.reviewCount,
     };
   },
   getItemSummary: (item) => {

@@ -11,7 +11,7 @@ export default function NotFound() {
         justifyContent: "center",
         minHeight: "80vh",
         padding: 32,
-        fontFamily,
+        fontFamily: fontFamily.system,
       }}
     >
       <h1

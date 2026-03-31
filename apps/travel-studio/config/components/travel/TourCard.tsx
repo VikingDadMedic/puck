@@ -1,6 +1,7 @@
 import type { ComponentConfig } from "@/core";
 import { imagePickerField } from "../../fields/image-picker";
 import { color, radius } from "../../tokens";
+import { formatPrice } from "../../format";
 
 export type TourCardProps = {
   name: string;
@@ -95,7 +96,7 @@ export const TourCard: ComponentConfig<TourCardProps> = {
   render: ({ name, timing, details, price, notes, imageUrl, puck }) => {
     const isClientView = puck.metadata?.target === "client_view";
     const hasImage = typeof imageUrl === "string" && imageUrl.trim().length > 0;
-    const hasPrice = price?.amount > 0;
+    const showPrice = puck.metadata?.showPricing !== false && price?.amount > 0;
 
     return (
       <div
@@ -192,15 +193,15 @@ export const TourCard: ComponentConfig<TourCardProps> = {
             </span>
           )}
 
-          {hasPrice && (
+          {showPrice && (
             <span
               style={{
                 fontSize: 13,
                 fontWeight: 600,
-                color: color.text.primary,
+                color: color.accent.blueDark,
               }}
             >
-              {price.currency} {price.amount.toLocaleString()}
+              {formatPrice(price.amount, price.currency)}
             </span>
           )}
 
@@ -218,14 +219,13 @@ export const TourCard: ComponentConfig<TourCardProps> = {
         </div>
 
         {hasImage && (
-          <div
-            className="ts-card-image"
-            style={{
-              width: 140,
-              flexShrink: 0,
-              background: `url(${imageUrl}) center/cover no-repeat`,
-            }}
-          />
+          <div className="ts-card-image" style={{ width: 140, flexShrink: 0 }}>
+            <img
+              src={imageUrl}
+              alt={name || "Tour"}
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          </div>
         )}
       </div>
     );

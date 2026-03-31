@@ -498,9 +498,9 @@ system rather than a generic page builder.
 
 - **Layer 1 (Domain)**: TypeScript types in `config/schema.ts` -- TripDocument, DocumentMode, VisibilityRule
 - **Layer 2 (Composition)**: Puck config in `config/index.ts` with 21 travel-specific components organized into 5 categories
-- **Layer 3 (Render)**: Mode-aware rendering via `metadata.target` (itinerary/proposal/client_view)
+- **Layer 3 (Render)**: Mode-aware rendering via `puck.metadata` — components read `target` (itinerary/proposal/client_view), `showPricing` (global pricing toggle), `brandTheme`, `agency` (name/logoUrl/accentColor), `fontPreference`, `contentMaxWidth`, and `contentPadding`
 - **Layer 4 (Shell)**: Custom `headerActions` override with save status indicator, autosave (4s debounce), conflict resolution modal, toast notifications, and `beforeunload` guard
-- **Layer 5 (Design System)**: Design tokens in `config/tokens.ts` — pure JS constants (`color`, `radius`, `spacing`, `fontSize`, `shadow`, `fontFamily`) consumed as inline `style={{}}` props across all components. No CSS custom properties emitted from `tokens.ts`, no dark mode.
+- **Layer 5 (Design System)**: Three-file system: `config/tokens.ts` (raw constants — `color`, `radius`, `spacing`, `fontSize`, `shadow`, `fontFamily` object `{system,serif,modern}`, `paddingScale`), `config/theme.ts` (`resolveTheme()` — resolves brand presets + agency accent overrides + font/padding preferences into a `ResolvedTheme`), and `config/format.ts` (`formatPrice()` — Intl-based currency formatting used by all pricing cards). All consumed as inline `style={{}}` props. No CSS custom properties emitted, no dark mode.
 - **Layer 6 (Template/Fill Mode)**: `documentType` discriminator (`"template"` vs `"itinerary"`) in root props; permissions-based structural lock in fill mode; `cloneAndReId` for template instantiation
 - **Layer 7 (Editor UX Polish)**: Dark editor chrome via `--puck-color-grey-*` overrides in `styles.css`; canvas dot grid background; Cmd+S manual save shortcut; Escape-to-deselect; drawer search filter via Puck `drawer` override; `DrawerSearchWrapper` + `FilteredDrawer` using `Drawer.Item` for draggable results
 
@@ -534,6 +534,8 @@ system rather than a generic page builder.
 | Editor client    | `apps/travel-studio/app/[...puckPath]/client.tsx`                 |
 | Documents API    | `apps/travel-studio/app/api/documents/route.ts` (GET/POST/DELETE) |
 | Design tokens    | `apps/travel-studio/config/tokens.ts`                             |
+| Theme resolver   | `apps/travel-studio/config/theme.ts`                              |
+| Price formatter  | `apps/travel-studio/config/format.ts`                             |
 | ItineraryMap     | `apps/travel-studio/config/components/travel/ItineraryMap.tsx`    |
 | Geocode API      | `apps/travel-studio/app/api/geocode/route.ts`                     |
 | Login page       | `apps/travel-studio/app/auth/login/page.tsx`                      |
@@ -576,9 +578,10 @@ Components connect to live travel data through a three-layer architecture:
 Caching: search responses are file-cached in `.cache/serp/` with TTL + stale-if-error fallback semantics.
 Image search (Pexels/Unsplash) also uses the shared file cache layer.
 
-Components using external fields: `StayCard` (hotel picker), `ActivityCard` (activity picker + event picker),
+Components using external fields: `StayCard` (hotel picker + image picker), `ActivityCard` (activity picker + event picker + image picker),
 `TransportCard` (flight picker via resolveFields), `TripHeader` (image picker),
-`RestaurantCard` (restaurant picker), plus `place-picker` for location enrichment.
+`RestaurantCard` (restaurant picker + image picker), `TourCard` (image picker),
+`CruiseCard` (image picker), `BookingCard` (image picker), plus `place-picker` for location enrichment.
 
 Components using richtext: `StayCard.notes`, `ActivityCard.description`, `TransportCard.notes`,
 `AdvisorInsight.content`, `TripOverview.summary`, `PricingSummary.notes`.
@@ -638,7 +641,7 @@ types but are not yet fully aligned (see `domain/MAPPING.md` for the gap analysi
 - `create-reducer-action` skill exists at `.cursor/skills/create-reducer-action/SKILL.md` for adding new PuckAction types
 - Docker build for the demo app cannot use `turbo prune --docker` because `@puckeditor/core` is resolved via tsconfig path aliases, not `package.json` dependencies — requires full monorepo copy instead
 - Travel-studio app shell: autosave (4s debounce), `beforeunload` guard, conflict resolution modal on 409, toast notifications, `error.tsx`/`loading.tsx` at both levels, documents API (GET/POST/DELETE) with dashboard
-- All 21 travel-studio components are mode-aware via `puck.metadata.target`; design tokens are pure JS constants in `config/tokens.ts` consumed via inline `style={{}}` (no CSS custom properties, no dark mode)
+- All 21 travel-studio components are mode-aware via `puck.metadata` (target, showPricing, brandTheme, agency, fontPreference); design system spans three files: `tokens.ts` (raw constants, `fontFamily` is `{system,serif,modern}` object), `theme.ts` (`resolveTheme()`), `format.ts` (`formatPrice()`); 7 cards gate pricing display via `showPricing` toggle
 - Travel-studio Docker Compose (9 services: Postgres, Kong, GoTrue, Realtime, Storage, Studio, Redis, Directus, travel-studio); Directus adapter falls back to file-based when `DIRECTUS_URL` unset; Supabase auth falls back to API-key when unconfigured
 - Mapbox integration: ItineraryMap uses `react-map-gl` (v7 root import, not `/mapbox` subpath) with dynamic import; geocode route proxies Mapbox server-side geocoding
 - Azure deployment: resource group `rg-travel-studio-westus`, ACR `travstudiocr.azurecr.io`, Container App `travel-studio` at `travel-studio.bravepebble-29dca480.westus.azurecontainerapps.io`; deploy via `az acr build` + `az containerapp update --revision-suffix`
@@ -652,5 +655,5 @@ types but are not yet fully aligned (see `domain/MAPPING.md` for the gap analysi
 - Drawer search: Puck's `drawer` override wraps the component list; `Drawer.Item` from `@/core` is required for drag-and-drop (plain divs are not draggable)
 - Keyboard shortcuts: `Cmd+S`/`Ctrl+S` for save and `Escape` for deselect are implemented in HeaderActions via `useEffect` + `window.addEventListener("keydown")`; the `dispatch({ type: "setUi", ui: { itemSelector: null } })` pattern deselects the active component
 - Puck-to-itinerary mapper (`lib/itinerary/puck-to-itinerary.ts`): `mapCard` switch dispatches per component type; `mapMoney`/`supplierRef` helpers for common conversions; pipeline test at `lib/itinerary/pipeline.test.ts` exercises all card types
-- Travel-studio design system uses `config/tokens.ts` as the single source of truth (JS constants, not CSS vars). `app/styles.css` contains only: a minimal `:root` stub with 7 `--ts-*` vars used by the `body` rule and `auth/login/page.tsx`, the `[data-puck-editor]` dark editor chrome overrides, the canvas dot grid, and 3 responsive `@media` rules. No `[data-theme="dark"]` block exists.
+- Travel-studio design system: three-file architecture — `config/tokens.ts` (raw tokens + `paddingScale` + `FontPreference`/`ContentPadding` types), `config/theme.ts` (`resolveTheme()` computes brand + agency + font/padding resolved values), `config/format.ts` (`formatPrice()`). `app/styles.css` contains only: a minimal `:root` stub with 3 `--ts-*` vars used by the `body` rule, the `[data-puck-editor]` dark editor chrome overrides, the canvas dot grid, and 3 responsive `@media` rules. No `[data-theme="dark"]` block exists.
 - TourEvent and BookingEvent are now fully typed domain events (promoted from GenericUnmodeledEvent); GenericUnmodeledEvent covers only `"smartImport"`

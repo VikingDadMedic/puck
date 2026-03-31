@@ -5,8 +5,10 @@ type HotelSearchRow = {
   name?: string;
   location?: string;
   rating?: number;
+  stars?: number;
   imageUrl?: string;
   pricePerNight?: string;
+  currency?: string;
 };
 
 export const hotelPickerField: ExternalField<Record<string, unknown> | null> = {
@@ -48,8 +50,10 @@ export const hotelPickerField: ExternalField<Record<string, unknown> | null> = {
       name: row?.name,
       location: row?.location,
       rating: row?.rating,
+      stars: row?.stars,
       imageUrl: row?.imageUrl,
       pricePerNight: row?.pricePerNight,
+      currency: row?.currency ?? "USD",
     };
   },
   getItemSummary: (item) => {

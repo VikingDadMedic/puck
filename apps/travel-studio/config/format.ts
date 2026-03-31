@@ -1,0 +1,16 @@
+/**
+ * Shared formatting utilities for Travel Studio components.
+ */
+
+export function formatPrice(amount: number, currency: string = "USD"): string {
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  } catch {
+    return `${currency} ${amount.toLocaleString("en-US")}`;
+  }
+}

@@ -2,6 +2,7 @@ import type { ComponentConfig } from "@/core";
 import { restaurantPickerField } from "../../fields/restaurant-picker";
 import { imagePickerField } from "../../fields/image-picker";
 import { color, fontSize, radius, shadow } from "../../tokens";
+import { formatPrice } from "../../format";
 
 export type RestaurantCardProps = {
   restaurant: Record<string, unknown> | null;
@@ -118,11 +119,13 @@ export const RestaurantCard: ComponentConfig<RestaurantCardProps> = {
     imageUrl,
     timing,
     details,
+    price,
     notes,
     puck,
   }) => {
     const isClientView = puck.metadata?.target === "client_view";
     const isProposal = puck.metadata?.target === "proposal";
+    const showPrice = puck.metadata?.showPricing !== false && price?.amount > 0;
     const hasImage = typeof imageUrl === "string" && imageUrl.trim().length > 0;
     const stars =
       rating > 0
@@ -174,6 +177,17 @@ export const RestaurantCard: ComponentConfig<RestaurantCardProps> = {
             <div style={{ fontSize: 13, color: color.star, letterSpacing: 1 }}>
               {stars}
             </div>
+          )}
+          {showPrice && (
+            <span
+              style={{
+                fontSize: 13,
+                fontWeight: 600,
+                color: color.accent.blueDark,
+              }}
+            >
+              {formatPrice(price.amount, price.currency)}
+            </span>
           )}
           {(timing?.date || timing?.time) && (
             <div style={{ fontSize: 13, color: color.text.muted }}>

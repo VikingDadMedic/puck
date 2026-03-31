@@ -1,6 +1,7 @@
 import type { ComponentConfig, Fields } from "@/core";
 import { flightPickerField } from "../../fields/flight-picker";
 import { color, fontSize, radius, shadow } from "../../tokens";
+import { formatPrice } from "../../format";
 
 export type SupplierRefField = {
   name?: string;
@@ -28,6 +29,7 @@ export type TransportCardProps = {
   otherDetails: { number: string };
   carRentalDetails: { leg: "pickUp" | "dropOff" };
   confirmationNumber: string;
+  airlineLogo: string;
   notes: string;
   departureCoordinates: { lat: number; lng: number } | null;
   arrivalCoordinates: { lat: number; lng: number } | null;
@@ -146,6 +148,7 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
       objectFields: supplierObjectFields,
     },
     confirmationNumber: { type: "text", label: "Confirmation #" },
+    airlineLogo: { type: "text", label: "Airline Logo URL" },
     notes: { type: "richtext" },
     departureCoordinates: {
       type: "object",
@@ -239,6 +242,10 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
             typeof fs.departureTime === "string"
               ? fs.departureTime
               : props.timing?.time,
+          duration:
+            typeof fs.duration === "string"
+              ? fs.duration
+              : props.timing?.duration,
         },
         flightDetails: {
           ...props.flightDetails,
@@ -250,8 +257,15 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
         price: {
           amount:
             typeof fs.price === "number" ? fs.price : props.price?.amount || 0,
-          currency: props.price?.currency || "USD",
+          currency:
+            typeof fs.currency === "string"
+              ? fs.currency
+              : props.price?.currency || "USD",
         },
+        airlineLogo:
+          typeof fs.airlineLogo === "string"
+            ? fs.airlineLogo
+            : props.airlineLogo || "",
       },
       readOnly: { departure: true, arrival: true },
     };
@@ -276,6 +290,7 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
     otherDetails: { number: "" },
     carRentalDetails: { leg: "pickUp" },
     confirmationNumber: "",
+    airlineLogo: "",
     notes: "",
     departureCoordinates: null,
     arrivalCoordinates: null,
@@ -292,13 +307,16 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
     otherDetails,
     carRentalDetails,
     confirmationNumber,
+    airlineLogo,
     notes,
     puck,
   }) => {
     const icon = typeIcons[type] || "✈";
+    const hasLogo =
+      typeof airlineLogo === "string" && airlineLogo.trim().length > 0;
     const isProposal = puck.metadata?.target === "proposal";
     const isItinerary = puck.metadata?.target === "itinerary";
-    const hasPrice = price?.amount > 0;
+    const showPrice = puck.metadata?.showPricing !== false && price?.amount > 0;
     const hasTiming = timing?.date || timing?.time || timing?.duration;
     const carrierLabel = carrier?.name?.trim() || "";
 
@@ -325,16 +343,25 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
       >
         <div
           style={{
-            width: isItinerary ? 44 : 56,
+            width: hasLogo ? 56 : isItinerary ? 44 : 56,
             flexShrink: 0,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             background: color.bg.subtle,
             fontSize: isItinerary ? 20 : 24,
+            overflow: "hidden",
           }}
         >
-          {icon}
+          {hasLogo ? (
+            <img
+              src={airlineLogo}
+              alt={carrier?.name || type}
+              style={{ width: 32, height: 32, objectFit: "contain" }}
+            />
+          ) : (
+            icon
+          )}
         </div>
 
         <div
@@ -431,7 +458,7 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
             </div>
           )}
 
-          {hasPrice && (
+          {showPrice && (
             <div
               style={{
                 fontSize: isProposal ? 16 : 14,
@@ -448,8 +475,7 @@ export const TransportCard: ComponentConfig<TransportCardProps> = {
                   : {}),
               }}
             >
-              {price.currency === "USD" ? "$" : price.currency + " "}
-              {price.amount.toLocaleString()}
+              {formatPrice(price.amount, price.currency)}
             </div>
           )}
 

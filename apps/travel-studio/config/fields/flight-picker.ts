@@ -3,14 +3,17 @@ import { travelStudioApiHeaders } from "../travel-studio-fetch";
 
 type FlightSearchRow = {
   airline?: string;
+  airlineLogo?: string;
   carrier?: string;
   flightNumber?: string;
   departure?: string;
   arrival?: string;
   departureTime?: string;
   arrivalTime?: string;
+  duration?: string;
   stops?: number;
   price?: number;
+  currency?: string;
 };
 
 export const flightPickerField: ExternalField<Record<string, unknown> | null> =
@@ -52,12 +55,16 @@ export const flightPickerField: ExternalField<Record<string, unknown> | null> =
       const row = item as FlightSearchRow | null;
       return {
         carrier: row?.airline,
+        airlineLogo: row?.airlineLogo,
         flightNumber: row?.flightNumber,
         departure: row?.departure,
         arrival: row?.arrival,
         departureTime: row?.departureTime,
         arrivalTime: row?.arrivalTime,
+        duration: row?.duration,
+        stops: row?.stops,
         price: row?.price,
+        currency: row?.currency ?? "USD",
       };
     },
     getItemSummary: (item) => {

@@ -3,6 +3,7 @@ import { hotelPickerField } from "../../fields/hotel-picker";
 import { placePickerField } from "../../fields/place-picker";
 import { imagePickerField } from "../../fields/image-picker";
 import { color, fontSize, radius, shadow } from "../../tokens";
+import { formatPrice } from "../../format";
 
 export type StayCardProps = {
   hotel: Record<string, unknown> | null;
@@ -149,6 +150,7 @@ export const StayCard: ComponentConfig<StayCardProps> = {
     location,
     dates,
     details,
+    price,
     rating,
     imageUrl,
     notes,
@@ -156,6 +158,7 @@ export const StayCard: ComponentConfig<StayCardProps> = {
   }) => {
     const isClientView = puck.metadata?.target === "client_view";
     const hasImage = typeof imageUrl === "string" && imageUrl.trim().length > 0;
+    const showPrice = puck.metadata?.showPricing !== false && price?.amount > 0;
     const stars =
       "★".repeat(Math.min(rating, 5)) + "☆".repeat(5 - Math.min(rating, 5));
 
@@ -173,13 +176,14 @@ export const StayCard: ComponentConfig<StayCardProps> = {
         {hasImage && (
           <div
             className="ts-card-image"
-            style={{
-              width: 200,
-              minHeight: 180,
-              flexShrink: 0,
-              background: `url(${imageUrl}) center/cover no-repeat`,
-            }}
-          />
+            style={{ width: 200, minHeight: 180, flexShrink: 0 }}
+          >
+            <img
+              src={imageUrl}
+              alt={name || "Stay"}
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          </div>
         )}
 
         <div
@@ -233,6 +237,18 @@ export const StayCard: ComponentConfig<StayCardProps> = {
               {stars}
             </span>
           </div>
+
+          {showPrice && (
+            <span
+              style={{
+                fontSize: 14,
+                fontWeight: 600,
+                color: color.accent.blueDark,
+              }}
+            >
+              {formatPrice(price.amount, price.currency)}
+            </span>
+          )}
 
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             {dates && (

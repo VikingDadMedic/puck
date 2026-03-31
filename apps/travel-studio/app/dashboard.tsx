@@ -405,7 +405,7 @@ export function Dashboard({
         maxWidth: 960,
         margin: "0 auto",
         padding: "40px 24px",
-        fontFamily,
+        fontFamily: fontFamily.system,
       }}
     >
       {/* Header */}

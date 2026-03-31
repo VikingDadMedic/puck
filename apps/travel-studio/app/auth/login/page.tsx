@@ -23,7 +23,7 @@ export default function LoginPage() {
         style={{
           padding: 40,
           textAlign: "center",
-          fontFamily,
+          fontFamily: fontFamily.system,
         }}
       >
         <h2>Authentication Not Configured</h2>
@@ -124,7 +124,7 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: "center",
     padding: "1rem",
     background: color.bg.page,
-    fontFamily,
+    fontFamily: fontFamily.system,
   },
   card: {
     width: "100%",

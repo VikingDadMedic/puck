@@ -642,7 +642,23 @@ export function Client({
   const documentMode = (rootProps?.documentMode as string) || "itinerary";
   const documentType = (rootProps?.documentType as string) || "template";
   const isFillMode = documentType === "itinerary";
-  const metadata = { target: documentMode, documentType };
+  const metadata = {
+    target: documentMode,
+    documentType,
+    showPricing:
+      rootProps?.showPricing !== undefined
+        ? Boolean(rootProps.showPricing)
+        : documentMode === "proposal",
+    brandTheme: (rootProps?.brandTheme as string) || "default",
+    agency: {
+      name: (rootProps?.agencyName as string) || "",
+      logoUrl: (rootProps?.agencyLogoUrl as string) || "",
+      accentColor: (rootProps?.agencyAccentColor as string) || "",
+    },
+    fontPreference: (rootProps?.fontPreference as string) || "system",
+    contentMaxWidth: (rootProps?.contentMaxWidth as number) || 960,
+    contentPadding: (rootProps?.contentPadding as string) || "comfortable",
+  };
 
   useEffect(() => {
     if (!isEdit) return;

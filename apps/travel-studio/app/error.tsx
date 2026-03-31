@@ -19,7 +19,7 @@ export default function RootError({
         justifyContent: "center",
         minHeight: "80vh",
         padding: 32,
-        fontFamily,
+        fontFamily: fontFamily.system,
       }}
     >
       <h1 style={{ fontSize: 24, fontWeight: 700, margin: "0 0 8px" }}>

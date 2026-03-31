@@ -19,7 +19,7 @@ export default function PuckPathError({
         justifyContent: "center",
         minHeight: "60vh",
         padding: 32,
-        fontFamily,
+        fontFamily: fontFamily.system,
       }}
     >
       <h2 style={{ fontSize: 22, fontWeight: 600, margin: "0 0 12px" }}>

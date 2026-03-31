@@ -125,8 +125,13 @@ export const shadow = {
   lg: "0 8px 32px rgba(0,0,0,0.12)",
 } as const;
 
-export const fontFamily =
-  '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+export const fontFamily = {
+  system: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  serif: 'Georgia, "Times New Roman", "Palatino Linotype", serif',
+  modern: '"Inter", "SF Pro Display", system-ui, sans-serif',
+} as const;
+
+export type FontPreference = keyof typeof fontFamily;
 
 export const tokens = {
   color,
@@ -136,6 +141,15 @@ export const tokens = {
   shadow,
   fontFamily,
 } as const;
+
+/** Padding scales mapped to density preference. */
+export const paddingScale = {
+  compact: 16,
+  comfortable: 24,
+  spacious: 40,
+} as const;
+
+export type ContentPadding = keyof typeof paddingScale;
 
 export type Tokens = typeof tokens;
 

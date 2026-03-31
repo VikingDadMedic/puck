@@ -1,5 +1,7 @@
 import type { ComponentConfig } from "@/core";
+import { imagePickerField } from "../../fields/image-picker";
 import { color, radius } from "../../tokens";
+import { formatPrice } from "../../format";
 
 export type BookingCardProps = {
   name: string;
@@ -11,6 +13,7 @@ export type BookingCardProps = {
     bookingReference: string;
   };
   price: { amount: number; currency: string };
+  imageUrl: string;
   notes: string;
 };
 
@@ -58,6 +61,7 @@ export const BookingCard: ComponentConfig<BookingCardProps> = {
         currency: { type: "text", label: "Currency" },
       },
     },
+    imageUrl: imagePickerField,
     notes: { type: "richtext" },
   },
   defaultProps: {
@@ -70,131 +74,151 @@ export const BookingCard: ComponentConfig<BookingCardProps> = {
       bookingReference: "",
     },
     price: { amount: 0, currency: "USD" },
+    imageUrl: "",
     notes: "",
   },
-  render: ({ name, timing, details, price, notes, puck }) => {
+  resolveData: async ({ props }) => ({ props }),
+  render: ({ name, timing, details, price, imageUrl, notes, puck }) => {
     const isClientView = puck.metadata?.target === "client_view";
-    const hasPrice = price?.amount > 0;
+    const showPrice = puck.metadata?.showPricing !== false && price?.amount > 0;
+    const hasImage = typeof imageUrl === "string" && imageUrl.trim().length > 0;
 
     return (
       <div
         style={{
+          display: "flex",
           background: color.bg.card,
           borderRadius: radius.lg,
           overflow: "hidden",
           border: `1px solid ${color.border.default}`,
           borderLeft: `4px solid ${color.accent.amber}`,
-          padding: "16px 20px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 8,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontSize: 20 }}>🎫</span>
-          <h4
-            style={{
-              margin: 0,
-              fontSize: 16,
-              fontWeight: 700,
-              color: color.text.primary,
-            }}
-          >
-            {name || "Untitled Booking"}
-          </h4>
-        </div>
-
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          {timing.date && (
-            <span
+        <div
+          style={{
+            flex: 1,
+            padding: "16px 20px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 20 }}>🎫</span>
+            <h4
               style={{
-                fontSize: 12,
-                fontWeight: 500,
-                color: color.text.secondary,
-                background: color.bg.muted,
-                padding: "3px 10px",
-                borderRadius: radius.sm,
+                margin: 0,
+                fontSize: 16,
+                fontWeight: 700,
+                color: color.text.primary,
               }}
             >
-              {timing.date}
-            </span>
-          )}
-          {timing.time && (
+              {name || "Untitled Booking"}
+            </h4>
+          </div>
+
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {timing.date && (
+              <span
+                style={{
+                  fontSize: 12,
+                  fontWeight: 500,
+                  color: color.text.secondary,
+                  background: color.bg.muted,
+                  padding: "3px 10px",
+                  borderRadius: radius.sm,
+                }}
+              >
+                {timing.date}
+              </span>
+            )}
+            {timing.time && (
+              <span
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: color.accent.amber,
+                  background: color.bg.muted,
+                  padding: "3px 10px",
+                  borderRadius: radius.sm,
+                }}
+              >
+                {timing.time}
+              </span>
+            )}
+          </div>
+
+          {!isClientView && details?.confirmationNumber && (
             <span
               style={{
                 fontSize: 12,
                 fontWeight: 600,
-                color: color.accent.amber,
-                background: color.bg.muted,
+                color: color.accent.greenDark,
+                background: color.bg.greenPale,
                 padding: "3px 10px",
                 borderRadius: radius.sm,
+                width: "fit-content",
               }}
             >
-              {timing.time}
+              Conf # {details.confirmationNumber}
             </span>
+          )}
+
+          {!isClientView && details?.bookingReference && (
+            <span
+              style={{
+                fontSize: 12,
+                color: color.text.muted,
+              }}
+            >
+              Ref: {details.bookingReference}
+            </span>
+          )}
+
+          {showPrice && (
+            <span
+              style={{
+                fontSize: 13,
+                fontWeight: 600,
+                color: color.accent.blueDark,
+              }}
+            >
+              {formatPrice(price.amount, price.currency)}
+            </span>
+          )}
+
+          {!isClientView && details?.provider?.name && (
+            <p
+              style={{
+                margin: 0,
+                fontSize: 12,
+                color: color.text.faint,
+              }}
+            >
+              Provider: {details.provider.name}
+            </p>
+          )}
+
+          {notes && (
+            <div
+              style={{
+                fontSize: 13,
+                lineHeight: 1.5,
+                color: color.text.muted,
+              }}
+            >
+              {notes}
+            </div>
           )}
         </div>
 
-        {!isClientView && details?.confirmationNumber && (
-          <span
-            style={{
-              fontSize: 12,
-              fontWeight: 600,
-              color: color.accent.greenDark,
-              background: color.bg.greenPale,
-              padding: "3px 10px",
-              borderRadius: radius.sm,
-              width: "fit-content",
-            }}
-          >
-            Conf # {details.confirmationNumber}
-          </span>
-        )}
-
-        {!isClientView && details?.bookingReference && (
-          <span
-            style={{
-              fontSize: 12,
-              color: color.text.muted,
-            }}
-          >
-            Ref: {details.bookingReference}
-          </span>
-        )}
-
-        {hasPrice && (
-          <span
-            style={{
-              fontSize: 13,
-              fontWeight: 600,
-              color: color.text.primary,
-            }}
-          >
-            {price.currency} {price.amount.toLocaleString()}
-          </span>
-        )}
-
-        {!isClientView && details?.provider?.name && (
-          <p
-            style={{
-              margin: 0,
-              fontSize: 12,
-              color: color.text.faint,
-            }}
-          >
-            Provider: {details.provider.name}
-          </p>
-        )}
-
-        {notes && (
-          <div
-            style={{
-              fontSize: 13,
-              lineHeight: 1.5,
-              color: color.text.muted,
-            }}
-          >
-            {notes}
+        {hasImage && (
+          <div className="ts-card-image" style={{ width: 140, flexShrink: 0 }}>
+            <img
+              src={imageUrl}
+              alt={name || "Booking"}
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
           </div>
         )}
       </div>

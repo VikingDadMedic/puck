@@ -3,6 +3,7 @@ import { activityPickerField } from "../../fields/activity-picker";
 import { eventPickerField } from "../../fields/event-picker";
 import { imagePickerField } from "../../fields/image-picker";
 import { color, radius } from "../../tokens";
+import { formatPrice } from "../../format";
 
 export type ActivityCardProps = {
   activity: Record<string, unknown> | null;
@@ -122,9 +123,10 @@ export const ActivityCard: ComponentConfig<ActivityCardProps> = {
 
     return { props };
   },
-  render: ({ name, timing, details, description, imageUrl, puck }) => {
+  render: ({ name, timing, details, price, description, imageUrl, puck }) => {
     const isClientView = puck.metadata?.target === "client_view";
     const hasImage = typeof imageUrl === "string" && imageUrl.trim().length > 0;
+    const showPrice = puck.metadata?.showPricing !== false && price?.amount > 0;
     const hasBookingDetails =
       !isClientView &&
       (details.bookedThrough?.name ||
@@ -206,6 +208,18 @@ export const ActivityCard: ComponentConfig<ActivityCardProps> = {
             </div>
           )}
 
+          {showPrice && (
+            <span
+              style={{
+                fontSize: 13,
+                fontWeight: 600,
+                color: color.accent.blueDark,
+              }}
+            >
+              {formatPrice(price.amount, price.currency)}
+            </span>
+          )}
+
           {hasBookingDetails && (
             <div
               style={{
@@ -248,14 +262,13 @@ export const ActivityCard: ComponentConfig<ActivityCardProps> = {
         </div>
 
         {hasImage && (
-          <div
-            className="ts-card-image"
-            style={{
-              width: 140,
-              flexShrink: 0,
-              background: `url(${imageUrl}) center/cover no-repeat`,
-            }}
-          />
+          <div className="ts-card-image" style={{ width: 140, flexShrink: 0 }}>
+            <img
+              src={imageUrl}
+              alt={name || "Activity"}
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          </div>
         )}
       </div>
     );

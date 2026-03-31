@@ -8,7 +8,7 @@ export default function PuckPathLoading() {
         alignItems: "center",
         justifyContent: "center",
         minHeight: "60vh",
-        fontFamily,
+        fontFamily: fontFamily.system,
       }}
     >
       <p style={{ color: color.text.muted, fontSize: 14 }}>

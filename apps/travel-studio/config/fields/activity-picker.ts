@@ -42,6 +42,9 @@ export const activityPickerField: ExternalField<Record<
       name: row?.name,
       description: row?.description,
       imageUrl: row?.imageUrl,
+      rating: row?.rating,
+      reviewCount: row?.reviewCount,
+      category: row?.category,
     };
   },
   getItemSummary: (item) => {
