@@ -589,8 +589,8 @@ Components using richtext: `StayCard.notes`, `ActivityCard.description`, `Transp
 Components using resolveFields: `TransportCard` (polymorphic detail fields based on transport type).
 
 Components using resolveData: `StayCard` (hydrates from hotel search), `ActivityCard` (hydrates
-from activity search), `TransportCard` (hydrates from flight search), `RestaurantCard` (hydrates
-from restaurant search).
+from activity search), `TransportCard` (hydrates from flight search including airlineLogo/duration/currency),
+`RestaurantCard` (hydrates from restaurant search), `CruiseCard` and `BookingCard` (passthrough stubs).
 
 ### Domain Model (Itinerary Event Schema)
 
@@ -632,6 +632,7 @@ types but are not yet fully aligned (see `domain/MAPPING.md` for the gap analysi
 - Imports external domain analysis (e.g., ChatGPT schema discussions) into Cursor as structured input for architecture and modeling work
 - Follows structured phase workflow with intermediate stabilization sub-phases (e.g., 5.5, 5.5b) and post-implementation audits before advancing
 - Prefers full build verification (`yarn turbo run build`) before committing changes
+- Prefers parallel subagent dispatch to speed up multi-phase exploration and implementation tasks
 
 ## Learned Workspace Facts
 
@@ -650,10 +651,11 @@ types but are not yet fully aligned (see `domain/MAPPING.md` for the gap analysi
 - Puck's RichTextRender handles string HTML values natively (parses via `generateJSON` from `@tiptap/html`); components should render richtext as JSX children `{value}` not `dangerouslySetInnerHTML`
 - Template/itinerary split: `documentType` in `root.props` discriminates; fill mode uses Puck global permissions `{ drag: false, delete: false, duplicate: false, insert: false, edit: true }`
 - `lib/render/richtext.ts` was deleted (dead code after richtext rendering fix)
-- Travel-studio test suite: ~73 tests across 8 test files; `cloneAndReId` has 8 dedicated test cases
+- Travel-studio test suite: ~162 tests; `cloneAndReId` has 8 dedicated test cases
 - Editor dark mode: override Puck's `--puck-color-grey-*` CSS custom properties within `[data-puck-editor]` selector -- do NOT modify Puck core CSS files
 - Drawer search: Puck's `drawer` override wraps the component list; `Drawer.Item` from `@/core` is required for drag-and-drop (plain divs are not draggable)
 - Keyboard shortcuts: `Cmd+S`/`Ctrl+S` for save and `Escape` for deselect are implemented in HeaderActions via `useEffect` + `window.addEventListener("keydown")`; the `dispatch({ type: "setUi", ui: { itemSelector: null } })` pattern deselects the active component
 - Puck-to-itinerary mapper (`lib/itinerary/puck-to-itinerary.ts`): `mapCard` switch dispatches per component type; `mapMoney`/`supplierRef` helpers for common conversions; pipeline test at `lib/itinerary/pipeline.test.ts` exercises all card types
 - Travel-studio design system: three-file architecture — `config/tokens.ts` (raw tokens + `paddingScale` + `FontPreference`/`ContentPadding` types), `config/theme.ts` (`resolveTheme()` computes brand + agency + font/padding resolved values), `config/format.ts` (`formatPrice()`). `app/styles.css` contains only: a minimal `:root` stub with 3 `--ts-*` vars used by the `body` rule, the `[data-puck-editor]` dark editor chrome overrides, the canvas dot grid, and 3 responsive `@media` rules. No `[data-theme="dark"]` block exists.
+- Login page (`app/auth/login/page.tsx`) uses JS token imports from `config/tokens`; no `var(--ts-*)` references remain outside `styles.css`
 - TourEvent and BookingEvent are now fully typed domain events (promoted from GenericUnmodeledEvent); GenericUnmodeledEvent covers only `"smartImport"`

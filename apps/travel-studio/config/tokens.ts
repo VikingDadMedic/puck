@@ -56,7 +56,6 @@ export const color = {
     amberPale: "#fefce8",
     amberWarm: "#fffbeb",
     redLight: "#fef2f2",
-    slate: "#1e293b",
   },
   border: {
     default: "#e5e7eb",
@@ -66,13 +65,6 @@ export const color = {
     red: "#fca5a5",
     amber: "#fde68a",
     green: "#86efac",
-  },
-  badge: {
-    blue: { text: "#1d4ed8", bg: "#eff6ff" },
-    green: { text: "#065f46", bg: "#f0fdf4" },
-    greenBright: { text: "#059669", bg: "#f0fdf4" },
-    amber: { text: "#92400e", bg: "#fef3c7" },
-    red: { text: "#dc2626", bg: "#fef2f2" },
   },
   star: "#f59e0b",
   /** Semantic colors for DaySection time-slot border accents. */
