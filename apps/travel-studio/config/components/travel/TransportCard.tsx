@@ -29,7 +29,7 @@ export type TransportCardProps = {
   otherDetails: { number: string };
   carRentalDetails: { leg: "pickUp" | "dropOff" };
   confirmationNumber: string;
-  airlineLogo?: string;
+  airlineLogo: string;
   notes: string;
   departureCoordinates: { lat: number; lng: number } | null;
   arrivalCoordinates: { lat: number; lng: number } | null;

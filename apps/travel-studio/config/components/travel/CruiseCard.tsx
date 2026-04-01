@@ -13,7 +13,7 @@ export type CruiseCardProps = {
   cabinNumber: string;
   confirmationNumber: string;
   price: { amount: number; currency: string };
-  imageUrl?: string;
+  imageUrl: string;
   notes: string;
 };
 

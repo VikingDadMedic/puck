@@ -13,7 +13,7 @@ export type BookingCardProps = {
     bookingReference: string;
   };
   price: { amount: number; currency: string };
-  imageUrl?: string;
+  imageUrl: string;
   notes: string;
 };
 
