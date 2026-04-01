@@ -9,13 +9,13 @@ export type RootProps = DefaultRootProps & {
   documentType: DocumentType;
   documentMode: "itinerary" | "proposal" | "client_view";
   brandTheme: "default" | "luxury" | "adventure";
-  showPricing: boolean;
-  agencyName: string;
-  agencyLogoUrl: string;
-  agencyAccentColor: string;
-  fontPreference: FontPreference;
-  contentMaxWidth: number;
-  contentPadding: ContentPadding;
+  showPricing?: boolean;
+  agencyName?: string;
+  agencyLogoUrl?: string;
+  agencyAccentColor?: string;
+  fontPreference?: FontPreference;
+  contentMaxWidth?: number;
+  contentPadding?: ContentPadding;
 };
 
 const Root: RootConfig<{ props: RootProps }> = {
