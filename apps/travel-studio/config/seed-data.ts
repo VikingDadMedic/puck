@@ -1946,6 +1946,13 @@ export const honeymoon: Partial<TravelStudioData> = {
       documentMode: "proposal",
       documentType: "template",
       brandTheme: "luxury",
+      showPricing: true,
+      agencyName: "Wanderlux Travel",
+      agencyLogoUrl: "",
+      agencyAccentColor: "",
+      fontPreference: "serif",
+      contentMaxWidth: 960,
+      contentPadding: "spacious",
     },
   },
   content: [

@@ -523,29 +523,30 @@ system rather than a generic page builder.
 
 ### Key Paths
 
-| What             | Path                                                              |
-| ---------------- | ----------------------------------------------------------------- |
-| App root         | `apps/travel-studio/`                                             |
-| Config barrel    | `apps/travel-studio/config/index.ts`                              |
-| Root config      | `apps/travel-studio/config/root.tsx`                              |
-| Schema types     | `apps/travel-studio/config/schema.ts`                             |
-| Seed data        | `apps/travel-studio/config/seed-data.ts`                          |
-| Dashboard page   | `apps/travel-studio/app/page.tsx` + `app/dashboard.tsx`           |
-| Editor client    | `apps/travel-studio/app/[...puckPath]/client.tsx`                 |
-| Documents API    | `apps/travel-studio/app/api/documents/route.ts` (GET/POST/DELETE) |
-| Design tokens    | `apps/travel-studio/config/tokens.ts`                             |
-| Theme resolver   | `apps/travel-studio/config/theme.ts`                              |
-| Price formatter  | `apps/travel-studio/config/format.ts`                             |
-| ItineraryMap     | `apps/travel-studio/config/components/travel/ItineraryMap.tsx`    |
-| Geocode API      | `apps/travel-studio/app/api/geocode/route.ts`                     |
-| Login page       | `apps/travel-studio/app/auth/login/page.tsx`                      |
-| Docker Compose   | `docker-compose.travel-studio.yml`                                |
-| DB migrations    | `docker/travel-studio/migrations/`                                |
-| Directus client  | `apps/travel-studio/lib/directus/client.ts`                       |
-| Directus adapter | `apps/travel-studio/lib/persistence/directus-adapter.ts`          |
-| Supabase client  | `apps/travel-studio/lib/supabase/client.ts`                       |
-| Auth middleware  | `apps/travel-studio/lib/auth/middleware.ts`                       |
-| cloneAndReId     | `apps/travel-studio/lib/get-document.ts`                          |
+| What              | Path                                                              |
+| ----------------- | ----------------------------------------------------------------- |
+| App root          | `apps/travel-studio/`                                             |
+| Config barrel     | `apps/travel-studio/config/index.ts`                              |
+| Root config       | `apps/travel-studio/config/root.tsx`                              |
+| Schema types      | `apps/travel-studio/config/schema.ts`                             |
+| Seed data         | `apps/travel-studio/config/seed-data.ts`                          |
+| Dashboard page    | `apps/travel-studio/app/page.tsx` + `app/dashboard.tsx`           |
+| Editor client     | `apps/travel-studio/app/[...puckPath]/client.tsx`                 |
+| Documents API     | `apps/travel-studio/app/api/documents/route.ts` (GET/POST/DELETE) |
+| Design tokens     | `apps/travel-studio/config/tokens.ts`                             |
+| Theme resolver    | `apps/travel-studio/config/theme.ts`                              |
+| Price formatter   | `apps/travel-studio/config/format.ts`                             |
+| Design system doc | `apps/travel-studio/docs/design-system.md`                        |
+| ItineraryMap      | `apps/travel-studio/config/components/travel/ItineraryMap.tsx`    |
+| Geocode API       | `apps/travel-studio/app/api/geocode/route.ts`                     |
+| Login page        | `apps/travel-studio/app/auth/login/page.tsx`                      |
+| Docker Compose    | `docker-compose.travel-studio.yml`                                |
+| DB migrations     | `docker/travel-studio/migrations/`                                |
+| Directus client   | `apps/travel-studio/lib/directus/client.ts`                       |
+| Directus adapter  | `apps/travel-studio/lib/persistence/directus-adapter.ts`          |
+| Supabase client   | `apps/travel-studio/lib/supabase/client.ts`                       |
+| Auth middleware   | `apps/travel-studio/lib/auth/middleware.ts`                       |
+| cloneAndReId      | `apps/travel-studio/lib/get-document.ts`                          |
 
 ### Running
 
